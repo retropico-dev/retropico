@@ -17,30 +17,27 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-#define ENABLE_LCD    1
-
 #ifndef ENABLE_SOUND
-# define ENABLE_SOUND    0
+#define ENABLE_SOUND 1
 #endif
 
 /* C Headers */
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <sys/unistd.h>
 
 /* Project headers */
-#include "gbcolors.h"
-#include "hedley.h"
-#include "peanut_gb.h"
 #include "platform.h"
 #include "clock.h"
-
 #ifdef LINUX
 #include "platform_linux.h"
+#include "audio_linux.h"
 #else
 #include "platform_pico.h"
 #endif
+#include "gbcolors.h"
+#include "hedley.h"
+#include "peanut_gb.h"
 
 /* Definition of ROM data variable. Must be declared like:
  * #include <pico/platform.h>
@@ -86,8 +83,6 @@ static struct gb_priv gb_priv = {0};
 /* Pixel data is stored in here. */
 static uint8_t pixels_buffer[LCD_WIDTH];
 
-#define putstdio(x) write(1, x, strlen(x))
-
 /**
  * Returns a byte from the ROM file at the given address.
  */
@@ -122,7 +117,7 @@ void gb_error(struct gb_s *gb, const enum gb_error_e gb_err, const uint16_t val)
     (void) gb;
     (void) val;
 #if 1
-    const char *gb_err_str[5] = {
+    const char *gb_err_str[GB_INVALID_MAX] = {
             "UNKNOWN",
             "INVALID OPCODE",
             "INVALID READ",
@@ -151,8 +146,7 @@ void core1_lcd_draw_line(const uint_fast8_t line) {
     __atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);
 }
 
-_Noreturn
-void main_core1() {
+_Noreturn void main_core1() {
     union core_cmd cmd{};
 
     /* Handle commands coming from core0. */
@@ -175,8 +169,6 @@ void main_core1() {
 
     HEDLEY_UNREACHABLE();
 }
-
-#if ENABLE_LCD
 
 void lcd_draw_line(struct gb_s *gb, const uint8_t pixels[LCD_WIDTH], const uint_fast8_t line) {
     union core_cmd cmd{};
@@ -201,8 +193,6 @@ void lcd_draw_line(struct gb_s *gb, const uint8_t pixels[LCD_WIDTH], const uint_
 #endif
 }
 
-#endif
-
 int main() {
     static struct gb_s gb;
     enum gb_init_error_e ret;
@@ -215,17 +205,12 @@ int main() {
     platform = new mb::PicoPlatform();
 #endif
 
-    //(void) getchar();
-    putstdio("INIT: ");
-
     /* Start Core1, which processes requests to the LCD. */
-    putstdio("CORE1 ");
     multicore_launch_core1(main_core1);
 
     /* Initialise GB context. */
     memcpy(rom_bank0, rom, sizeof(rom_bank0));
     ret = gb_init(&gb, &gb_rom_read, &gb_cart_ram_read, &gb_cart_ram_write, &gb_error, &gb_priv);
-    putstdio("GB ");
 
     if (ret != GB_INIT_NO_ERROR) {
         printf("error: %d\n", ret);
@@ -241,34 +226,16 @@ int main() {
     char rom_title[16];
     auto_assign_palette(palette, gb_colour_hash(&gb), gb_get_rom_name(&gb, rom_title));
 
-#if ENABLE_LCD
     gb_init_lcd(&gb, &lcd_draw_line);
-    putstdio("LCD ");
     //gb.direct.interlace = 1;
-#endif
-#if ENABLE_SOUND
-    audio_init();
-    putstdio("AUDIO ");
-#endif
-
-    putstdio("\n> ");
 
     while (true) {
-#if ENABLE_SOUND
-        static uint16_t stream[1098];
-#endif
-
         gb.gb_frame = 0;
 
         do {
             __gb_step_cpu(&gb);
             tight_loop_contents();
         } while (HEDLEY_LIKELY(gb.gb_frame == 0));
-
-        frames++;
-#if ENABLE_SOUND
-        audio_callback(NULL, stream, 1098);
-#endif
 
         /* Required since we do not know whether a button remains
          * pressed over a serial connection. */
@@ -290,10 +257,11 @@ int main() {
 
         // fps
         if (clock.getElapsedTime().asSeconds() >= 1) {
-            int fps = (int) ((float) frames / clock.restart().asSeconds());
+            printf("fps: %i\r\n", (int) ((float) frames / clock.restart().asSeconds()));
             frames = 0;
-            printf("fps: %i\r\n", fps);
         }
+
+        frames++;
     }
 
     delete (platform);

@@ -22,8 +22,17 @@ if (NOT PLATFORM_LINUX)
 endif ()
 
 # set source files
-file(GLOB SOURCES *.c* utility/*.c*)
-set(INCLUDES . Peanut-GB utility)
+file(GLOB SOURCES
+        *.c*
+        utility/*.c*
+        Peanut-GB/examples/sdl2/minigb_apu/*.c*
+        )
+set(INCLUDES
+        .
+        utility
+        Peanut-GB
+        Peanut-GB/examples/sdl2/minigb_apu
+        )
 
 if (PLATFORM_LINUX)
     file(GLOB_RECURSE PLATFORM_SOURCES platforms/linux/*.c*)

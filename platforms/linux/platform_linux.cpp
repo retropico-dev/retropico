@@ -5,11 +5,13 @@
 #include "platform_linux.h"
 #include "display_linux.h"
 #include "input_linux.h"
+#include "audio_linux.h"
 
 using namespace mb;
 
 LinuxPlatform::LinuxPlatform() : Platform() {
     p_display = new LinuxDisplay();
+    p_audio = new LinuxAudio();
     p_input = new LinuxInput();
 }
 

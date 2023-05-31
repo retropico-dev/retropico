@@ -49,6 +49,11 @@ PicoPlatform::PicoPlatform() : Platform() {
 #endif
 
     p_display = new SSD1306Display();
+
+    // TODO
+    p_input = new Input();
+    p_audio = new Audio();
+    // TODO
 }
 
 PicoPlatform::~PicoPlatform() {

@@ -8,6 +8,7 @@
 #include <cstdio>
 #include "display.h"
 #include "input.h"
+#include "audio.h"
 
 namespace mb {
     class Platform {
@@ -17,16 +18,20 @@ namespace mb {
         virtual ~Platform() {
             printf("~Platform()\n");
             delete (p_display);
+            delete (p_audio);
             delete (p_input);
         };
 
         Display *getDisplay() { return p_display; };
+
+        Audio *getAudio() { return p_audio; };
 
         Input *getInput() { return p_input; };
 
     protected:
         Display *p_display = nullptr;
         Input *p_input = nullptr;
+        Audio *p_audio = nullptr;
     };
 }
 

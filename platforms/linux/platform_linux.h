@@ -5,6 +5,7 @@
 #ifndef MICROBOY_PLATFORM_LINUX_H
 #define MICROBOY_PLATFORM_LINUX_H
 
+#include <SDL2/SDL.h>
 #include "platform.h"
 #include "platform_compat.h"
 
