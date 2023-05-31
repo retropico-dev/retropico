@@ -7,7 +7,7 @@
 
 using namespace mb;
 
-LinuxAudio::LinuxAudio(Audio::AudioCallback cb) : Audio(cb) {
+LinuxAudio::LinuxAudio() : Audio() {
     SDL_AudioSpec want, have;
 
     if (!SDL_WasInit(SDL_INIT_AUDIO)) {

@@ -15,6 +15,8 @@ namespace mb {
         explicit Audio() = default;
 
         virtual ~Audio() = default;
+
+        virtual void loop() {};
     };
 }
 

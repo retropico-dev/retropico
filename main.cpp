@@ -31,7 +31,6 @@
 #include "clock.h"
 #ifdef LINUX
 #include "platform_linux.h"
-#include "audio_linux.h"
 #else
 #include "platform_pico.h"
 #endif
@@ -236,6 +235,8 @@ int main() {
             __gb_step_cpu(&gb);
             tight_loop_contents();
         } while (HEDLEY_LIKELY(gb.gb_frame == 0));
+
+        platform->getAudio()->loop();
 
         /* Required since we do not know whether a button remains
          * pressed over a serial connection. */

@@ -44,8 +44,14 @@ if (PLATFORM_LINUX)
     list(APPEND PLATFORM_LIBS ${SDL2_LIBRARIES})
 else ()
     file(GLOB_RECURSE PLATFORM_SOURCES platforms/pico/*.c*)
-    list(APPEND INCLUDES platforms/pico)
-    list(APPEND PLATFORM_LIBS pico_stdlib pico_multicore hardware_i2c hardware_sleep)
+    list(APPEND INCLUDES platforms/pico platforms/pico/i2s)
+    list(APPEND PLATFORM_LIBS
+            pico_stdlib
+            pico_multicore
+            hardware_i2c
+            hardware_pio
+            hardware_dma
+            hardware_sleep)
 endif ()
 
 # sources
@@ -58,6 +64,8 @@ target_link_libraries(${CMAKE_PROJECT_NAME} ${PLATFORM_LIBS})
 if (PLATFORM_LINUX)
     target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE -DLINUX)
 else ()
+    pico_generate_pio_header(${CMAKE_PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/platforms/pico/i2s/audio_i2s.pio)
+
     #target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
     #       -DPICO_DEFAULT_UART_TX_PIN=12
     #       -DPICO_DEFAULT_UART_RX_PIN=13)

@@ -10,7 +10,7 @@
 namespace mb {
     class LinuxAudio : public Audio {
     public:
-        explicit LinuxAudio(AudioCallback cb = nullptr);
+        explicit LinuxAudio();
 
         ~LinuxAudio() override;
 

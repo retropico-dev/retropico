@@ -7,6 +7,7 @@
 #include <pico/stdlib.h>
 #include "platform_pico.h"
 #include "display_ssd1306.h"
+#include "audio_pico.h"
 
 using namespace mb;
 
@@ -49,10 +50,9 @@ PicoPlatform::PicoPlatform() : Platform() {
 #endif
 
     p_display = new SSD1306Display();
-
+    p_audio = new PicoAudio();
     // TODO
     p_input = new Input();
-    p_audio = new Audio();
     // TODO
 }
 
