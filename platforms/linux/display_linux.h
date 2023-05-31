@@ -14,6 +14,8 @@ namespace mb {
     public:
         LinuxDisplay();
 
+        ~LinuxDisplay() override;
+
         void clear() override;
 
         void flip() override;

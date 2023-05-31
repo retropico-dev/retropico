@@ -18,6 +18,8 @@ namespace mb {
     class LinuxPlatform : public Platform {
     public:
         LinuxPlatform();
+
+        ~LinuxPlatform() override;
     };
 }
 

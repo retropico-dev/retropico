@@ -12,6 +12,8 @@ namespace mb {
     public:
         explicit Display(const Utility::Vec2i &size = {160, 144});
 
+        virtual ~Display() = default;
+
         virtual void clear() {};
 
         virtual void flip() {};

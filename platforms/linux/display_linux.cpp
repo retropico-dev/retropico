@@ -51,3 +51,9 @@ void LinuxDisplay::drawLine(uint8_t y, uint16_t *line) {
         flip();
     }
 }
+
+LinuxDisplay::~LinuxDisplay() {
+    printf("~LinuxDisplay()\n");
+    SDL_DestroyRenderer(p_renderer);
+    SDL_DestroyWindow(p_window);
+}

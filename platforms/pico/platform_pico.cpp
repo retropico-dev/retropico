@@ -50,3 +50,8 @@ PicoPlatform::PicoPlatform() : Platform() {
 
     p_display = new SSD1306Display();
 }
+
+PicoPlatform::~PicoPlatform() {
+    printf("~PicoPlatform()\n");
+    reset_usb_boot(0, 0);
+}

@@ -4,9 +4,16 @@
 
 #include "platform_linux.h"
 #include "display_linux.h"
+#include "input_linux.h"
 
 using namespace mb;
 
 LinuxPlatform::LinuxPlatform() : Platform() {
     p_display = new LinuxDisplay();
+    p_input = new LinuxInput();
+}
+
+LinuxPlatform::~LinuxPlatform() {
+    printf("~LinuxPlatform()\n");
+    SDL_Quit();
 }

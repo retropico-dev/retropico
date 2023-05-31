@@ -5,17 +5,28 @@
 #ifndef MICROBOY_PLATFORM_H
 #define MICROBOY_PLATFORM_H
 
+#include <cstdio>
 #include "display.h"
+#include "input.h"
 
 namespace mb {
     class Platform {
     public:
-        Platform();
+        Platform() = default;
+
+        virtual ~Platform() {
+            printf("~Platform()\n");
+            delete (p_display);
+            delete (p_input);
+        };
 
         Display *getDisplay() { return p_display; };
 
+        Input *getInput() { return p_input; };
+
     protected:
         Display *p_display = nullptr;
+        Input *p_input = nullptr;
     };
 }
 

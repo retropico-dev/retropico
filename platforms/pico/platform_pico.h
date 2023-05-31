@@ -16,6 +16,8 @@ namespace mb {
     class PicoPlatform : public Platform {
     public:
         PicoPlatform();
+
+        ~PicoPlatform() override;
     };
 }
 

@@ -228,8 +228,13 @@ int main() {
     putstdio("GB ");
 
     if (ret != GB_INIT_NO_ERROR) {
-        printf("Error: %d\n", ret);
-        goto sleep;
+        printf("error: %d\n", ret);
+        stdio_flush();
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "EndlessLoop"
+        while (true) { __wfi(); }
+#pragma clang diagnostic pop
+        HEDLEY_UNREACHABLE();
     }
 
     /* Automatically assign a colour palette to the game */
@@ -249,7 +254,6 @@ int main() {
     putstdio("\n> ");
 
     while (true) {
-        int input;
 #if ENABLE_SOUND
         static uint16_t stream[1098];
 #endif
@@ -270,85 +274,28 @@ int main() {
          * pressed over a serial connection. */
         if (frames % 4 == 0) gb.direct.joypad = 0xFF;
 
+        // handle input
+        uint16_t buttons = platform->getInput()->getButtons();
+        if (buttons > 0 && !(buttons & mb::Input::Button::DELAY)) {
+            if (buttons & mb::Input::Button::QUIT) break;
+            if (buttons & mb::Input::Button::B1) gb.direct.joypad_bits.a = 0;
+            if (buttons & mb::Input::Button::B2) gb.direct.joypad_bits.b = 0;
+            if (buttons & mb::Input::Button::SELECT) gb.direct.joypad_bits.select = 0;
+            if (buttons & mb::Input::Button::START) gb.direct.joypad_bits.start = 0;
+            if (buttons & mb::Input::Button::UP) gb.direct.joypad_bits.up = 0;
+            if (buttons & mb::Input::Button::RIGHT) gb.direct.joypad_bits.right = 0;
+            if (buttons & mb::Input::Button::DOWN) gb.direct.joypad_bits.down = 0;
+            if (buttons & mb::Input::Button::LEFT) gb.direct.joypad_bits.left = 0;
+        }
+
         // fps
         if (clock.getElapsedTime().asSeconds() >= 1) {
             int fps = (int) ((float) frames / clock.restart().asSeconds());
             frames = 0;
             printf("fps: %i\r\n", fps);
         }
-        // fps
-
-#if 0
-        input = getchar_timeout_us(0);
-        if (input == PICO_ERROR_TIMEOUT)
-            continue;
-        switch (input) {
-            case 'i':
-                gb.direct.interlace = !gb.direct.interlace;
-                break;
-
-            case 'f':
-                gb.direct.frame_skip = !gb.direct.frame_skip;
-                break;
-            case '\n':
-            case '\r': {
-                gb.direct.joypad_bits.start = 0;
-                break;
-            }
-
-            case '\b': {
-                gb.direct.joypad_bits.select = 0;
-                break;
-            }
-
-            case '8': {
-                gb.direct.joypad_bits.up = 0;
-                break;
-            }
-
-            case '2': {
-                gb.direct.joypad_bits.down = 0;
-                break;
-            }
-
-            case '4': {
-                gb.direct.joypad_bits.left = 0;
-                break;
-            }
-
-            case '6': {
-                gb.direct.joypad_bits.right = 0;
-                break;
-            }
-
-            case 'z': {
-                gb.direct.joypad_bits.a = 0;
-                break;
-            }
-
-            case 'x': {
-                gb.direct.joypad_bits.b = 0;
-                break;
-            }
-
-            case 'q':
-                goto out;
-
-            default:
-                break;
-        }
-#endif
     }
 
-    out:
-    puts("\nEmulation Ended");
-    //mk_ili9225_set_rst(true);
-    reset_usb_boot(0, 0);
-
-    /* Sleep forever. */
-    sleep:
-    stdio_flush();
-    while (true) __wfi();
-
-    HEDLEY_UNREACHABLE();
+    delete (platform);
+    return 0;
 }
