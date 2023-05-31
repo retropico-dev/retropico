@@ -5,6 +5,7 @@
 #include <hardware/vreg.h>
 #include <pico/time.h>
 #include <pico/stdlib.h>
+#include <class/cdc/cdc_device.h>
 #include "platform_pico.h"
 #include "display_ssd1306.h"
 #include "audio_pico.h"
@@ -18,7 +19,8 @@ PicoPlatform::PicoPlatform() : Platform() {
          * consumption. */
         const unsigned vco = 792000000; /* 264MHz/132MHz */
         const unsigned div1 = 3, div2 = 1;
-        vreg_set_voltage(VREG_VOLTAGE_1_15);
+        //vreg_set_voltage(VREG_VOLTAGE_1_15);
+        vreg_set_voltage(VREG_VOLTAGE_DEFAULT);
         sleep_ms(2);
         set_sys_clock_pll(vco, div1, div2);
         sleep_ms(2);
@@ -26,6 +28,9 @@ PicoPlatform::PicoPlatform() : Platform() {
 
     /* Initialise USB serial connection for debugging. */
     stdio_init_all();
+#ifndef NDEBUG
+    while (!tud_cdc_connected()) { sleep_ms(100); }
+#endif
 
     /* Initialise GPIO pins. */
 #if 0

@@ -46,7 +46,7 @@ typedef uint16_t palette_t[3][4];
  * https://tcrf.net/Game_Boy_Color_Bootstrap_ROM
  */
 void get_colour_palette(palette_t selected_palette, uint8_t table_entry, uint8_t shuffling_flags) {
-    printf("get_colour_palette(table_entry=0x%02X,shuffling_flags=0x%02X)\n",
+    printf("get_colour_palette(table_entry=0x%02X,shuffling_flags=0x%02X)\r\n",
            table_entry,
            shuffling_flags);
     if (table_entry == 0x00 && shuffling_flags == 0x01) {
@@ -519,7 +519,7 @@ void get_colour_palette(palette_t selected_palette, uint8_t table_entry, uint8_t
         return;
     }
     /* default palette */
-    printf("get_colour_palette: No palette found for table_entry=0x%02X shuffling_flags=0x%02X\n",
+    printf("get_colour_palette: No palette found for table_entry=0x%02X shuffling_flags=0x%02X\r\n",
            table_entry,
            shuffling_flags);
     /* Game Boy DMG palette (4 shades of green) */
@@ -547,7 +547,7 @@ void get_colour_palette(palette_t selected_palette, uint8_t table_entry, uint8_t
  */
 void auto_assign_palette(uint16_t palette[3][4], uint8_t game_checksum, const char *game_title) {
     char disambiguation_character = game_title[3]; /* e.g. 'METROID' -> R */
-    printf("auto_assign_palette(0x%02X,%s)\n", game_checksum, game_title);
+    printf("auto_assign_palette(0x%02X,%s)\r\n", game_checksum, game_title);
     switch (game_checksum) {
         case 0x00: {
             /*  */
@@ -1103,7 +1103,7 @@ void auto_assign_palette(uint16_t palette[3][4], uint8_t game_checksum, const ch
             break;
         }
         default: {
-            printf("auto_assign_palette: No palette found for checksum 0x%02X.\n", game_checksum);
+            printf("auto_assign_palette: No palette found for checksum 0x%02X.\r\n", game_checksum);
             /* Original Game Boy DMG color palette (monochrome 4-shades of green!) */
             get_colour_palette(palette, 0xFF, 0xFF);
             break;
@@ -1126,7 +1126,7 @@ void auto_assign_palette(uint16_t palette[3][4], uint8_t game_checksum, const ch
  * Game Boy Color logo is still being displayed on the screen.
  */
 void manual_assign_palette(palette_t palette, uint8_t selection) {
-    printf("manual_assign_palette(%d)\n", selection);
+    printf("manual_assign_palette(%d)\r\n", selection);
     switch (selection) {
         case 0: {
             /* Right */

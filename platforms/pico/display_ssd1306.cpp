@@ -15,13 +15,14 @@ using namespace mb;
 
 SSD1306Display::SSD1306Display() : Display() {
     // init SSD1306 oled panel (debug, cropped screen)
-    i2c_init(i2c0, 400000);
+    uint rate = i2c_init(i2c0, 1000000); // push i2c rate for speed
     gpio_set_function(SSD1306_SDA, GPIO_FUNC_I2C);
     gpio_set_function(SSD1306_SCL, GPIO_FUNC_I2C);
     gpio_pull_up(SSD1306_SDA);
     gpio_pull_up(SSD1306_SCL);
 
     ssd1306_init(&m_display, 128, 64, 0x3C, i2c0);
+    printf("SSD1306Display(): i2c baud rate set to %i kHz\r\n", rate / 1000);
 }
 
 void SSD1306Display::clear() {
