@@ -38,10 +38,11 @@ void LinuxDisplay::flip() {
     SDL_RenderPresent(p_renderer);
 }
 
-void LinuxDisplay::drawLine(uint8_t y, uint16_t *line) {
+void LinuxDisplay::drawLine(uint8_t y, uint8_t width, uint16_t *line) {
     if (y >= m_size.y) return;
 
     for (int x = 0; x < m_size.x; x++) {
+        if (x >= width) break;
         uint16_t p = line[x];
         SDL_SetRenderDrawColor(p_renderer, p & 0xff, (p >> 5) & 0xff, (p >> 10) & 0xff, SDL_ALPHA_OPAQUE);
         SDL_RenderDrawPoint(p_renderer, x, y);

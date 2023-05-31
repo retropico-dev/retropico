@@ -145,7 +145,7 @@ void core1_lcd_draw_line(const uint_fast8_t line) {
     }
 
     if (platform && platform->getDisplay()) {
-        platform->getDisplay()->drawLine(line, fb);
+        platform->getDisplay()->drawLine(line, LCD_WIDTH, fb);
     }
 
     __atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);

@@ -14,7 +14,7 @@
 using namespace mb;
 
 SSD1306Display::SSD1306Display() : Display() {
-    // init SSD1306 oled panel
+    // init SSD1306 oled panel (debug, cropped screen)
     i2c_init(i2c0, 400000);
     gpio_set_function(SSD1306_SDA, GPIO_FUNC_I2C);
     gpio_set_function(SSD1306_SCL, GPIO_FUNC_I2C);
@@ -32,15 +32,16 @@ void SSD1306Display::flip() {
     ssd1306_show(&m_display);
 }
 
-void SSD1306Display::drawLine(uint8_t y, uint16_t *line) {
+void SSD1306Display::drawLine(uint8_t y, uint8_t width, uint16_t *line) {
     if (y > m_display.height) return;
 
     for (int x = 0; x < m_display.width; x++) {
+        if (x >= width) break;
         if (line[x] > 0) ssd1306_draw_pixel(&m_display, x, y);
         else ssd1306_clear_pixel(&m_display, x, y);
     }
 
-    if (y == m_display.height) {
+    if (y == m_display.height - 1) {
         flip();
     }
 }

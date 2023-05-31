@@ -10,7 +10,9 @@
 namespace mb {
     class Display {
     public:
-        explicit Display(const Utility::Vec2i &size = {160, 144});
+        explicit Display(const Utility::Vec2i &size = {160, 144}) {
+            m_size = size;
+        };
 
         virtual ~Display() = default;
 
@@ -18,9 +20,7 @@ namespace mb {
 
         virtual void flip() {};
 
-        virtual void drawPixel(const Utility::Vec2i &pos, uint16_t pixel) {};
-
-        virtual void drawLine(uint8_t y, uint16_t *line) {};
+        virtual void drawLine(uint8_t y, uint8_t width, uint16_t *line) {};
 
     protected:
         Utility::Vec2i m_size{};

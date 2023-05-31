@@ -18,7 +18,7 @@ namespace mb {
 
         void flip() override;
 
-        void drawLine(uint8_t y, uint16_t *line) override;
+        void drawLine(uint8_t y, uint8_t width, uint16_t *line) override;
 
     private:
         ssd1306_t m_display{};
