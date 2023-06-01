@@ -15,7 +15,7 @@ using namespace mb;
 
 SSD1306Display::SSD1306Display() : Display() {
     // init SSD1306 oled panel (debug, cropped screen)
-    uint rate = i2c_init(i2c0, 1000000); // push i2c rate for speed
+    uint rate = i2c_init(i2c0, 1300000); // push i2c rate for speed
     gpio_set_function(SSD1306_SDA, GPIO_FUNC_I2C);
     gpio_set_function(SSD1306_SCL, GPIO_FUNC_I2C);
     gpio_pull_up(SSD1306_SDA);

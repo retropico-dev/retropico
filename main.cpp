@@ -84,11 +84,10 @@ uint8_t gb_rom_read(struct gb_s *gb, const uint_fast32_t addr) {
     (void) gb;
 #ifdef ENABLE_RAM_BANK
     if (addr < sizeof(rom_bank0)) {
-        //printf("gb_rom_read(rom_bank0): %lu\n", addr);
         return rom_bank0[addr];
     }
 #endif
-    //printf("gb_rom_read(rom): %lu\n", addr);
+
     return rom[addr];
 }
 
