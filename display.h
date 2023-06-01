@@ -20,7 +20,9 @@ namespace mb {
 
         virtual void flip() {};
 
-        virtual void drawLine(uint8_t y, uint8_t width, uint16_t *line) {};
+        virtual void drawPixel(const Utility::Vec2i &pos, uint16_t pixel) {};
+
+        Utility::Vec2i getSize() { return m_size; };
 
     protected:
         Utility::Vec2i m_size{};

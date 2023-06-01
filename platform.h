@@ -9,6 +9,7 @@
 #include "display.h"
 #include "input.h"
 #include "audio.h"
+#include "io.h"
 
 namespace mb {
     class Platform {
@@ -20,6 +21,7 @@ namespace mb {
             delete (p_display);
             delete (p_audio);
             delete (p_input);
+            delete (p_io);
         };
 
         Display *getDisplay() { return p_display; };
@@ -28,10 +30,13 @@ namespace mb {
 
         Input *getInput() { return p_input; };
 
+        Io *getIo() { return p_io; };
+
     protected:
         Display *p_display = nullptr;
         Input *p_input = nullptr;
         Audio *p_audio = nullptr;
+        Io *p_io = nullptr;
     };
 }
 

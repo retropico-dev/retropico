@@ -13,6 +13,7 @@
 #endif
 
 #define MAX_BUTTONS 8
+#define INPUT_DELAY_UI 500
 
 namespace mb {
     class Input {

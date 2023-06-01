@@ -20,6 +20,9 @@
 #ifndef ENABLE_SOUND
 #define ENABLE_SOUND 1
 #endif
+#ifdef ENABLE_RAM_BANK
+#define ENABLE_RAM_BANK 1
+#endif
 
 /* C Headers */
 #include <cstdio>
@@ -38,14 +41,10 @@
 #include "hedley.h"
 #include "peanut_gb.h"
 
-/* Definition of ROM data variable. Must be declared like:
- * #include <pico/platform.h>
- * const unsigned char __in_flash("rom") rom[] = {
- * 	...
- * };
- */
-extern "C" const unsigned char rom[];
-unsigned char rom_bank0[16384];
+#ifdef ENABLE_RAM_BANK
+static unsigned char rom_bank0[65536];
+#endif
+static uint8_t *rom = nullptr;
 static uint8_t ram[32768];
 static int lcd_line_busy = 0;
 
@@ -63,11 +62,7 @@ union core_cmd {
 #define CORE_CMD_LCD_LINE    1
         /* Control idle mode on the LCD. Limits colours to 2 bits. */
 #define CORE_CMD_IDLE_SET    2
-        /* Set a specific pixel. For debugging. */
-#define CORE_CMD_SET_PIXEL    3
         uint8_t cmd;
-        uint8_t unused1;
-        uint8_t unused2;
         uint8_t data;
     };
     uint32_t full;
@@ -87,9 +82,13 @@ static uint8_t pixels_buffer[LCD_WIDTH];
  */
 uint8_t gb_rom_read(struct gb_s *gb, const uint_fast32_t addr) {
     (void) gb;
-    if (addr < sizeof(rom_bank0))
+#ifdef ENABLE_RAM_BANK
+    if (addr < sizeof(rom_bank0)) {
+        //printf("gb_rom_read(rom_bank0): %lu\n", addr);
         return rom_bank0[addr];
-
+    }
+#endif
+    //printf("gb_rom_read(rom): %lu\n", addr);
     return rom[addr];
 }
 
@@ -123,23 +122,23 @@ void gb_error(struct gb_s *gb, const enum gb_error_e gb_err, const uint16_t val)
             "INVALID WRITE",
             "HALT"
     };
-    printf("Error %d occurred: %s\n. Abort.\n",
+    printf("Error %d occurred: %s (abort)\r\n",
            gb_err,
-           gb_err >= GB_INVALID_MAX ?
-           gb_err_str[0] : gb_err_str[gb_err]);
+           gb_err >= GB_INVALID_MAX ? gb_err_str[0] : gb_err_str[gb_err]);
     abort();
 #endif
 }
 
 void core1_lcd_draw_line(const uint_fast8_t line) {
-    static uint16_t fb[LCD_WIDTH];
-
-    for (unsigned int x = 0; x < LCD_WIDTH; x++) {
-        fb[x] = palette[(pixels_buffer[x] & LCD_PALETTE_ALL) >> 4][pixels_buffer[x] & 3];
+    // write line to display buffer
+    for (uint_fast8_t x = 0; x < LCD_WIDTH; x++) {
+        uint16_t p = palette[(pixels_buffer[x] & LCD_PALETTE_ALL) >> 4][pixels_buffer[x] & 3];
+        platform->getDisplay()->drawPixel({(int16_t) x, (int16_t) line}, p);
     }
 
-    if (platform && platform->getDisplay()) {
-        platform->getDisplay()->drawLine(line, LCD_WIDTH, fb);
+    // flip
+    if (line == platform->getDisplay()->getSize().y - 1) {
+        platform->getDisplay()->flip();
     }
 
     __atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);
@@ -196,7 +195,9 @@ int main() {
     static struct gb_s gb;
     enum gb_init_error_e ret;
     uint_fast32_t frames = 0;
+#ifndef NDEBUG
     mb::Clock clock;
+#endif
 
 #ifdef LINUX
     platform = new mb::LinuxPlatform();
@@ -204,15 +205,20 @@ int main() {
     platform = new mb::PicoPlatform();
 #endif
 
-    /* Start Core1, which processes requests to the LCD. */
+    // load rom from fs
+    rom = platform->getIo()->load("/roms/rom.gb");
+#ifdef ENABLE_RAM_BANK
+    memcpy(rom_bank0, rom, sizeof(rom_bank0));
+#endif
+
+    // start Core1, which processes requests to the LCD
     multicore_launch_core1(main_core1);
 
-    /* Initialise GB context. */
-    memcpy(rom_bank0, rom, sizeof(rom_bank0));
+    // initialise GB context
     ret = gb_init(&gb, &gb_rom_read, &gb_cart_ram_read, &gb_cart_ram_write, &gb_error, &gb_priv);
 
     if (ret != GB_INIT_NO_ERROR) {
-        printf("error: %d\n", ret);
+        printf("error: %d\r\n", ret);
         stdio_flush();
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "EndlessLoop"
@@ -221,7 +227,7 @@ int main() {
         HEDLEY_UNREACHABLE();
     }
 
-    /* Automatically assign a colour palette to the game */
+    // automatically assign a colour palette to the game
     char rom_title[16];
     auto_assign_palette(palette, gb_colour_hash(&gb), gb_get_rom_name(&gb, rom_title));
 
@@ -245,7 +251,10 @@ int main() {
         // handle input
         uint16_t buttons = platform->getInput()->getButtons();
         if (buttons > 0 && !(buttons & mb::Input::Button::DELAY)) {
+            // exit requested (linux)
             if (buttons & mb::Input::Button::QUIT) break;
+
+            // emulation inputs
             if (buttons & mb::Input::Button::B1) gb.direct.joypad_bits.a = 0;
             if (buttons & mb::Input::Button::B2) gb.direct.joypad_bits.b = 0;
             if (buttons & mb::Input::Button::SELECT) gb.direct.joypad_bits.select = 0;
@@ -254,14 +263,34 @@ int main() {
             if (buttons & mb::Input::Button::RIGHT) gb.direct.joypad_bits.right = 0;
             if (buttons & mb::Input::Button::DOWN) gb.direct.joypad_bits.down = 0;
             if (buttons & mb::Input::Button::LEFT) gb.direct.joypad_bits.left = 0;
+
+            // hotkey / combos
+            if (buttons & mb::Input::Button::SELECT) {
+                platform->getInput()->setRepeatDelay(INPUT_DELAY_UI);
+                // palette selection
+                if (buttons & mb::Input::Button::LEFT) {
+                    if (manual_palette_selected > 0) {
+                        manual_palette_selected--;
+                        manual_assign_palette(palette, manual_palette_selected);
+                    }
+                } else if (buttons & mb::Input::Button::RIGHT) {
+                    if (manual_palette_selected < NUMBER_OF_MANUAL_PALETTES) {
+                        manual_palette_selected++;
+                        manual_assign_palette(palette, manual_palette_selected);
+                    }
+                }
+            } else {
+                platform->getInput()->setRepeatDelay(0);
+            }
         }
 
+#ifndef NDEBUG
         // fps
         if (clock.getElapsedTime().asSeconds() >= 1) {
             printf("fps: %i\r\n", (int) ((float) frames / clock.restart().asSeconds()));
             frames = 0;
         }
-
+#endif
         frames++;
     }
 

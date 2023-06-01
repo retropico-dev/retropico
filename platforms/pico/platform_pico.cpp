@@ -2,13 +2,14 @@
 // Created by cpasjuste on 30/05/23.
 //
 
-#include <hardware/vreg.h>
 #include <pico/time.h>
 #include <pico/stdlib.h>
+#include <hardware/vreg.h>
 #include <class/cdc/cdc_device.h>
 #include "platform_pico.h"
 #include "display_ssd1306.h"
 #include "audio_pico.h"
+#include "io_pico.h"
 
 using namespace mb;
 
@@ -59,6 +60,7 @@ PicoPlatform::PicoPlatform() : Platform() {
     // TODO
     p_input = new Input();
     // TODO
+    p_io = new PicoIo();
 }
 
 PicoPlatform::~PicoPlatform() {

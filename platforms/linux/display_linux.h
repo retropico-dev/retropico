@@ -16,11 +16,11 @@ namespace mb {
 
         ~LinuxDisplay() override;
 
+        void drawPixel(const Utility::Vec2i &pos, uint16_t pixel) override;
+
         void clear() override;
 
         void flip() override;
-
-        void drawLine(uint8_t y, uint8_t width, uint16_t *line) override;
 
     private:
         SDL_Window *p_window = nullptr;

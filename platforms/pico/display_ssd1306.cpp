@@ -22,7 +22,14 @@ SSD1306Display::SSD1306Display() : Display() {
     gpio_pull_up(SSD1306_SCL);
 
     ssd1306_init(&m_display, 128, 64, 0x3C, i2c0);
+    SSD1306Display::clear();
+    SSD1306Display::flip();
     printf("SSD1306Display(): i2c baud rate set to %i kHz\r\n", rate / 1000);
+}
+
+void SSD1306Display::drawPixel(const Utility::Vec2i &pos, uint16_t pixel) {
+    if (pixel > 0) ssd1306_draw_pixel(&m_display, pos.x, pos.y);
+    else ssd1306_clear_pixel(&m_display, pos.x, pos.y);
 }
 
 void SSD1306Display::clear() {
@@ -31,18 +38,4 @@ void SSD1306Display::clear() {
 
 void SSD1306Display::flip() {
     ssd1306_show(&m_display);
-}
-
-void SSD1306Display::drawLine(uint8_t y, uint8_t width, uint16_t *line) {
-    if (y > m_display.height) return;
-
-    for (int x = 0; x < m_display.width; x++) {
-        if (x >= width) break;
-        if (line[x] > 0) ssd1306_draw_pixel(&m_display, x, y);
-        else ssd1306_clear_pixel(&m_display, x, y);
-    }
-
-    if (y == m_display.height - 1) {
-        flip();
-    }
 }

@@ -29,6 +29,12 @@ LinuxDisplay::LinuxDisplay() : Display() {
     printf("LinuxDisplay: %ix%i\n", m_size.x, m_size.y);
 }
 
+void LinuxDisplay::drawPixel(const Utility::Vec2i &pos, uint16_t pixel) {
+    if (pos.x > m_size.x || pos.y > m_size.y) return;
+    SDL_SetRenderDrawColor(p_renderer, pixel & 0xff, (pixel >> 5) & 0xff, (pixel >> 10) & 0xff, SDL_ALPHA_OPAQUE);
+    SDL_RenderDrawPoint(p_renderer, pos.x, pos.y);
+}
+
 void LinuxDisplay::clear() {
     SDL_SetRenderDrawColor(p_renderer, 0, 0, 0, 255);
     SDL_RenderClear(p_renderer);
@@ -36,21 +42,6 @@ void LinuxDisplay::clear() {
 
 void LinuxDisplay::flip() {
     SDL_RenderPresent(p_renderer);
-}
-
-void LinuxDisplay::drawLine(uint8_t y, uint8_t width, uint16_t *line) {
-    if (y >= m_size.y) return;
-
-    for (int x = 0; x < m_size.x; x++) {
-        if (x >= width) break;
-        uint16_t p = line[x];
-        SDL_SetRenderDrawColor(p_renderer, p & 0xff, (p >> 5) & 0xff, (p >> 10) & 0xff, SDL_ALPHA_OPAQUE);
-        SDL_RenderDrawPoint(p_renderer, x, y);
-    }
-
-    if (y == m_size.y - 1) {
-        flip();
-    }
 }
 
 LinuxDisplay::~LinuxDisplay() {

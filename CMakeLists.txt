@@ -46,12 +46,14 @@ else ()
     file(GLOB_RECURSE PLATFORM_SOURCES platforms/pico/*.c*)
     list(APPEND INCLUDES platforms/pico platforms/pico/i2s)
     list(APPEND PLATFORM_LIBS
+            -Wl,--print-memory-usage
             pico_stdlib
             pico_multicore
             hardware_i2c
             hardware_pio
             hardware_dma
-            hardware_sleep)
+            hardware_sleep
+            )
 endif ()
 
 # sources
@@ -67,8 +69,8 @@ else ()
     pico_generate_pio_header(${CMAKE_PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/platforms/pico/i2s/audio_i2s.pio)
 
     #target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
-    #       -DPICO_DEFAULT_UART_TX_PIN=12
-    #       -DPICO_DEFAULT_UART_RX_PIN=13)
+    #        -DPICO_DEFAULT_UART_TX_PIN=12
+    #        -DPICO_DEFAULT_UART_RX_PIN=13)
     target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
             PARAM_ASSERTIONS_DISABLE_ALL=1
             PICO_ENTER_USB_BOOT_ON_EXIT=1
@@ -81,11 +83,9 @@ else ()
 
     # run from ram
     pico_set_binary_type(${CMAKE_PROJECT_NAME} copy_to_ram)
-
     # enable usb output, disable uart output
     pico_enable_stdio_usb(${CMAKE_PROJECT_NAME} 1)
     pico_enable_stdio_uart(${CMAKE_PROJECT_NAME} 0)
-
     # create map/bin/hex/uf2 file etc.
     pico_add_extra_outputs(${CMAKE_PROJECT_NAME})
 endif ()
