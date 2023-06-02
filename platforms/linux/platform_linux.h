@@ -7,7 +7,7 @@
 
 #include <SDL2/SDL.h>
 #include "platform.h"
-#include "platform_compat.h"
+#include "compat_linux.h"
 
 #define _Noreturn
 #define tight_loop_contents() ((void)0)
