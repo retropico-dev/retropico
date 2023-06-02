@@ -10,8 +10,6 @@
 namespace mb {
     class LinuxInput : public Input {
     public:
-        LinuxInput();
-
         uint16_t getButtons() override;
     };
 }

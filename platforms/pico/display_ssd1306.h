@@ -9,6 +9,9 @@
 #include "ssd1306.h"
 #include "clock.h"
 
+#define SSD1306_SDA_PIN 0
+#define SSD1306_SCL_PIN 1
+
 namespace mb {
     class SSD1306Display : public Display {
     public:

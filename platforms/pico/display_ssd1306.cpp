@@ -8,18 +8,15 @@
 #include "display.h"
 #include "display_ssd1306.h"
 
-#define SSD1306_SDA 0
-#define SSD1306_SCL 1
-
 using namespace mb;
 
 SSD1306Display::SSD1306Display() : Display() {
     // init SSD1306 oled panel (debug, cropped screen)
     uint rate = i2c_init(i2c0, 1300000); // push i2c rate for speed
-    gpio_set_function(SSD1306_SDA, GPIO_FUNC_I2C);
-    gpio_set_function(SSD1306_SCL, GPIO_FUNC_I2C);
-    gpio_pull_up(SSD1306_SDA);
-    gpio_pull_up(SSD1306_SCL);
+    gpio_set_function(SSD1306_SDA_PIN, GPIO_FUNC_I2C);
+    gpio_set_function(SSD1306_SCL_PIN, GPIO_FUNC_I2C);
+    gpio_pull_up(SSD1306_SDA_PIN);
+    gpio_pull_up(SSD1306_SCL_PIN);
 
     ssd1306_init(&m_display, 128, 64, 0x3C, i2c0);
     SSD1306Display::clear();

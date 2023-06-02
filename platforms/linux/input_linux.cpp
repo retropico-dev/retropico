@@ -13,21 +13,17 @@ struct Mapping {
 };
 
 const Mapping mapping[MAX_BUTTONS] = {
-        {Input::Button::B1, SDL_SCANCODE_KP_1},
-        {Input::Button::B2, SDL_SCANCODE_KP_2},
-        {Input::Button::START, SDL_SCANCODE_RETURN},
+        {Input::Button::B1,     SDL_SCANCODE_KP_1},
+        {Input::Button::B2,     SDL_SCANCODE_KP_2},
+        {Input::Button::START,  SDL_SCANCODE_RETURN},
         {Input::Button::SELECT, SDL_SCANCODE_SPACE},
-        {Input::Button::LEFT, SDL_SCANCODE_LEFT},
-        {Input::Button::RIGHT, SDL_SCANCODE_RIGHT},
-        {Input::Button::UP, SDL_SCANCODE_UP},
-        {Input::Button::DOWN, SDL_SCANCODE_DOWN}
+        {Input::Button::LEFT,   SDL_SCANCODE_LEFT},
+        {Input::Button::RIGHT,  SDL_SCANCODE_RIGHT},
+        {Input::Button::UP,     SDL_SCANCODE_UP},
+        {Input::Button::DOWN,   SDL_SCANCODE_DOWN}
 };
 
-mb::LinuxInput::LinuxInput() : Input() {
-
-}
-
-uint16_t mb::LinuxInput::getButtons() {
+uint16_t LinuxInput::getButtons() {
     // reset buttons state
     m_buttons = 0;
 

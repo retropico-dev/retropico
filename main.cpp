@@ -254,14 +254,14 @@ int main() {
             if (buttons & mb::Input::Button::QUIT) break;
 
             // emulation inputs
-            if (buttons & mb::Input::Button::B1) gb.direct.joypad_bits.a = 0;
-            if (buttons & mb::Input::Button::B2) gb.direct.joypad_bits.b = 0;
-            if (buttons & mb::Input::Button::SELECT) gb.direct.joypad_bits.select = 0;
-            if (buttons & mb::Input::Button::START) gb.direct.joypad_bits.start = 0;
-            if (buttons & mb::Input::Button::UP) gb.direct.joypad_bits.up = 0;
-            if (buttons & mb::Input::Button::RIGHT) gb.direct.joypad_bits.right = 0;
-            if (buttons & mb::Input::Button::DOWN) gb.direct.joypad_bits.down = 0;
-            if (buttons & mb::Input::Button::LEFT) gb.direct.joypad_bits.left = 0;
+            gb.direct.joypad_bits.a = !(buttons & mb::Input::Button::B1);
+            gb.direct.joypad_bits.b = !(buttons & mb::Input::Button::B2);
+            gb.direct.joypad_bits.select = !(buttons & mb::Input::Button::SELECT);
+            gb.direct.joypad_bits.start = !(buttons & mb::Input::Button::START);
+            gb.direct.joypad_bits.up = !(buttons & mb::Input::Button::UP);
+            gb.direct.joypad_bits.right = !(buttons & mb::Input::Button::RIGHT);
+            gb.direct.joypad_bits.down = !(buttons & mb::Input::Button::DOWN);
+            gb.direct.joypad_bits.left = !(buttons & mb::Input::Button::LEFT);
 
             // hotkey / combos
             if (buttons & mb::Input::Button::SELECT) {
