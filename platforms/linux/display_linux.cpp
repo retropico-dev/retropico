@@ -31,7 +31,13 @@ LinuxDisplay::LinuxDisplay() : Display() {
 
 void LinuxDisplay::drawPixel(const Utility::Vec2i &pos, uint16_t pixel) {
     if (pos.x > m_size.x || pos.y > m_size.y) return;
-    SDL_SetRenderDrawColor(p_renderer, pixel & 0xff, (pixel >> 5) & 0xff, (pixel >> 10) & 0xff, SDL_ALPHA_OPAQUE);
+
+    // rgb565 > rgb32
+    int32_t r = ((pixel & 0xF800) >> 11) << 3;
+    int32_t g = ((pixel & 0x7E0) >> 5) << 2;
+    int32_t b = ((pixel & 0x1F)) << 3;
+
+    SDL_SetRenderDrawColor(p_renderer, r, g, b, SDL_ALPHA_OPAQUE);
     SDL_RenderDrawPoint(p_renderer, pos.x, pos.y);
 }
 
