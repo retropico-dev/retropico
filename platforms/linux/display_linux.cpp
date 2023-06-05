@@ -29,16 +29,16 @@ LinuxDisplay::LinuxDisplay() : Display() {
     printf("LinuxDisplay: %ix%i (texture pitch: %i)\n", m_size.x, m_size.y, m_pitch);
 }
 
-void LinuxDisplay::setPixel(const Utility::Vec2i &pos, uint16_t pixel) {
-    if (pos.x > m_size.x || pos.y > m_size.y) return;
+void LinuxDisplay::drawPixel(uint16_t x, uint16_t y, uint16_t color) {
+    if (x > m_size.x || y > m_size.y) return;
 
     // rgb565 > rgb32
-    int32_t r = ((pixel & 0xF800) >> 11) << 3;
-    int32_t g = ((pixel & 0x7E0) >> 5) << 2;
-    int32_t b = ((pixel & 0x1F)) << 3;
+    int32_t r = ((color & 0xF800) >> 11) << 3;
+    int32_t g = ((color & 0x7E0) >> 5) << 2;
+    int32_t b = ((color & 0x1F)) << 3;
 
     SDL_SetRenderDrawColor(p_renderer, r, g, b, SDL_ALPHA_OPAQUE);
-    SDL_RenderDrawPoint(p_renderer, pos.x, pos.y);
+    SDL_RenderDrawPoint(p_renderer, x, y);
 }
 
 void LinuxDisplay::clear() {
@@ -47,7 +47,6 @@ void LinuxDisplay::clear() {
 }
 
 void LinuxDisplay::flip() {
-    Display::flip();
     SDL_RenderPresent(p_renderer);
 }
 

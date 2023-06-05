@@ -52,6 +52,7 @@ static palette_t palette;
 static uint8_t manual_palette_selected = 0;
 
 static mb::Platform *platform;
+static mb::Surface *surface;
 
 /* Multicore command structure. */
 union core_cmd {
@@ -128,22 +129,30 @@ void gb_error(struct gb_s *gb, const enum gb_error_e gb_err, const uint16_t val)
 #endif
 }
 
+static bool m_scale = true;
+
 void core1_lcd_draw_line(const uint_fast8_t line) {
     // write a line to display buffer
-    mb::Utility::Vec2i slide{};
-    if (!platform->getDisplay()->isScaled()) {
-        slide.x = (int16_t) ((platform->getDisplay()->getSize().x - LCD_WIDTH) / 2);
-        slide.y = (int16_t) ((platform->getDisplay()->getSize().y - LCD_HEIGHT) / 2);
-    }
+    mb::Utility::Vec2i pos{};
 
-    for (uint_fast8_t x = 0; x < LCD_WIDTH; x++) {
-        uint16_t p = palette[(pixels_buffer[x] & LCD_PALETTE_ALL) >> 4][pixels_buffer[x] & 3];
-        platform->getDisplay()->drawPixel({(int16_t) (x + slide.x), (int16_t) (line + slide.y)}, p);
+    if (m_scale) {
+        for (uint_fast8_t x = 0; x < LCD_WIDTH; x++) {
+            surface->setPixel(x, line, palette[(pixels_buffer[x] & LCD_PALETTE_ALL) >> 4][pixels_buffer[x] & 3]);
+        }
+    } else {
+        pos.x = (int16_t) ((platform->getDisplay()->getSize().x - LCD_WIDTH) / 2);
+        pos.y = (int16_t) ((platform->getDisplay()->getSize().y - LCD_HEIGHT) / 2);
+        for (uint_fast8_t x = 0; x < LCD_WIDTH; x++) {
+            uint16_t p = palette[(pixels_buffer[x] & LCD_PALETTE_ALL) >> 4][pixels_buffer[x] & 3];
+            platform->getDisplay()->drawPixel({(int16_t) (x + pos.x), (int16_t) (line + pos.y)}, p);
+        }
     }
 
     // flip
     if (line == LCD_HEIGHT - 1) {
-        //platform->getDisplay()->setScaled(true);
+        if (m_scale) {
+            platform->getDisplay()->drawSurface(surface, {0, 0}, platform->getDisplay()->getSize());
+        }
         platform->getDisplay()->flip();
     }
 
@@ -210,6 +219,9 @@ int main() {
 #else
     platform = new mb::PicoPlatform();
 #endif
+
+    // create a render surface
+    surface = new mb::Surface({LCD_WIDTH, LCD_HEIGHT});
 
     // load rom from fs
     rom = platform->getIo()->load("/roms/rom.gb");
@@ -300,6 +312,7 @@ int main() {
         frames++;
     }
 
+    delete (surface);
     delete (platform);
 
     return 0;

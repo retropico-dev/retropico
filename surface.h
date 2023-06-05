@@ -21,16 +21,24 @@ namespace mb {
             if (p_buffer) free(p_buffer);
         }
 
-        void setPixel(const Utility::Vec2i &pos, uint16_t pixel) {
+        void setPixel(uint16_t x, uint16_t y, uint16_t pixel) {
             if (!p_buffer) return;
-            if (pos.x > m_size.x || pos.y > m_size.y) return;
-            *(uint16_t *) (p_buffer + pos.y * m_pitch + pos.x * m_bpp) = pixel;
+            if (x > m_size.x || y > m_size.y) return;
+            *(uint16_t *) (p_buffer + y * m_pitch + x * m_bpp) = pixel;
+        }
+
+        void setPixel(const Utility::Vec2i &pos, uint16_t pixel) {
+            setPixel(pos.x, pos.y, pixel);
+        }
+
+        uint16_t getPixel(uint16_t x, uint16_t y) {
+            if (!p_buffer) return 0;
+            if (x > m_size.x || y > m_size.y) return 0;
+            return *(uint16_t *) (p_buffer + y * m_pitch + x * m_bpp);
         }
 
         uint16_t getPixel(const Utility::Vec2i &pos) {
-            if (!p_buffer) return 0;
-            if (pos.x > m_size.x || pos.y > m_size.y) return 0;
-            return *(uint16_t *) (p_buffer + pos.y * m_pitch + pos.x * m_bpp);
+            return getPixel(pos.x, pos.y);
         }
 
         uint8_t *getPixels() { return p_buffer; };
