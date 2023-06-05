@@ -129,14 +129,21 @@ void gb_error(struct gb_s *gb, const enum gb_error_e gb_err, const uint16_t val)
 }
 
 void core1_lcd_draw_line(const uint_fast8_t line) {
-    // write line to display buffer
+    // write a line to display buffer
+    mb::Utility::Vec2i slide{};
+    if (!platform->getDisplay()->isScaled()) {
+        slide.x = (int16_t) ((platform->getDisplay()->getSize().x - LCD_WIDTH) / 2);
+        slide.y = (int16_t) ((platform->getDisplay()->getSize().y - LCD_HEIGHT) / 2);
+    }
+
     for (uint_fast8_t x = 0; x < LCD_WIDTH; x++) {
         uint16_t p = palette[(pixels_buffer[x] & LCD_PALETTE_ALL) >> 4][pixels_buffer[x] & 3];
-        platform->getDisplay()->drawPixel({(int16_t) x, (int16_t) line}, p);
+        platform->getDisplay()->drawPixel({(int16_t) (x + slide.x), (int16_t) (line + slide.y)}, p);
     }
 
     // flip
-    if (line == platform->getDisplay()->getSize().y - 1) {
+    if (line == LCD_HEIGHT - 1) {
+        //platform->getDisplay()->setScaled(true);
         platform->getDisplay()->flip();
     }
 
@@ -294,5 +301,6 @@ int main() {
     }
 
     delete (platform);
+
     return 0;
 }

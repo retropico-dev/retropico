@@ -18,6 +18,14 @@ namespace mb {
 
             Vec2i(const int16_t x, const int16_t y) : x(x), y(y) {}
 
+            bool operator==(const Vec2i &rhs) const {
+                return rhs.x == x && rhs.y == y;
+            }
+
+            bool operator!=(const Vec2i &rhs) const {
+                return rhs.x != x || rhs.y != y;
+            }
+
             Vec2i operator+(const Vec2i &rhs) const {
                 return {(int16_t) (x + rhs.x), (int16_t) (y + rhs.y)};
             }

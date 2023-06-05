@@ -12,12 +12,13 @@
 #define SSD1306_SDA_PIN 0
 #define SSD1306_SCL_PIN 1
 
+#define SSD1306_WIDTH 128
+#define SSD1306_HEIGHT 64
+
 namespace mb {
     class SSD1306Display : public Display {
     public:
         SSD1306Display();
-
-        void drawPixel(const Utility::Vec2i &pos, uint16_t pixel) override;
 
         void clear() override;
 
@@ -25,6 +26,8 @@ namespace mb {
 
     private:
         ssd1306_t m_display{};
+
+        void setPixel(const Utility::Vec2i &pos, uint16_t pixel) override;
     };
 }
 

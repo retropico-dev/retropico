@@ -16,8 +16,6 @@ namespace mb {
 
         ~LinuxDisplay() override;
 
-        void drawPixel(const Utility::Vec2i &pos, uint16_t pixel) override;
-
         void clear() override;
 
         void flip() override;
@@ -25,6 +23,8 @@ namespace mb {
     private:
         SDL_Window *p_window = nullptr;
         SDL_Renderer *p_renderer = nullptr;
+
+        void setPixel(const Utility::Vec2i &pos, uint16_t pixel) override;
     };
 }
 

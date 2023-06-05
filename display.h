@@ -5,27 +5,44 @@
 #ifndef MICROBOY_DISPLAY_H
 #define MICROBOY_DISPLAY_H
 
+#include "surface.h"
 #include "utility.h"
 
 namespace mb {
     class Display {
     public:
-        explicit Display(const Utility::Vec2i &size = {160, 144}) {
-            m_size = size;
-        };
+        // init a display (hardware dependant, to be implemented)
+        // default display size used for "ST7789 1.54" TFT IPS 240x240"
+        explicit Display(const Utility::Vec2i &displaySize = {240, 240},
+                         const Utility::Vec2i &surfaceSize = {160, 144});
 
-        virtual ~Display() = default;
+        // destroy the display (hardware dependant, to be implemented)
+        virtual ~Display();
 
+        // clear the display (hardware dependant, to be implemented)
         virtual void clear() {};
 
-        virtual void flip() {};
+        // flip the display (hardware dependant, to be implemented)
+        virtual void flip();
 
-        virtual void drawPixel(const Utility::Vec2i &pos, uint16_t pixel) {};
+        // draw a pixel to the pixel buffer
+        void drawPixel(const Utility::Vec2i &pos, uint16_t pixel);
 
         Utility::Vec2i getSize() { return m_size; };
 
+        void setScaled(bool scaled) { m_scale = scaled; };
+
+        [[nodiscard]] bool isScaled() const { return m_scale; };
+
     protected:
+        Surface *p_surface = nullptr;
         Utility::Vec2i m_size{};
+        int m_pitch = 0;
+        int m_bpp = 2;
+        bool m_scale = false;
+
+        // draw a pixel to the display (hardware dependant)
+        virtual void setPixel(const Utility::Vec2i &pos, uint16_t pixel) {};
     };
 }
 
