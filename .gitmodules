@@ -1,3 +1,6 @@
 [submodule "Peanut-GB"]
 	path = external/cores/Peanut-GB
 	url = https://github.com/deltabeard/Peanut-GB.git
+[submodule "external/misc/Adafruit-GFX-Library"]
+	path = external/misc/Adafruit-GFX-Library
+	url = https://github.com/adafruit/Adafruit-GFX-Library.git

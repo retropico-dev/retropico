@@ -129,7 +129,7 @@ void gb_error(struct gb_s *gb, const enum gb_error_e gb_err, const uint16_t val)
 #endif
 }
 
-static bool m_scale = true;
+static bool m_scale = false;
 
 void core1_lcd_draw_line(const uint_fast8_t line) {
     // write a line to display buffer
@@ -153,6 +153,10 @@ void core1_lcd_draw_line(const uint_fast8_t line) {
         if (m_scale) {
             platform->getDisplay()->drawSurface(surface, {0, 0}, platform->getDisplay()->getSize());
         }
+        //platform->getDisplay()->setRotation(1);
+        //platform->getDisplay()->fillRect(16, 16, 64, 32, mb::Display::Color::Yellow);
+        //platform->getDisplay()->setCursor(4, 4);
+        //platform->getDisplay()->print("Hello World");
         platform->getDisplay()->flip();
     }
 

@@ -2,66 +2,14 @@
 // Created by cpasjuste on 05/06/23.
 //
 
-#include <cstdio>
 #include "display.h"
 
 using namespace mb;
 
-#ifndef min
-#define min(a, b) (((a) < (b)) ? (a) : (b))
-#endif
-
-#ifndef _swap_int16_t
-#define _swap_int16_t(a, b)                                                    \
-  {                                                                            \
-    int16_t t = a;                                                             \
-    a = b;                                                                     \
-    b = t;                                                                     \
-  }
-#endif
-
-Display::Display(const Utility::Vec2i &size) {
+Display::Display(const Utility::Vec2i &size) : Adafruit_GFX(size.x, size.y) {
     m_size = size;
     m_bpp = 2;
     m_pitch = m_size.x * m_bpp;
-}
-
-void Display::drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color) {
-    int16_t steep = abs(y1 - y0) > abs(x1 - x0);
-    if (steep) {
-        _swap_int16_t(x0, y0);
-        _swap_int16_t(x1, y1);
-    }
-
-    if (x0 > x1) {
-        _swap_int16_t(x0, x1);
-        _swap_int16_t(y0, y1);
-    }
-
-    int16_t dx, dy;
-    dx = x1 - x0;
-    dy = abs(y1 - y0);
-    int16_t err = dx / 2;
-    int16_t ystep;
-
-    if (y0 < y1) {
-        ystep = 1;
-    } else {
-        ystep = -1;
-    }
-
-    for (; x0 <= x1; x0++) {
-        if (steep) {
-            drawPixel(y0, x0, color);
-        } else {
-            drawPixel(x0, y0, color);
-        }
-        err -= dy;
-        if (err < 0) {
-            y0 += ystep;
-            err += dx;
-        }
-    }
 }
 
 void Display::drawSurface(Surface *surface, const Utility::Vec2i &pos, const Utility::Vec2i &size) {

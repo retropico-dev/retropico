@@ -29,13 +29,31 @@ LinuxDisplay::LinuxDisplay() : Display() {
     printf("LinuxDisplay: %ix%i (texture pitch: %i)\n", m_size.x, m_size.y, m_pitch);
 }
 
-void LinuxDisplay::drawPixel(uint16_t x, uint16_t y, uint16_t color) {
-    if (x > m_size.x || y > m_size.y) return;
+void LinuxDisplay::drawPixel(int16_t x, int16_t y, uint16_t color) {
+    if ((x < 0) || (y < 0) || x > m_size.x || y > m_size.y) return;
 
     // rgb565 > rgb32
     int32_t r = ((color & 0xF800) >> 11) << 3;
     int32_t g = ((color & 0x7E0) >> 5) << 2;
     int32_t b = ((color & 0x1F)) << 3;
+
+    int16_t t;
+    switch (rotation) {
+        case 1:
+            t = x;
+            x = (int16_t) (m_size.x - 1 - y);
+            y = t;
+            break;
+        case 2:
+            x = (int16_t) (m_size.x - 1 - x);
+            y = (int16_t) (m_size.y - 1 - y);
+            break;
+        case 3:
+            t = x;
+            x = y;
+            y = (int16_t) (m_size.y - 1 - t);
+            break;
+    }
 
     SDL_SetRenderDrawColor(p_renderer, r, g, b, SDL_ALPHA_OPAQUE);
     SDL_RenderDrawPoint(p_renderer, x, y);
