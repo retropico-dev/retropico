@@ -13,7 +13,9 @@ namespace mb {
     public:
         explicit PicoAudio();
 
-        void loop() override;
+        void setup(uint16_t rate, uint16_t samples, AudioCallback cb) override;
+
+        void play(const void *data, int samples) override;
 
     private:
         uint16_t m_stream[1098]{};

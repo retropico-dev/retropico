@@ -51,6 +51,11 @@ namespace mb {
             drawSurface(surface, pos, surface->getSize());
         }
 
+        void drawSurface(Surface *surface) {
+            if (!surface) return;
+            drawSurface(surface, {0, 0}, surface->getSize());
+        }
+
         Utility::Vec2i getSize() { return m_size; };
 
     protected:

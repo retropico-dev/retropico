@@ -7,35 +7,48 @@
 
 using namespace mb;
 
-LinuxAudio::LinuxAudio() : Audio() {
-    SDL_AudioSpec want, have;
-
+LinuxAudio::LinuxAudio() {
     if (!SDL_WasInit(SDL_INIT_AUDIO)) {
         SDL_InitSubSystem(SDL_INIT_AUDIO);
     }
+}
 
-    want.freq = AUDIO_SAMPLE_RATE;
+void LinuxAudio::setup(uint16_t rate, uint16_t samples, Audio::AudioCallback cb) {
+    if (rate == m_rate && samples == m_samples && cb == p_callback) {
+        return;
+    }
+
+    // call base class
+    Audio::setup(rate, samples, cb);
+
+    // first close device if already setup
+    if (m_dev != 0u) {
+        SDL_PauseAudioDevice(m_dev, 1);
+        SDL_CloseAudioDevice(m_dev);
+    }
+
+    SDL_AudioSpec want, got;
+    want.freq = rate;
     want.format = AUDIO_S16;
     want.channels = 2;
-    want.samples = AUDIO_SAMPLES;
-    want.callback = audio_callback;
+    want.samples = samples;
+    want.callback = cb;
     want.userdata = nullptr;
 
-    SDL_LogMessage(SDL_LOG_CATEGORY_AUDIO, SDL_LOG_PRIORITY_INFO,
-                   "Audio driver: %s", SDL_GetAudioDeviceName(0, 0));
-
-    if ((m_dev = SDL_OpenAudioDevice(nullptr, 0, &want, &have, 0)) == 0) {
-        SDL_LogMessage(SDL_LOG_CATEGORY_ERROR, SDL_LOG_PRIORITY_CRITICAL,
-                       "SDL could not open audio device: %s", SDL_GetError());
+    if ((m_dev = SDL_OpenAudioDevice(nullptr, 0, &want, &got, 0)) == 0) {
+        printf("LinuxAudio::setup:  could not open audio device: %s", SDL_GetError());
         exit(EXIT_FAILURE);
     }
 
-    audio_init();
+    printf("LinuxAudio::setup: \n\tfreq: %i\n\tsamples: %i\n\tdriver: %s\n",
+           got.freq, got.samples,
+           SDL_GetAudioDeviceName(0, 0));
+
     SDL_PauseAudioDevice(m_dev, 0);
 }
 
 LinuxAudio::~LinuxAudio() {
-    if (m_dev != 0u) {
+    if (m_dev != 0) {
         SDL_PauseAudioDevice(m_dev, 1);
         SDL_CloseAudioDevice(m_dev);
     }

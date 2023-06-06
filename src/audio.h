@@ -5,18 +5,29 @@
 #ifndef MICROBOY_AUDIO_H
 #define MICROBOY_AUDIO_H
 
-extern "C" {
-#include "minigb_apu.h"
-}
+#include <cstdint>
 
 namespace mb {
     class Audio {
     public:
+        typedef void (*AudioCallback)(void *data, unsigned char *stream, int len);
+
         explicit Audio() = default;
 
         virtual ~Audio() = default;
 
-        virtual void loop() {};
+        virtual void setup(uint16_t rate, uint16_t samples, AudioCallback cb) {
+            m_rate = rate;
+            m_samples = samples;
+            p_callback = cb;
+        }
+
+        virtual void play(const void *data, int samples) {};
+
+    protected:
+        uint16_t m_rate = 0;
+        uint16_t m_samples = 0;
+        AudioCallback p_callback = nullptr;
     };
 }
 

@@ -14,8 +14,10 @@ namespace mb {
 
         ~LinuxAudio() override;
 
+        void setup(uint16_t rate, uint16_t samples, AudioCallback cb) override;
+
     private:
-        SDL_AudioDeviceID m_dev;
+        SDL_AudioDeviceID m_dev = 0;
     };
 }
 

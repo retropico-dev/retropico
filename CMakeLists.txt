@@ -22,39 +22,43 @@ if (NOT PLATFORM_LINUX)
 endif ()
 
 # set source files
-file(GLOB SOURCES
+file(GLOB PLATFORM_SOURCES
         src/*.c*
         src/utility/*.c*
         src/compat/*.c*
         external/misc/Adafruit-GFX-Library/Adafruit_GFX.cpp
-        external/cores/Peanut-GB/examples/sdl2/minigb_apu/*.c*
         )
-set(INCLUDES
+set(PLATFORM_INCLUDES
         src
         src/utility
         src/compat
         external/misc/Adafruit-GFX-Library
-        external/cores/Peanut-GB
-        external/cores/Peanut-GB/examples/sdl2/minigb_apu
         )
 
-set(FLAGS
+set(PLATFORM_FLAGS
         -DARDUINO=123
         )
 
+if (TRUE)
+    include(src/cores/Peanut-GB/peanut-gb.cmake)
+    #include(src/cores/sameboy/sameboy.cmake)
+endif ()
+
 if (PLATFORM_LINUX)
-    file(GLOB_RECURSE PLATFORM_SOURCES src/platforms/linux/*.c*)
-    list(APPEND INCLUDES src/platforms/linux)
+    file(GLOB_RECURSE TEMP src/platforms/linux/*.c*)
+    list(APPEND PLATFORM_SOURCES ${TEMP})
+    list(APPEND PLATFORM_INCLUDES src/platforms/linux)
     # SDL2
     include(FindPkgConfig)
     pkg_search_module(SDL2 REQUIRED sdl2)
-    list(APPEND INCLUDES ${SDL2_INCLUDE_DIRS})
-    list(APPEND FLAGS -DLINUX)
+    list(APPEND PLATFORM_INCLUDES ${SDL2_INCLUDE_DIRS})
+    list(APPEND PLATFORM_FLAGS -DLINUX)
     list(APPEND PLATFORM_LIBS ${SDL2_LIBRARIES})
 else ()
-    file(GLOB_RECURSE PLATFORM_SOURCES src/platforms/pico/*.c*)
-    list(APPEND INCLUDES src/platforms/pico src/platforms/pico/i2s)
-    list(APPEND FLAGS
+    file(GLOB_RECURSE TEMP src/platforms/pico/*.c*)
+    list(APPEND PLATFORM_SOURCES ${TEMP})
+    list(APPEND PLATFORM_INCLUDES src/platforms/pico src/platforms/pico/i2s)
+    list(APPEND PLATFORM_FLAGS
             PARAM_ASSERTIONS_DISABLE_ALL=1
             PICO_ENTER_USB_BOOT_ON_EXIT=1
             PICO_STDIO_ENABLE_CRLF_SUPPORT=0
@@ -77,15 +81,25 @@ else ()
             )
 endif ()
 
-# sources
-add_executable(${CMAKE_PROJECT_NAME} ${SOURCES} ${PLATFORM_SOURCES})
-# includes
-target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${INCLUDES})
-# definitions
-target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE ${FLAGS})
-# libs
-target_link_libraries(${CMAKE_PROJECT_NAME} ${PLATFORM_LIBS})
+# peanut-gb sources
+add_executable(${CMAKE_PROJECT_NAME}
+        ${PLATFORM_SOURCES}
+        ${CMAKE_SOURCE_DIR}/src/cores/Peanut-GB/peanut-gb.cpp
+        )
 
+# peanut-gb includes
+target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
+        ${PLATFORM_INCLUDES}
+        ${CMAKE_SOURCE_DIR}/src/cores/Peanut-GB
+        )
+
+# peanut-gb definitions
+target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE ${PLATFORM_FLAGS})
+
+# peanut-gb libs
+target_link_libraries(${CMAKE_PROJECT_NAME} ${PLATFORM_LIBS} peanut-gb)
+
+# peanut-gb rpi pico build stuff
 if (NOT PLATFORM_LINUX)
     pico_generate_pio_header(${CMAKE_PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/src/platforms/pico/i2s/audio_i2s.pio)
     # run from ram

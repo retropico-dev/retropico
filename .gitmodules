@@ -4,3 +4,6 @@
 [submodule "external/misc/Adafruit-GFX-Library"]
 	path = external/misc/Adafruit-GFX-Library
 	url = https://github.com/adafruit/Adafruit-GFX-Library.git
+[submodule "external/cores/SameBoy"]
+	path = external/cores/SameBoy
+	url = https://github.com/Cpasjuste/SameBoy.git
