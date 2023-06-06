@@ -6,10 +6,10 @@ option(PLATFORM_LINUX "Linux target platform" OFF)
 if (NOT PLATFORM_LINUX)
     # initialize the SDK based on PICO_SDK_PATH
     # note: this must happen before project()
-    include(platforms/pico/cmake/pico_sdk_import.cmake)
+    include(src/platforms/pico/cmake/pico_sdk_import.cmake)
 
     # for hardware_sleep
-    include(platforms/pico/cmake/pico_extras_import.cmake)
+    include(src/platforms/pico/cmake/pico_extras_import.cmake)
 endif ()
 
 project(microboy)
@@ -23,28 +23,28 @@ endif ()
 
 # set source files
 file(GLOB SOURCES
-        *.c*
-        utility/*.c*
+        src/*.c*
+        src/utility/*.c*
         Peanut-GB/examples/sdl2/minigb_apu/*.c*
         )
 set(INCLUDES
-        .
-        utility
+        src
+        src/utility
         Peanut-GB
         Peanut-GB/examples/sdl2/minigb_apu
         )
 
 if (PLATFORM_LINUX)
-    file(GLOB_RECURSE PLATFORM_SOURCES platforms/linux/*.c*)
-    list(APPEND INCLUDES platforms/linux)
+    file(GLOB_RECURSE PLATFORM_SOURCES src/platforms/linux/*.c*)
+    list(APPEND INCLUDES src/platforms/linux)
     # SDL2
     include(FindPkgConfig)
     pkg_search_module(SDL2 REQUIRED sdl2)
     list(APPEND INCLUDES ${SDL2_INCLUDE_DIRS})
     list(APPEND PLATFORM_LIBS ${SDL2_LIBRARIES})
 else ()
-    file(GLOB_RECURSE PLATFORM_SOURCES platforms/pico/*.c*)
-    list(APPEND INCLUDES platforms/pico platforms/pico/i2s)
+    file(GLOB_RECURSE PLATFORM_SOURCES src/platforms/pico/*.c*)
+    list(APPEND INCLUDES src/platforms/pico src/platforms/pico/i2s)
     list(APPEND PLATFORM_LIBS
             -Wl,--print-memory-usage
             pico_stdlib
@@ -66,7 +66,7 @@ target_link_libraries(${CMAKE_PROJECT_NAME} ${PLATFORM_LIBS})
 if (PLATFORM_LINUX)
     target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE -DLINUX)
 else ()
-    pico_generate_pio_header(${CMAKE_PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/platforms/pico/i2s/audio_i2s.pio)
+    pico_generate_pio_header(${CMAKE_PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/src/platforms/pico/i2s/audio_i2s.pio)
 
     #target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
     #        -DPICO_DEFAULT_UART_TX_PIN=12
