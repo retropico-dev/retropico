@@ -211,10 +211,8 @@ bool PeanutGB::loadRom(const uint8_t *buffer, size_t size) {
     ret = gb_init(&gameboy, &gb_rom_read, &gb_cart_ram_read, &gb_cart_ram_write, &gb_error, &gb_priv);
 
     if (ret != GB_INIT_NO_ERROR) {
-        printf("error: %d\r\n", ret);
-        stdio_flush();
-        while (true) { __wfi(); }
-        HEDLEY_UNREACHABLE();
+        printf("PeanutGB::loadRom: error %d\r\n", ret);
+        return false;
     }
 
     // automatically assign a colour palette to the game

@@ -22,15 +22,12 @@
 
 using namespace mb;
 
-Platform *platform;
-Core *core;
-
 int main() {
     mb::Clock clock;
     int frames = 0;
 
-    platform = new mb::MBPlatform();
-    core = new PeanutGB(platform);
+    auto platform = new mb::MBPlatform();
+    auto core = new PeanutGB(platform);
     if (!core->loadRom("/roms/rom.gb")) {
         stdio_flush();
         while (true) { __wfi(); }
