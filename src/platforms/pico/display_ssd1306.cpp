@@ -24,9 +24,9 @@ SSD1306Display::SSD1306Display() : Display({SSD1306_WIDTH, SSD1306_HEIGHT}) {
     printf("SSD1306Display(): i2c baud rate set to %i kHz\r\n", rate / 1000);
 }
 
-void SSD1306Display::setPixel(const Utility::Vec2i &pos, uint16_t pixel) {
-    if (pixel > 0) ssd1306_draw_pixel(&m_display, pos.x, pos.y);
-    else ssd1306_clear_pixel(&m_display, pos.x, pos.y);
+void SSD1306Display::drawPixel(uint16_t x, uint16_t y, uint16_t color) {
+    if (color > 0) ssd1306_draw_pixel(&m_display, x, y);
+    else ssd1306_clear_pixel(&m_display, x, y);
 }
 
 void SSD1306Display::clear() {
@@ -34,6 +34,5 @@ void SSD1306Display::clear() {
 }
 
 void SSD1306Display::flip() {
-    Display::flip();
     ssd1306_show(&m_display);
 }

@@ -24,10 +24,10 @@ namespace mb {
 
         void flip() override;
 
+        void drawPixel(uint16_t x, uint16_t y, uint16_t color) override;
+
     private:
         ssd1306_t m_display{};
-
-        void setPixel(const Utility::Vec2i &pos, uint16_t pixel) override;
     };
 }
 
