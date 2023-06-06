@@ -2,8 +2,7 @@
 // Created by cpasjuste on 31/05/23.
 //
 
-#include <hardware/gpio.h>
-#include "input_pico.h"
+#include "platform.h"
 
 using namespace mb;
 

@@ -6,7 +6,10 @@
 #define MICROBOY_PLATFORM_LINUX_H
 
 #include <SDL2/SDL.h>
-#include "platform.h"
+#include "display_linux.h"
+#include "input_linux.h"
+#include "audio_linux.h"
+#include "io_linux.h"
 #include "compat_linux.h"
 
 #define _Noreturn

@@ -18,13 +18,6 @@
  */
 
 #include "platform.h"
-#include "clock.h"
-#ifdef LINUX
-#include "platform_linux.h"
-#else
-#include "platform_pico.h"
-#endif
-
 #include "peanut-gb.h"
 
 using namespace mb;
@@ -36,12 +29,7 @@ int main() {
     mb::Clock clock;
     int frames = 0;
 
-#ifdef LINUX
-    platform = new mb::LinuxPlatform();
-#else
-    platform = new mb::PicoPlatform();
-#endif
-
+    platform = new mb::MBPlatform();
     core = new PeanutGB(platform);
     if (!core->loadRom("/roms/rom.gb")) {
         stdio_flush();
@@ -56,7 +44,7 @@ int main() {
             frames = 0;
         }
 
-        // increment frame for fps counter
+        // increment frames for fps counter
         frames++;
     }
 

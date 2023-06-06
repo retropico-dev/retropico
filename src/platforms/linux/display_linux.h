@@ -5,10 +5,6 @@
 #ifndef MICROBOY_DISPLAY_LINUX_H
 #define MICROBOY_DISPLAY_LINUX_H
 
-#include <SDL2/SDL.h>
-#include "display.h"
-#include "clock.h"
-
 namespace mb {
     class LinuxDisplay : public Display {
     public:

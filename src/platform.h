@@ -10,6 +10,8 @@
 #include "input.h"
 #include "audio.h"
 #include "io.h"
+#include "clock.h"
+#include "utility"
 
 namespace mb {
     class Platform {
@@ -39,5 +41,13 @@ namespace mb {
         Io *p_io = nullptr;
     };
 }
+
+#ifdef LINUX
+#include "platform_linux.h"
+#define MBPlatform LinuxPlatform
+#else
+#include "platform_pico.h"
+#define MBPlatform PicoPlatform
+#endif
 
 #endif //MICROBOY_PLATFORM_H

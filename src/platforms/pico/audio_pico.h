@@ -5,7 +5,6 @@
 #ifndef MICROBOY_AUDIO_PICO_H
 #define MICROBOY_AUDIO_PICO_H
 
-#include "audio.h"
 #include "i2s.h"
 
 namespace mb {

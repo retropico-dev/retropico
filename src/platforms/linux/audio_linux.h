@@ -5,8 +5,6 @@
 #ifndef MICROBOY_AUDIO_LINUX_H
 #define MICROBOY_AUDIO_LINUX_H
 
-#include "audio.h"
-
 namespace mb {
     class LinuxAudio : public Audio {
     public:

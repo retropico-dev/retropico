@@ -2,11 +2,8 @@
 // Created by cpasjuste on 01/06/23.
 //
 
-#include <hardware/flash.h>
-#include <hardware/sync.h>
-#include <pico/stdio.h>
 #include <cstring>
-#include "io_pico.h"
+#include "platform.h"
 
 using namespace mb;
 

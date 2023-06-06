@@ -5,8 +5,6 @@
 #ifndef MICROBOY_INPUT_LINUX_H
 #define MICROBOY_INPUT_LINUX_H
 
-#include "input.h"
-
 namespace mb {
     class LinuxInput : public Input {
     public:

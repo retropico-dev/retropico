@@ -2,11 +2,7 @@
 // Created by cpasjuste on 06/06/23.
 //
 
-#ifdef LINUX
-#include "platform_linux.h"
-#else
-#include "platform_pico.h"
-#endif
+#include "platform.h"
 
 #include "peanut-gb.h"
 #include "gbcolors.h"

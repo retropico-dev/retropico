@@ -5,8 +5,6 @@
 #ifndef MICROBOY_IO_PICO_H
 #define MICROBOY_IO_PICO_H
 
-#include "io.h"
-
 namespace mb {
     class PicoIo : public Io {
     public:

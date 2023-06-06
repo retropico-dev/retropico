@@ -3,7 +3,7 @@
 //
 
 #include <cstdio>
-#include "display_linux.h"
+#include "platform.h"
 
 using namespace mb;
 

@@ -8,9 +8,16 @@
 #include <pico/stdio.h>
 #include <pico/bootrom.h>
 #include <pico/multicore.h>
+#include <pico/stdio.h>
+#include <hardware/gpio.h>
+#include <hardware/sync.h>
+#include <hardware/flash.h>
 #include <hardware/sync.h>
 
-#include "platform.h"
+#include "display_ssd1306.h"
+#include "input_pico.h"
+#include "audio_pico.h"
+#include "io_pico.h"
 
 namespace mb {
     class PicoPlatform : public Platform {

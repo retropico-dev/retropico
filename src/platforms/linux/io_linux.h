@@ -5,8 +5,6 @@
 #ifndef MICROBOY_IO_LINUX_H
 #define MICROBOY_IO_LINUX_H
 
-#include "io.h"
-
 namespace mb {
     class LinuxIo : public Io {
     public:

@@ -6,11 +6,7 @@
 #include <pico/stdlib.h>
 #include <hardware/vreg.h>
 #include <class/cdc/cdc_device.h>
-#include "platform_pico.h"
-#include "display_ssd1306.h"
-#include "audio_pico.h"
-#include "io_pico.h"
-#include "input_pico.h"
+#include "platform.h"
 
 using namespace mb;
 

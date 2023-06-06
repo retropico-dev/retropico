@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include <fstream>
-#include "io_linux.h"
+#include "platform.h"
 
 using namespace mb;
 

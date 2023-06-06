@@ -5,8 +5,8 @@
 #include <cstdio>
 #include <hardware/i2c.h>
 #include <hardware/gpio.h>
-#include "display.h"
-#include "display_ssd1306.h"
+
+#include "platform.h"
 
 using namespace mb;
 

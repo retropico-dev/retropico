@@ -5,9 +5,7 @@
 #ifndef MICROBOY_DISPLAY_SSD1306_H
 #define MICROBOY_DISPLAY_SSD1306_H
 
-#include "display.h"
 #include "ssd1306.h"
-#include "clock.h"
 
 #define SSD1306_SDA_PIN 0
 #define SSD1306_SCL_PIN 1
