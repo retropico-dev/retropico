@@ -21,7 +21,6 @@ const WORD __not_in_flash_func(NesPalette)[64] = {
         CC(0x7fff), CC(0x579f), CC(0x635f), CC(0x6b3f), CC(0x7f1f), CC(0x7f1b), CC(0x7ef6), CC(0x7f75),
         CC(0x7f94), CC(0x73f4), CC(0x57d7), CC(0x5bf9), CC(0x4ffe), CC(0x0000), CC(0x0000), CC(0x0000)};
 
-static InfoNES *infoNes;
 static Platform *platform;
 static bool quit = false;
 static WORD lineBuffer[NES_DISP_WIDTH];
@@ -29,7 +28,6 @@ static WORD lineBuffer[NES_DISP_WIDTH];
 InfoNES::InfoNES(Platform *p) : Core(p) {
     // crappy
     platform = p;
-    infoNes = this;
 }
 
 bool InfoNES::loadRom(const std::string &path) {
@@ -83,12 +81,6 @@ InfoNES::~InfoNES() = default;
 
 void __not_in_flash_func(InfoNES_PreDrawLine)(int line) {
     //printf("InfoNES_PreDrawLine(%i)\r\n", line);
-    /*
-    // TODO: not enough memory
-    auto buffer = infoNes->getSurface()->getPixels();
-    auto start = (uint16_t *) (buffer + line * infoNes->getSurface()->getPitch());
-    InfoNES_SetLineBuffer(reinterpret_cast<WORD *>(start), NES_DISP_WIDTH);
-    */
     InfoNES_SetLineBuffer(reinterpret_cast<WORD *>(lineBuffer), NES_DISP_WIDTH);
 }
 
@@ -102,7 +94,6 @@ void __not_in_flash_func(InfoNES_PostDrawLine)(int line) {
 
 void InfoNES_LoadFrame() {
     //printf("InfoNES_LoadFrame\r\n");
-    //platform->getDisplay()->drawSurface(infoNes->getSurface());
     platform->getDisplay()->flip();
 }
 
