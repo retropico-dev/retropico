@@ -39,9 +39,10 @@ set(PLATFORM_FLAGS
         -DARDUINO=123
         )
 
-# OK
-#include(src/cores/Peanut-GB/peanut-gb.cmake)
-include(src/cores/InfoNES/infones.cmake)
+# OK (WIP)
+include(src/cores/Peanut-GB/peanut-gb.cmake)
+# OK (WIP)
+#include(src/cores/InfoNES/infones.cmake)
 # too slow...
 #include(src/cores/sameboy/sameboy.cmake)
 # too much memory usage
@@ -88,16 +89,17 @@ endif ()
 # add executable
 add_executable(${CMAKE_PROJECT_NAME}
         ${PLATFORM_SOURCES}
-        #${CMAKE_SOURCE_DIR}/src/cores/Peanut-GB/peanut-gb.cpp
-        src/cores/InfoNES/infones.cpp src/cores/InfoNES/work_meter.cpp
+        ${CMAKE_SOURCE_DIR}/src/cores/Peanut-GB/peanut-gb.cpp
+        ${CMAKE_SOURCE_DIR}/src/cores/Peanut-GB/rom.c
+        #src/cores/InfoNES/infones.cpp src/cores/InfoNES/work_meter.cpp
         #src/cores/Gearsystem/gearsystem.cpp
         )
 
 # add includes
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
         ${PLATFORM_INCLUDES}
-        #${CMAKE_SOURCE_DIR}/src/cores/Peanut-GB
-        src/cores/InfoNES
+        ${CMAKE_SOURCE_DIR}/src/cores/Peanut-GB
+        #src/cores/InfoNES
         #src/cores/Gearsystem
         )
 
@@ -107,8 +109,8 @@ target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE ${PLATFORM_FLAGS})
 # add libs
 target_link_libraries(${CMAKE_PROJECT_NAME}
         ${PLATFORM_LIBS}
-        #peanut-gb
-        infones
+        peanut-gb
+        #infones
         #gearsystem
         )
 

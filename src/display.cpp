@@ -22,18 +22,8 @@ void Display::drawSurface(Surface *surface, const Utility::Vec2i &pos, const Uti
             }
         }
     } else {
-        auto srcSize = surface->getSize();
-        /*
-        auto dstSize = Utility::Vec2i(
-                size.x, (int16_t) ((float) size.x * ((float) srcSize.y / (float) srcSize.x)));
-        Utility::Vec2i dstPos = {pos.x, (int16_t) (pos.y + (size.y - dstSize.y) / 2)};
-        if (dstSize.y > size.y) {
-            dstSize = Utility::Vec2i((int16_t) ((float) size.y * ((float) srcSize.x / (float) srcSize.y)), size.y);
-            dstPos = {(int16_t) (pos.x + (size.x - dstSize.x) / 2), pos.y};
-        }
-        */
-
         int x, y;
+        auto srcSize = surface->getSize();
         int xRatio = (srcSize.x << 16) / size.x;
         int yRatio = (srcSize.y << 16) / size.y;
         for (int16_t i = 0; i < size.y; i++) {
