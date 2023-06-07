@@ -14,7 +14,7 @@
 #include <hardware/flash.h>
 #include <hardware/sync.h>
 
-#include "display_ssd1306.h"
+#include "pico_display.h"
 #include "input_pico.h"
 #include "audio_pico.h"
 #include "io_pico.h"

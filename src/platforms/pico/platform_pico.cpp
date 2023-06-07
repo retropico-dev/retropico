@@ -12,7 +12,7 @@ using namespace mb;
 
 PicoPlatform::PicoPlatform() : Platform() {
     // overclock - the value for VCO set here is meant for least power consumption
-    const unsigned vco = 792000000; /* 264MHz/132MHz */
+    const unsigned vco = 792000000; // 264MHz/132MHz
     const unsigned div1 = 3, div2 = 1;
     //vreg_set_voltage(VREG_VOLTAGE_1_15);
     vreg_set_voltage(VREG_VOLTAGE_DEFAULT);
@@ -27,7 +27,7 @@ PicoPlatform::PicoPlatform() : Platform() {
     while (!tud_cdc_connected()) { sleep_ms(100); }
 #endif
 
-    p_display = new SSD1306Display();
+    p_display = new PicoDisplay();
     p_audio = new PicoAudio();
     p_input = new PicoInput();
     p_io = new PicoIo();

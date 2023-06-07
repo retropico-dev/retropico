@@ -2,8 +2,8 @@
 // Created by cpasjuste on 30/05/23.
 //
 
-#ifndef MICROBOY_DISPLAY_SSD1306_H
-#define MICROBOY_DISPLAY_SSD1306_H
+#ifndef MICROBOY_PICO_DISPLAY_H
+#define MICROBOY_PICO_DISPLAY_H
 
 #include "ssd1306.h"
 
@@ -14,9 +14,9 @@
 #define SSD1306_HEIGHT 64
 
 namespace mb {
-    class SSD1306Display : public Display {
+    class PicoDisplay : public Display {
     public:
-        SSD1306Display();
+        PicoDisplay();
 
         void clear() override;
 
@@ -29,4 +29,4 @@ namespace mb {
     };
 }
 
-#endif //MICROBOY_DISPLAY_SSD1306_H
+#endif //MICROBOY_PICO_DISPLAY_H

@@ -3,6 +3,11 @@ cmake_minimum_required(VERSION 3.13)
 # linux platform
 option(PLATFORM_LINUX "Linux target platform" OFF)
 
+# pico options
+option(PICO_DISPLAY_ST7789_PIO "Pico ST7789 display driver (pio)" ON)
+option(PICO_DISPLAY_ST7789_SPI "Pico ST7789 display driver (spi)" OFF)
+option(PICO_DISPLAY_SSD1306 "Pico SSD1306 display driver (debug)" OFF)
+
 if (NOT PLATFORM_LINUX)
     # initialize the SDK based on PICO_SDK_PATH
     # note: this must happen before project()
@@ -59,7 +64,7 @@ if (PLATFORM_LINUX)
     list(APPEND PLATFORM_FLAGS -DLINUX)
     list(APPEND PLATFORM_LIBS ${SDL2_LIBRARIES})
 else ()
-    file(GLOB_RECURSE TEMP src/platforms/pico/*.c*)
+    file(GLOB TEMP src/platforms/pico/*.c*)
     list(APPEND PLATFORM_SOURCES ${TEMP})
     list(APPEND PLATFORM_INCLUDES src/platforms/pico src/platforms/pico/i2s)
     list(APPEND PLATFORM_FLAGS
@@ -84,6 +89,24 @@ else ()
             hardware_sleep
             #hardware_flash
             )
+    # display driver
+    if (PICO_DISPLAY_SSD1306)
+        list(APPEND PLATFORM_SOURCES
+                src/platforms/pico/display/ssd1306/pico_display.cpp
+                src/platforms/pico/display/ssd1306/ssd1306.c
+                )
+        list(APPEND PLATFORM_INCLUDES src/platforms/pico/display/ssd1306)
+    elseif (PICO_DISPLAY_ST7789_PIO)
+        list(APPEND PLATFORM_SOURCES src/platforms/pico/display/st7789_pio/pico_display.cpp)
+        list(APPEND PLATFORM_INCLUDES src/platforms/pico/display/st7789_pio)
+        list(APPEND PLATFORM_LIBS hardware_interp)
+    elseif (PICO_DISPLAY_ST7789_SPI)
+        list(APPEND PLATFORM_SOURCES
+                src/platforms/pico/display/st7789_spi/pico_display.cpp
+                src/platforms/pico/display/st7789_spi/st7789.c)
+        list(APPEND PLATFORM_INCLUDES src/platforms/pico/display/st7789_spi)
+        list(APPEND PLATFORM_LIBS hardware_spi)
+    endif ()
 endif ()
 
 # add executable
@@ -116,9 +139,14 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
 
 # rpi pico build stuff
 if (NOT PLATFORM_LINUX)
-    pico_generate_pio_header(${CMAKE_PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/src/platforms/pico/i2s/audio_i2s.pio)
+    if (PICO_DISPLAY_ST7789_PIO)
+        pico_generate_pio_header(${CMAKE_PROJECT_NAME}
+                ${CMAKE_SOURCE_DIR}/src/platforms/pico/display/st7789_pio/st7789_lcd.pio)
+    endif ()
+    pico_generate_pio_header(${CMAKE_PROJECT_NAME}
+            ${CMAKE_SOURCE_DIR}/src/platforms/pico/i2s/audio_i2s.pio)
     # run from ram
-    #pico_set_binary_type(${CMAKE_PROJECT_NAME} copy_to_ram)
+    pico_set_binary_type(${CMAKE_PROJECT_NAME} copy_to_ram)
     # enable usb output, disable uart output
     pico_enable_stdio_usb(${CMAKE_PROJECT_NAME} 1)
     pico_enable_stdio_uart(${CMAKE_PROJECT_NAME} 0)

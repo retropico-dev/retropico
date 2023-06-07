@@ -14,7 +14,7 @@ struct Mapping {
 const Mapping mapping[MAX_BUTTONS] = {
         {Input::Button::B1,     -1},
         {Input::Button::B2,     -1},
-        {Input::Button::START,  29},
+        {Input::Button::START,  -1},
         {Input::Button::SELECT, -1},
         {Input::Button::LEFT,   -1},
         {Input::Button::RIGHT,  -1},
