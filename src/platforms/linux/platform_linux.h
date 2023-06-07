@@ -10,13 +10,7 @@
 #include "input_linux.h"
 #include "audio_linux.h"
 #include "io_linux.h"
-#include "compat_linux.h"
-
-#define _Noreturn
-#define tight_loop_contents() ((void)0)
-#define stdio_flush() fflush(stdout)
-#define reset_usb_boot(x, y) ((void)0)
-#define __wfi() break
+#include "pico.h"
 
 namespace mb {
     class LinuxPlatform : public Platform {

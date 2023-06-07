@@ -51,10 +51,17 @@ void LinuxDisplay::drawPixel(int16_t x, int16_t y, uint16_t color) {
             break;
     }
 
+#if 1
     // rgb565 > rgb32
     int32_t r = ((color & 0xF800) >> 11) << 3;
     int32_t g = ((color & 0x7E0) >> 5) << 2;
     int32_t b = ((color & 0x1F)) << 3;
+#else
+    // rgb555 > rgb32
+    int32_t r = ((color & 0x7C00) >> 10) << 3;
+    int32_t g = ((color & 0x3E0) >> 5) << 3;
+    int32_t b = (color & 0x1F) << 3;
+#endif
 
     // draw the pixel to the renderer
     SDL_SetRenderDrawColor(p_renderer, r, g, b, SDL_ALPHA_OPAQUE);

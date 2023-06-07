@@ -10,3 +10,6 @@
 [submodule "external/cores/Gearsystem"]
 	path = external/cores/Gearsystem
 	url = https://github.com/drhelius/Gearsystem
+[submodule "external/cores/InfoNES"]
+	path = external/cores/InfoNES
+	url = https://github.com/Cpasjuste/pico-infones.git

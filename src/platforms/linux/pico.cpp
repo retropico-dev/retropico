@@ -2,8 +2,7 @@
 // Created by cpasjuste on 02/06/23.
 //
 
-#include <cstdint>
-#include "compat_linux.h"
+#include "pico.h"
 
 void multicore_launch_core1(void (*entry)()) {}
 

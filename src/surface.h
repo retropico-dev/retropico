@@ -15,8 +15,10 @@ namespace mb {
             m_size = size;
             if (bufferSize > 0) {
                 p_buffer = (uint8_t *) malloc(bufferSize);
+                memset(p_buffer, 0, bufferSize);
             } else {
                 p_buffer = (uint8_t *) malloc(m_size.x * m_size.y * m_bpp);
+                memset(p_buffer, 0, m_size.x * m_size.y * m_bpp);
             }
             m_pitch = m_size.x * m_bpp;
         }
