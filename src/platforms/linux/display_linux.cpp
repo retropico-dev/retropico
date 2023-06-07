@@ -32,11 +32,7 @@ LinuxDisplay::LinuxDisplay() : Display() {
 void LinuxDisplay::drawPixel(int16_t x, int16_t y, uint16_t color) {
     if ((x < 0) || (y < 0) || x > m_size.x || y > m_size.y) return;
 
-    // rgb565 > rgb32
-    int32_t r = ((color & 0xF800) >> 11) << 3;
-    int32_t g = ((color & 0x7E0) >> 5) << 2;
-    int32_t b = ((color & 0x1F)) << 3;
-
+    // rotation
     int16_t t;
     switch (rotation) {
         case 1:
@@ -55,6 +51,12 @@ void LinuxDisplay::drawPixel(int16_t x, int16_t y, uint16_t color) {
             break;
     }
 
+    // rgb565 > rgb32
+    int32_t r = ((color & 0xF800) >> 11) << 3;
+    int32_t g = ((color & 0x7E0) >> 5) << 2;
+    int32_t b = ((color & 0x1F)) << 3;
+
+    // draw the pixel to the renderer
     SDL_SetRenderDrawColor(p_renderer, r, g, b, SDL_ALPHA_OPAQUE);
     SDL_RenderDrawPoint(p_renderer, x, y);
 }

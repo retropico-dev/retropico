@@ -8,7 +8,7 @@
 namespace mb {
     class LinuxIo : public Io {
     public:
-        uint8_t *load(const std::string &romPath) override;
+        uint8_t *load(const std::string &romPath, size_t *size) override;
     };
 }
 

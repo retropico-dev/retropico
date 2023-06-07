@@ -3,6 +3,8 @@
 //
 
 #include "platform.h"
+#include "audio_linux.h"
+
 
 using namespace mb;
 
@@ -44,6 +46,10 @@ void LinuxAudio::setup(uint16_t rate, uint16_t samples, Audio::AudioCallback cb)
            SDL_GetAudioDeviceName(0, 0));
 
     SDL_PauseAudioDevice(m_dev, 0);
+}
+
+void LinuxAudio::play(const void *data, int samples) {
+    if (m_dev != 0) SDL_QueueAudio(m_dev, data, samples << 1);
 }
 
 LinuxAudio::~LinuxAudio() {

@@ -39,10 +39,11 @@ set(PLATFORM_FLAGS
         -DARDUINO=123
         )
 
-if (TRUE)
-    include(src/cores/Peanut-GB/peanut-gb.cmake)
-    #include(src/cores/sameboy/sameboy.cmake)
-endif ()
+include(src/cores/Peanut-GB/peanut-gb.cmake)
+# too slow...
+#include(src/cores/sameboy/sameboy.cmake)
+# too much memory usage
+#include(src/cores/Gearsystem/gearsystem.cmake)
 
 if (PLATFORM_LINUX)
     file(GLOB_RECURSE TEMP src/platforms/linux/*.c*)
@@ -81,25 +82,31 @@ else ()
             )
 endif ()
 
-# peanut-gb sources
+# add executable
 add_executable(${CMAKE_PROJECT_NAME}
         ${PLATFORM_SOURCES}
         ${CMAKE_SOURCE_DIR}/src/cores/Peanut-GB/peanut-gb.cpp
+        #src/cores/Gearsystem/gearsystem.cpp
         )
 
-# peanut-gb includes
+# add includes
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
         ${PLATFORM_INCLUDES}
         ${CMAKE_SOURCE_DIR}/src/cores/Peanut-GB
+        #src/cores/Gearsystem
         )
 
-# peanut-gb definitions
+# add definitions
 target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE ${PLATFORM_FLAGS})
 
-# peanut-gb libs
-target_link_libraries(${CMAKE_PROJECT_NAME} ${PLATFORM_LIBS} peanut-gb)
+# add libs
+target_link_libraries(${CMAKE_PROJECT_NAME}
+        ${PLATFORM_LIBS}
+        peanut-gb
+        #gearsystem
+        )
 
-# peanut-gb rpi pico build stuff
+# rpi pico build stuff
 if (NOT PLATFORM_LINUX)
     pico_generate_pio_header(${CMAKE_PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/src/platforms/pico/i2s/audio_i2s.pio)
     # run from ram

@@ -14,6 +14,8 @@ namespace mb {
 
         void setup(uint16_t rate, uint16_t samples, AudioCallback cb) override;
 
+        void play(const void *data, int samples) override;
+
     private:
         SDL_AudioDeviceID m_dev = 0;
     };

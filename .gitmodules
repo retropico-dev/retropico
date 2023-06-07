@@ -7,3 +7,6 @@
 [submodule "external/cores/SameBoy"]
 	path = external/cores/SameBoy
 	url = https://github.com/Cpasjuste/SameBoy.git
+[submodule "external/cores/Gearsystem"]
+	path = external/cores/Gearsystem
+	url = https://github.com/drhelius/Gearsystem

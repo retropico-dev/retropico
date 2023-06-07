@@ -11,7 +11,7 @@ using namespace mb;
 extern "C" const unsigned char flash_rom[];
 extern "C" unsigned int flash_rom_len;
 
-uint8_t *PicoIo::load(const std::string &romPath) {
+uint8_t *PicoIo::load(const std::string &romPath, size_t *size) {
     uint8_t buffer[FLASH_SECTOR_SIZE];
     uint32_t ints = save_and_disable_interrupts();
 
@@ -28,6 +28,8 @@ uint8_t *PicoIo::load(const std::string &romPath) {
     restore_interrupts(ints);
 
     printf(" done\r\n");
+
+    if (*size) *size = flash_rom_len;
 
     return (uint8_t *) (XIP_BASE + FLASH_TARGET_OFFSET);
 }

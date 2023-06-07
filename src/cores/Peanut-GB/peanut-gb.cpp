@@ -94,27 +94,31 @@ static bool m_scale = false;
 
 void core1_lcd_draw_line(const uint_fast8_t line) {
     // write a line to display buffer
-    mb::Utility::Vec2i pos{};
-
     if (m_scale) {
         for (uint_fast8_t x = 0; x < LCD_WIDTH; x++) {
             gb_priv.surface->setPixel(x, line,
                                       palette[(pixels_buffer[x] & LCD_PALETTE_ALL) >> 4][pixels_buffer[x] & 3]);
         }
     } else {
-        pos.x = (int16_t) ((gb_priv.platform->getDisplay()->getSize().x - LCD_WIDTH) / 2);
-        pos.y = (int16_t) ((gb_priv.platform->getDisplay()->getSize().y - LCD_HEIGHT) / 2);
+        auto dstPos = Utility::Vec2i(
+                (int16_t) ((gb_priv.platform->getDisplay()->getSize().x - LCD_WIDTH) / 2),
+                (int16_t) ((gb_priv.platform->getDisplay()->getSize().y - LCD_HEIGHT) / 2)
+        );
         for (uint_fast8_t x = 0; x < LCD_WIDTH; x++) {
             uint16_t p = palette[(pixels_buffer[x] & LCD_PALETTE_ALL) >> 4][pixels_buffer[x] & 3];
-            gb_priv.platform->getDisplay()->drawPixel({(int16_t) (x + pos.x), (int16_t) (line + pos.y)}, p);
+            gb_priv.platform->getDisplay()->drawPixel({(int16_t) (x + dstPos.x), (int16_t) (line + dstPos.y)}, p);
         }
     }
 
     // flip
     if (line == LCD_HEIGHT - 1) {
         if (m_scale) {
-            gb_priv.platform->getDisplay()->drawSurface(gb_priv.surface, {0, 0},
-                                                        gb_priv.platform->getDisplay()->getSize());
+            auto displaySize = gb_priv.platform->getDisplay()->getSize();
+            auto surfaceSize = gb_priv.surface->getSize();
+            auto dstSize = Utility::Vec2i(
+                    displaySize.x, (int16_t) ((float) displaySize.x * ((float) surfaceSize.y / (float) surfaceSize.x)));
+            auto dstPos = Utility::Vec2i(0, (int16_t) ((displaySize.y - dstSize.y) / 2));
+            gb_priv.platform->getDisplay()->drawSurface(gb_priv.surface, dstPos, dstSize);
         }
         // testing
         //gb_priv.platform->getDisplay()->setRotation(1);
@@ -185,13 +189,14 @@ PeanutGB::PeanutGB(Platform *p) : Core(p) {
 }
 
 bool PeanutGB::loadRom(const std::string &path) {
-    uint8_t *rom = p_platform->getIo()->load("/roms/rom.gb");
+    size_t size;
+    uint8_t *rom = p_platform->getIo()->load("/roms/rom.gb", &size);
     if (!rom) {
         printf("PeanutGB::loadRom: failed to load rom (%s)\r\n", path.c_str());
         return false;
     }
 
-    return loadRom(rom, 0);
+    return loadRom(rom, size);
 }
 
 bool PeanutGB::loadRom(const uint8_t *buffer, size_t size) {

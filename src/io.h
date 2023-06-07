@@ -17,7 +17,7 @@ namespace mb {
             printf("~Io()\n");
         }
 
-        virtual uint8_t *load(const std::string &romPath) { return nullptr; };
+        virtual uint8_t *load(const std::string &romPath, size_t *size) { return nullptr; };
     };
 }
 

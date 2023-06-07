@@ -11,9 +11,13 @@
 namespace mb {
     class Surface {
     public:
-        explicit Surface(const Utility::Vec2i &size) {
+        explicit Surface(const Utility::Vec2i &size, uint32_t bufferSize = 0) {
             m_size = size;
-            p_buffer = (uint8_t *) malloc(m_size.x * m_size.y * m_bpp);
+            if (bufferSize > 0) {
+                p_buffer = (uint8_t *) malloc(bufferSize);
+            } else {
+                p_buffer = (uint8_t *) malloc(m_size.x * m_size.y * m_bpp);
+            }
             m_pitch = m_size.x * m_bpp;
         }
 

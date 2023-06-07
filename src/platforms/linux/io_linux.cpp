@@ -8,7 +8,7 @@
 
 using namespace mb;
 
-uint8_t *LinuxIo::load(const std::string &romPath) {
+uint8_t *LinuxIo::load(const std::string &romPath, size_t *size) {
     // remove "/"
     std::string path = romPath;
     path.erase(0, 1);
@@ -22,15 +22,19 @@ uint8_t *LinuxIo::load(const std::string &romPath) {
         return nullptr;
     }
 
-    std::streamsize size = is.tellg();
+    std::streamsize len = is.tellg();
     is.seekg(0, std::ios::beg);
-    auto buffer = static_cast<uint8_t *>(malloc(size));
-    if (!is.read((char *) buffer, size)) {
+    auto buffer = static_cast<uint8_t *>(malloc(len));
+    if (!is.read((char *) buffer, len)) {
         printf("LinuxIo::load: could not read file (%s)\r\n", path.c_str());
         free(buffer);
         return nullptr;
     }
 
     is.close();
+    if (*size) {
+        *size = len;
+    }
+
     return buffer;
 }
