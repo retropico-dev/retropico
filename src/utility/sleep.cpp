@@ -3,12 +3,9 @@
 //
 
 #include <cstdio>
-#include <string>
 #ifndef LINUX
 #include <pico/stdlib.h>
 #include <pico/sleep.h>
-#include <hardware/i2c.h>
-#include <hardware/vreg.h>
 #include <hardware/rosc.h>
 #include <hardware/clocks.h>
 #include <hardware/structs/scb.h>

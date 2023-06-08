@@ -83,10 +83,9 @@ else ()
             -Wl,--print-memory-usage
             pico_stdlib
             pico_multicore
-            hardware_i2c
+            hardware_sleep
             hardware_pio
             hardware_dma
-            hardware_sleep
             #hardware_flash
             )
     # display driver
@@ -96,10 +95,14 @@ else ()
                 src/platforms/pico/display/ssd1306/ssd1306.c
                 )
         list(APPEND PLATFORM_INCLUDES src/platforms/pico/display/ssd1306)
+        list(APPEND PLATFORM_LIBS hardware_i2c)
     elseif (PICO_DISPLAY_ST7789_PIO)
-        list(APPEND PLATFORM_SOURCES src/platforms/pico/display/st7789_pio/pico_display.cpp)
+        list(APPEND PLATFORM_SOURCES
+                src/platforms/pico/display/st7789_pio/pico_display.cpp
+                src/platforms/pico/display/st7789_pio/st7789.cpp
+                )
         list(APPEND PLATFORM_INCLUDES src/platforms/pico/display/st7789_pio)
-        list(APPEND PLATFORM_LIBS hardware_interp)
+        list(APPEND PLATFORM_LIBS hardware_dma)
     elseif (PICO_DISPLAY_ST7789_SPI)
         list(APPEND PLATFORM_SOURCES
                 src/platforms/pico/display/st7789_spi/pico_display.cpp
@@ -143,6 +146,7 @@ if (NOT PLATFORM_LINUX)
         pico_generate_pio_header(${CMAKE_PROJECT_NAME}
                 ${CMAKE_SOURCE_DIR}/src/platforms/pico/display/st7789_pio/st7789_lcd.pio)
     endif ()
+    # audio
     pico_generate_pio_header(${CMAKE_PROJECT_NAME}
             ${CMAKE_SOURCE_DIR}/src/platforms/pico/i2s/audio_i2s.pio)
     # run from ram

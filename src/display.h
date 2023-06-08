@@ -43,15 +43,17 @@ namespace mb {
             drawPixel(pos.x, pos.y, color);
         }
 
-        // draw a surface (pixel buffer) to the display with scaling if requested
-        void drawSurface(Surface *surface, const Utility::Vec2i &pos, const Utility::Vec2i &size);
+        virtual void drawPixelLine(uint16_t x, uint16_t y, uint16_t width, const uint16_t *pixels) {};
 
-        void drawSurface(Surface *surface, const Utility::Vec2i &pos) {
+        // draw a surface (pixel buffer) to the display with scaling if requested
+        virtual void drawSurface(Surface *surface, const Utility::Vec2i &pos, const Utility::Vec2i &size);
+
+        virtual void drawSurface(Surface *surface, const Utility::Vec2i &pos) {
             if (!surface) return;
             drawSurface(surface, pos, surface->getSize());
         }
 
-        void drawSurface(Surface *surface) {
+        virtual void drawSurface(Surface *surface) {
             if (!surface) return;
             drawSurface(surface, {0, 0}, surface->getSize());
         }

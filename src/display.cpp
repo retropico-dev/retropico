@@ -23,6 +23,9 @@ void Display::drawSurface(Surface *surface, const Utility::Vec2i &pos, const Uti
         }
     } else {
         int x, y;
+        auto pitch = surface->getPitch();
+        auto bpp = surface->getBpp();
+        auto pixels = surface->getPixels();
         auto srcSize = surface->getSize();
         int xRatio = (srcSize.x << 16) / size.x;
         int yRatio = (srcSize.y << 16) / size.y;
@@ -33,7 +36,10 @@ void Display::drawSurface(Surface *surface, const Utility::Vec2i &pos, const Uti
                 }
                 x = (j * xRatio) >> 16;
                 y = (i * yRatio) >> 16;
-                drawPixel((int16_t) (j + pos.x), (int16_t) (i + pos.y), surface->getPixel(x, y));
+                // big fps drop in surface->getPixel ?!
+                //drawPixel((int16_t) (j + pos.x), (int16_t) (i + pos.y), surface->getPixel(x, y));
+                uint16_t p = *(uint16_t *) (pixels + y * pitch + x * bpp);
+                drawPixel((int16_t) (j + pos.x), (int16_t) (i + pos.y), p);
             }
         }
     }

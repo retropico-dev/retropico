@@ -15,6 +15,7 @@ extern "C" {
 
 using namespace mb;
 
+//#define ENABLE_RAM_BANK
 #ifdef ENABLE_RAM_BANK
 static unsigned char rom_bank0[65536];
 #endif
@@ -45,9 +46,6 @@ struct gb_priv {
     Surface *surface;
 };
 static struct gb_priv gb_priv{};
-
-/* Pixel data is stored in here. */
-static uint8_t pixels_buffer[LCD_WIDTH];
 
 static struct gb_s gameboy;
 
@@ -90,14 +88,19 @@ void gb_error(struct gb_s *gb, const enum gb_error_e gb_err, const uint16_t val)
 #endif
 }
 
-static bool m_scale = false;
+static bool m_scale = true;
+static uint16_t pixels_buffer[LCD_WIDTH];
+static Utility::Vec2i drawingPos{};
 
 void core1_lcd_draw_line(const uint_fast8_t line) {
+#if 1
+    gb_priv.platform->getDisplay()->drawPixelLine(drawingPos.x, drawingPos.y + line, LCD_WIDTH, pixels_buffer);
+#else
     // write a line to display buffer
     if (m_scale) {
         for (uint_fast8_t x = 0; x < LCD_WIDTH; x++) {
-            gb_priv.surface->setPixel(x, line,
-                                      palette[(pixels_buffer[x] & LCD_PALETTE_ALL) >> 4][pixels_buffer[x] & 3]);
+            gb_priv.surface->setPixel(
+                    x, line, palette[(pixels_buffer[x] & LCD_PALETTE_ALL) >> 4][pixels_buffer[x] & 3]);
         }
     } else {
         auto dstPos = Utility::Vec2i(
@@ -108,6 +111,7 @@ void core1_lcd_draw_line(const uint_fast8_t line) {
             uint16_t p = palette[(pixels_buffer[x] & LCD_PALETTE_ALL) >> 4][pixels_buffer[x] & 3];
             gb_priv.platform->getDisplay()->drawPixel({(int16_t) (x + dstPos.x), (int16_t) (line + dstPos.y)}, p);
         }
+        //gb_priv.platform->getDisplay()->drawPixelLine((int16_t) line, pixels_buffer, LCD_WIDTH * 2);
     }
 
     // flip
@@ -118,7 +122,7 @@ void core1_lcd_draw_line(const uint_fast8_t line) {
             auto dstSize = Utility::Vec2i(
                     displaySize.x, (int16_t) ((float) displaySize.x * ((float) surfaceSize.y / (float) surfaceSize.x)));
             auto dstPos = Utility::Vec2i(0, (int16_t) ((displaySize.y - dstSize.y) / 2));
-            gb_priv.platform->getDisplay()->drawSurface(gb_priv.surface, dstPos, dstSize);
+            gb_priv.platform->getDisplay()->drawSurface(gb_priv.surface);
         }
         // testing
         //gb_priv.platform->getDisplay()->setRotation(1);
@@ -128,6 +132,7 @@ void core1_lcd_draw_line(const uint_fast8_t line) {
         // testing
         gb_priv.platform->getDisplay()->flip();
     }
+#endif
 
     __atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);
 }
@@ -163,7 +168,13 @@ void lcd_draw_line(struct gb_s *gb, const uint8_t pixels[LCD_WIDTH], const uint_
     while (__atomic_load_n(&lcd_line_busy, __ATOMIC_SEQ_CST))
         tight_loop_contents();
 
+#if 0
     memcpy(pixels_buffer, pixels, LCD_WIDTH);
+#else
+    for (uint_fast8_t x = 0; x < LCD_WIDTH; x++) {
+        pixels_buffer[x] = palette[(pixels[x] & LCD_PALETTE_ALL) >> 4][pixels[x] & 3];
+    }
+#endif
 
     /* Populate command. */
     cmd.cmd = CORE_CMD_LCD_LINE;
@@ -181,7 +192,13 @@ void lcd_draw_line(struct gb_s *gb, const uint8_t pixels[LCD_WIDTH], const uint_
 
 PeanutGB::PeanutGB(Platform *p) : Core(p) {
     // create a render surface
-    p_surface = new mb::Surface({LCD_WIDTH, LCD_HEIGHT});
+    //p_surface = new mb::Surface({LCD_WIDTH, LCD_HEIGHT});
+
+    // cache drawing position
+    drawingPos = {
+            (int16_t) ((p_platform->getDisplay()->getSize().x - LCD_WIDTH) / 2),
+            (int16_t) ((p_platform->getDisplay()->getSize().y - LCD_HEIGHT) / 2)
+    };
 
     // init audio
     p_platform->getAudio()->setup(AUDIO_SAMPLE_RATE, AUDIO_SAMPLES, audio_callback);
@@ -212,7 +229,7 @@ bool PeanutGB::loadRom(const uint8_t *buffer, size_t size) {
 
     // initialise GB context
     gb_priv.platform = p_platform;
-    gb_priv.surface = p_surface;
+    //gb_priv.surface = p_surface;
     ret = gb_init(&gameboy, &gb_rom_read, &gb_cart_ram_read, &gb_cart_ram_write, &gb_error, &gb_priv);
 
     if (ret != GB_INIT_NO_ERROR) {
@@ -283,5 +300,5 @@ bool PeanutGB::loop() {
 }
 
 PeanutGB::~PeanutGB() {
-    delete (p_surface);
+    //delete (p_surface);
 }
