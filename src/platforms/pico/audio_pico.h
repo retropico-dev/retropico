@@ -17,7 +17,7 @@ namespace mb {
         void play(const void *data, int samples) override;
 
     private:
-        uint16_t m_stream[1098]{};
+        //uint16_t m_stream[1098]{};
         i2s_config_t m_i2s_config{};
     };
 }

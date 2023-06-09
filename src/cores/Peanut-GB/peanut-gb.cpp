@@ -26,6 +26,9 @@ static int lcd_line_busy = 0;
 static palette_t palette;
 static uint8_t manual_palette_selected = 0;
 
+#define AUDIO_BUFFER_SIZE (AUDIO_SAMPLES * 4)
+static uint16_t audio_stream[AUDIO_BUFFER_SIZE];
+
 /* Multicore command structure. */
 union core_cmd {
     struct {
@@ -242,7 +245,7 @@ bool PeanutGB::loadRom(const uint8_t *buffer, size_t size) {
     auto_assign_palette(palette, gb_colour_hash(&gameboy), gb_get_rom_name(&gameboy, rom_title));
 
     gb_init_lcd(&gameboy, &lcd_draw_line);
-    //gb.direct.interlace = 1;
+    //gameboy.direct.interlace = 1;
 
     return true;
 }
@@ -255,10 +258,24 @@ bool PeanutGB::loop() {
         tight_loop_contents();
     } while (HEDLEY_LIKELY(gameboy.gb_frame == 0));
 
+#ifndef LINUX
+    audio_callback(nullptr, reinterpret_cast<uint8_t *>(audio_stream), AUDIO_BUFFER_SIZE);
+    gb_priv.gb->getPlatform()->getAudio()->play(audio_stream, AUDIO_BUFFER_SIZE);
+#endif
+
     /* Required since we do not know whether a button remains
      * pressed over a serial connection. */
     //if (frames % 4 == 0) gameboy.direct.joypad = 0xFF;
     gameboy.direct.joypad = 0xFF;
+
+    int input = getchar_timeout_us(0);
+    switch (input) {
+        case 's':
+            gameboy.direct.joypad_bits.start = 0;
+            break;
+        default:
+            break;
+    }
 
     // handle input
     uint16_t buttons = p_platform->getInput()->getButtons();

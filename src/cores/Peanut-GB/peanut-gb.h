@@ -43,7 +43,7 @@ namespace mb {
     private:
         Surface *p_surface[2] = {nullptr, nullptr};
         uint8_t m_bufferIndex = 0;
-        bool m_doubleBuffer = false;
+        bool m_doubleBuffer = true;
     };
 }
 
