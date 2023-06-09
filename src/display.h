@@ -12,6 +12,12 @@
 namespace mb {
     class Display : public Adafruit_GFX {
     public:
+        enum Format {
+            RGB444,
+            RGB555,
+            RGB565
+        };
+
         enum Color {
             Black = 0x0000,
             Blue = 0x001F,
@@ -43,7 +49,8 @@ namespace mb {
             drawPixel(pos.x, pos.y, color);
         }
 
-        virtual void drawPixelLine(uint16_t x, uint16_t y, uint16_t width, const uint16_t *pixels) {};
+        virtual void drawPixelLine(uint16_t x, uint16_t y, uint16_t width,
+                                   const uint16_t *pixels, const Format &format = RGB565) {};
 
         // draw a surface (pixel buffer) to the display with scaling if requested
         virtual void drawSurface(Surface *surface, const Utility::Vec2i &pos, const Utility::Vec2i &size);

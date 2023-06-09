@@ -13,17 +13,16 @@ static uint m_sm = 0;
 // Format: cmd length (including cmd byte), post delay in units of 5 ms, then cmd payload
 // Note the delays have been shortened a little
 static const uint8_t st7789_init_seq[] = {
-        1, 20, 0x01,                        // Software reset
-        1, 10, 0x11,                        // Exit sleep mode
-        2, 2, 0x3a, 0x55,                   // Set colour mode to 16 bit
-        2, 0, 0x36, 0x00,                   // Set MADCTL: row then column, refresh is bottom to top ????
-        5, 0, 0x2a, 0x00, 0x00, DISPLAY_WIDTH >> 8, DISPLAY_WIDTH & 0xff,   // CASET: column addresses
-        5, 0, 0x2b, 0x00, 0x00, DISPLAY_HEIGHT >> 8, DISPLAY_HEIGHT & 0xff, // RASET: row addresses
-        //1, 0, 0xC6, 0x0F,    // Frame rate control in normal mode (Default value (60HZ))
-        1, 2, 0x21,                         // Inversion on, then 10 ms delay (supposedly a hack?)
-        1, 2, 0x13,                         // Normal display on, then 10 ms delay
-        1, 2, 0x29,                         // Main screen turn on, then wait 500 ms
-        0                                   // Terminate list
+        1, 20, ST7789_SWRESET,      // Software reset
+        1, 10, ST7789_SLPOUT,       // Exit sleep mode
+        2, 2, ST7789_COLMOD, 0x55,  // Set colour mode to 16 bit
+        2, 0, ST7789_MADCTL, 0x00,  // Set MADCTL: row then column, refresh is bottom to top ????
+        5, 0, ST7789_CASET, 0x00, 0x00, DISPLAY_WIDTH >> 8, DISPLAY_WIDTH & 0xff,   // CASET: column addresses
+        5, 0, ST7789_RASET, 0x00, 0x00, DISPLAY_HEIGHT >> 8, DISPLAY_HEIGHT & 0xff, // RASET: row addresses
+        1, 2, ST7789_INVON,         // Inversion on, then 10 ms delay (supposedly a hack?)
+        1, 2, ST7789_NORON,         // Normal display on, then 10 ms delay
+        1, 2, ST7789_DISPON,        // Main screen turn on, then wait 500 ms
+        0                           // Terminate list
 };
 
 static inline void st7789_lcd_set_dc_cs(bool dc, bool cs) {

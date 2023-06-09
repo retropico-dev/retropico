@@ -45,9 +45,9 @@ set(PLATFORM_FLAGS
         )
 
 # OK (WIP)
-include(src/cores/Peanut-GB/peanut-gb.cmake)
+#include(src/cores/Peanut-GB/peanut-gb.cmake)
 # OK (WIP)
-#include(src/cores/InfoNES/infones.cmake)
+include(src/cores/InfoNES/infones.cmake)
 # too slow...
 #include(src/cores/sameboy/sameboy.cmake)
 # too much memory usage
@@ -115,17 +115,16 @@ endif ()
 # add executable
 add_executable(${CMAKE_PROJECT_NAME}
         ${PLATFORM_SOURCES}
-        ${CMAKE_SOURCE_DIR}/src/cores/Peanut-GB/peanut-gb.cpp
-        ${CMAKE_SOURCE_DIR}/src/cores/Peanut-GB/rom.c
-        #src/cores/InfoNES/infones.cpp src/cores/InfoNES/work_meter.cpp
+        #${CMAKE_SOURCE_DIR}/src/cores/Peanut-GB/peanut-gb.cpp ${CMAKE_SOURCE_DIR}/src/cores/Peanut-GB/rom.c
+        src/cores/InfoNES/infones.cpp src/cores/InfoNES/work_meter.cpp src/cores/InfoNES/rom.c
         #src/cores/Gearsystem/gearsystem.cpp
         )
 
 # add includes
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
         ${PLATFORM_INCLUDES}
-        ${CMAKE_SOURCE_DIR}/src/cores/Peanut-GB
-        #src/cores/InfoNES
+        #${CMAKE_SOURCE_DIR}/src/cores/Peanut-GB
+        src/cores/InfoNES
         #src/cores/Gearsystem
         )
 
@@ -135,8 +134,8 @@ target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE ${PLATFORM_FLAGS})
 # add libs
 target_link_libraries(${CMAKE_PROJECT_NAME}
         ${PLATFORM_LIBS}
-        peanut-gb
-        #infones
+        #peanut-gb
+        infones
         #gearsystem
         )
 
@@ -150,7 +149,7 @@ if (NOT PLATFORM_LINUX)
     pico_generate_pio_header(${CMAKE_PROJECT_NAME}
             ${CMAKE_SOURCE_DIR}/src/platforms/pico/i2s/audio_i2s.pio)
     # run from ram
-    pico_set_binary_type(${CMAKE_PROJECT_NAME} copy_to_ram)
+    #pico_set_binary_type(${CMAKE_PROJECT_NAME} copy_to_ram)
     # enable usb output, disable uart output
     pico_enable_stdio_usb(${CMAKE_PROJECT_NAME} 1)
     pico_enable_stdio_uart(${CMAKE_PROJECT_NAME} 0)

@@ -7,6 +7,8 @@
 #include "infones.h"
 #include "InfoNES.h"
 #include "InfoNES_System.h"
+#include "K6502.h"
+#include "cores/Peanut-GB/hedley.h"
 
 using namespace mb;
 
@@ -23,11 +25,31 @@ const WORD __not_in_flash_func(NesPalette)[64] = {
 
 static Platform *platform;
 static bool quit = false;
-static WORD lineBuffer[NES_DISP_WIDTH];
+static bool frameLoaded = false;
+static WORD lineBufferRGB444[2][NES_DISP_WIDTH];
+static uint8_t lineBufferIndex = 0;
+extern int SpriteJustHit;
+static int lcd_line_busy = 0;
+
+_Noreturn void __not_in_flash_func(core1_main)();
+
+union core_cmd {
+    struct {
+#define CORE_CMD_NOP        0
+#define CORE_CMD_LCD_LINE   1
+        uint8_t cmd;
+        uint8_t line;
+        uint8_t index;
+    };
+    uint32_t full;
+};
 
 InfoNES::InfoNES(Platform *p) : Core(p) {
     // crappy
     platform = p;
+
+    // start Core1, which processes requests to the LCD
+    multicore_launch_core1(core1_main);
 }
 
 bool InfoNES::loadRom(const std::string &path) {
@@ -69,32 +91,120 @@ bool InfoNES::loadRom(const uint8_t *buffer, size_t size) {
         return false;
     }
 
+    InfoNES_Init();
+
     return true;
 }
 
 bool InfoNES::loop() {
-    InfoNES_Main();
-    return false;
+    if (InfoNES_Menu() == -1) return false; // quit
+
+    while (!frameLoaded) {
+        // Set a flag if a scanning line is a hit in the sprite #0
+        if (SpriteJustHit == PPU_Scanline && PPU_ScanTable[PPU_Scanline] == SCAN_ON_SCREEN) {
+            // # of Steps to execute before sprite #0 hit
+            int nStep = SPRRAM[SPR_X] * STEP_PER_SCANLINE / NES_DISP_WIDTH;
+
+            // Execute instructions
+            K6502_Step(nStep);
+
+            // Set a sprite hit flag
+            if ((PPU_R1 & R1_SHOW_SP) && (PPU_R1 & R1_SHOW_SCR))
+                PPU_R2 |= R2_HIT_SP;
+
+            // NMI is required if there is necessity
+            if ((PPU_R0 & R0_NMI_SP) && (PPU_R1 & R1_SHOW_SP))
+                NMI_REQ;
+
+            // Execute instructions
+            K6502_Step(STEP_PER_SCANLINE - nStep);
+        } else {
+            // Execute instructions
+            K6502_Step(STEP_PER_SCANLINE);
+        }
+
+        // Frame IRQ in H-Sync
+        FrameStep += STEP_PER_SCANLINE;
+        if (FrameStep > STEP_PER_FRAME && FrameIRQ_Enable) {
+            FrameStep %= STEP_PER_FRAME;
+            IRQ_REQ;
+            APU_Reg[0x4015] |= 0x40;
+        }
+
+        // A mapper function in H-Sync
+        MapperHSync();
+
+        // A function in H-Sync
+        if (InfoNES_HSync() == -1) return false;
+
+        // HSYNC Wait
+        //InfoNES_Wait();
+    }
+
+    frameLoaded = false;
+
+    return true;
 }
 
 InfoNES::~InfoNES() = default;
 
+void core1_lcd_draw_line(const uint_fast8_t line, const uint_fast8_t index) {
+    // crop pixel buffer, assume a 240x240 display size for now...
+    auto display = platform->getDisplay();
+    display->drawPixelLine(0, line, 240, lineBufferRGB444[index] + 8, Display::Format::RGB444);
+
+    // signal we are done
+    //__atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);
+}
+
+_Noreturn void __not_in_flash_func(core1_main)() {
+    union core_cmd cmd{};
+
+    while (true) {
+        cmd.full = multicore_fifo_pop_blocking();
+        switch (cmd.cmd) {
+            case CORE_CMD_LCD_LINE:
+                core1_lcd_draw_line(cmd.line, cmd.index);
+                break;
+            case CORE_CMD_NOP:
+            default:
+                break;
+        }
+    }
+
+    HEDLEY_UNREACHABLE();
+}
+
 void __not_in_flash_func(InfoNES_PreDrawLine)(int line) {
     //printf("InfoNES_PreDrawLine(%i)\r\n", line);
-    InfoNES_SetLineBuffer(reinterpret_cast<WORD *>(lineBuffer), NES_DISP_WIDTH);
+
+    // wait until previous line is sent
+    //while (__atomic_load_n(&lcd_line_busy, __ATOMIC_SEQ_CST))
+    //    tight_loop_contents();
+
+    InfoNES_SetLineBuffer(lineBufferRGB444[lineBufferIndex], NES_DISP_WIDTH);
 }
 
 void __not_in_flash_func(InfoNES_PostDrawLine)(int line) {
     //printf("InfoNES_PostDrawLine(%i)\r\n", line);
-    // crop pixel buffer, assume a 240x240 display size for now...
-    for (int16_t x = 8; x < NES_DISP_WIDTH - 8; x++) {
-        platform->getDisplay()->drawPixel((int16_t) (x - 8), (int16_t) line, lineBuffer[x]);
-    }
+#ifdef LINUX
+    core1_lcd_draw_line(line, lineBufferIndex);
+#else
+    // send cmd
+    core_cmd cmd{{CORE_CMD_LCD_LINE, (uint8_t) line, lineBufferIndex}};
+
+    //__atomic_store_n(&lcd_line_busy, 1, __ATOMIC_SEQ_CST);
+    multicore_fifo_push_blocking(cmd.full);
+
+    // swap line buffer
+    lineBufferIndex = lineBufferIndex ? 0 : 1;
+#endif
 }
 
 void InfoNES_LoadFrame() {
     //printf("InfoNES_LoadFrame\r\n");
     platform->getDisplay()->flip();
+    frameLoaded = true;
 }
 
 int InfoNES_ReadRom(const char *pszFileName) {
@@ -118,7 +228,7 @@ void InfoNES_PadState(DWORD *pdwPad1, DWORD *pdwPad2, DWORD *pdwSystem) {
 }
 
 int InfoNES_Menu() {
-    printf("InfoNES_Menu\r\n");
+    //printf("InfoNES_Menu\r\n");
     return quit ? -1 : 0;
 }
 
@@ -141,7 +251,7 @@ int __not_in_flash_func(InfoNES_GetSoundBufferSize)() {
 
 
 void __not_in_flash_func(InfoNES_SoundOutput)
-        (int samples, BYTE *wave1, BYTE *wave2, BYTE *wave3, BYTE *wave4, BYTE *wave5) {
+(int samples, BYTE *wave1, BYTE *wave2, BYTE *wave3, BYTE *wave4, BYTE *wave5) {
     //printf("InfoNES_SoundOutput\r\n");
 }
 
