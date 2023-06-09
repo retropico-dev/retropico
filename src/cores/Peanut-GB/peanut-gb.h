@@ -20,8 +20,30 @@ namespace mb {
 
         bool loop() override;
 
+        Surface *getSurface(uint8_t idx) {
+            return p_surface[idx];
+        }
+
+        [[nodiscard]] uint8_t getBufferIndex() const {
+            return m_bufferIndex;
+        }
+
+        void setBufferIndex(uint8_t idx) {
+            m_bufferIndex = idx;
+        }
+
+        [[nodiscard]] bool isBuffered() const {
+            return m_doubleBuffer;
+        }
+
+        void setDoubleBuffering(bool enable) {
+            m_doubleBuffer = enable;
+        }
+
     private:
-        Surface *p_surface = nullptr;
+        Surface *p_surface[2] = {nullptr, nullptr};
+        uint8_t m_bufferIndex = 0;
+        bool m_doubleBuffer = false;
     };
 }
 

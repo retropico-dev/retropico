@@ -29,12 +29,9 @@ static uint8_t manual_palette_selected = 0;
 /* Multicore command structure. */
 union core_cmd {
     struct {
-        /* Does nothing. */
 #define CORE_CMD_NOP        0
-        /* Set line "data" on the LCD. Pixel data is in pixels_buffer. */
-#define CORE_CMD_LCD_LINE    1
-        /* Control idle mode on the LCD. Limits colours to 2 bits. */
-#define CORE_CMD_IDLE_SET    2
+#define CORE_CMD_LCD_LINE   1
+#define CORE_CMD_LCD_FLIP   2
         uint8_t cmd;
         uint8_t data;
     };
@@ -42,8 +39,7 @@ union core_cmd {
 };
 
 struct gb_priv {
-    Platform *platform;
-    Surface *surface;
+    PeanutGB *gb;
 };
 static struct gb_priv gb_priv{};
 
@@ -93,46 +89,31 @@ static uint16_t pixels_buffer[LCD_WIDTH];
 static Utility::Vec2i drawingPos{};
 
 void core1_lcd_draw_line(const uint_fast8_t line) {
-#if 1
-    gb_priv.platform->getDisplay()->drawPixelLine(drawingPos.x, drawingPos.y + line, LCD_WIDTH, pixels_buffer);
-#else
-    // write a line to display buffer
-    if (m_scale) {
-        for (uint_fast8_t x = 0; x < LCD_WIDTH; x++) {
-            gb_priv.surface->setPixel(
-                    x, line, palette[(pixels_buffer[x] & LCD_PALETTE_ALL) >> 4][pixels_buffer[x] & 3]);
-        }
-    } else {
-        auto dstPos = Utility::Vec2i(
-                (int16_t) ((gb_priv.platform->getDisplay()->getSize().x - LCD_WIDTH) / 2),
-                (int16_t) ((gb_priv.platform->getDisplay()->getSize().y - LCD_HEIGHT) / 2)
-        );
-        for (uint_fast8_t x = 0; x < LCD_WIDTH; x++) {
-            uint16_t p = palette[(pixels_buffer[x] & LCD_PALETTE_ALL) >> 4][pixels_buffer[x] & 3];
-            gb_priv.platform->getDisplay()->drawPixel({(int16_t) (x + dstPos.x), (int16_t) (line + dstPos.y)}, p);
-        }
-        //gb_priv.platform->getDisplay()->drawPixelLine((int16_t) line, pixels_buffer, LCD_WIDTH * 2);
+    auto display = gb_priv.gb->getPlatform()->getDisplay();
+    display->drawPixelLine(drawingPos.x, drawingPos.y + line, LCD_WIDTH, pixels_buffer);
+
+    if (line == LCD_HEIGHT - 1) {
+        display->flip();
     }
 
-    // flip
-    if (line == LCD_HEIGHT - 1) {
-        if (m_scale) {
-            auto displaySize = gb_priv.platform->getDisplay()->getSize();
-            auto surfaceSize = gb_priv.surface->getSize();
-            auto dstSize = Utility::Vec2i(
-                    displaySize.x, (int16_t) ((float) displaySize.x * ((float) surfaceSize.y / (float) surfaceSize.x)));
-            auto dstPos = Utility::Vec2i(0, (int16_t) ((displaySize.y - dstSize.y) / 2));
-            gb_priv.platform->getDisplay()->drawSurface(gb_priv.surface);
-        }
-        // testing
-        //gb_priv.platform->getDisplay()->setRotation(1);
-        //gb_priv.platform->getDisplay()->fillRect(16, 16, 64, 32, mb::Display::Color::Yellow);
-        //gb_priv.platform->getDisplay()->setCursor(4, 4);
-        //gb_priv.platform->getDisplay()->print("Hello World");
-        // testing
-        gb_priv.platform->getDisplay()->flip();
+    __atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);
+}
+
+void core1_lcd_flip(const uint_fast8_t idx) {
+    //printf("core1_lcd_flip(%i)\r\n", idx);
+    auto display = gb_priv.gb->getPlatform()->getDisplay();
+    if (m_scale) {
+        auto surfaceSize = gb_priv.gb->getSurface(idx)->getSize();
+        auto displaySize = display->getSize();
+        auto dstSize = Utility::Vec2i(
+                displaySize.x, (int16_t) ((float) displaySize.x * ((float) surfaceSize.y / (float) surfaceSize.x)));
+        auto dstPos = Utility::Vec2i(0, (int16_t) ((displaySize.y - dstSize.y) / 2));
+        display->drawSurface(gb_priv.gb->getSurface(idx), dstPos, dstSize);
+    } else {
+        display->drawSurface(gb_priv.gb->getSurface(idx), drawingPos);
     }
-#endif
+
+    display->flip();
 
     __atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);
 }
@@ -140,18 +121,16 @@ void core1_lcd_draw_line(const uint_fast8_t line) {
 _Noreturn void main_core1() {
     union core_cmd cmd{};
 
-    /* Handle commands coming from core0. */
+    // handle commands coming from core0
     while (true) {
         cmd.full = multicore_fifo_pop_blocking();
         switch (cmd.cmd) {
             case CORE_CMD_LCD_LINE:
                 core1_lcd_draw_line(cmd.data);
                 break;
-#if 0
-                case CORE_CMD_IDLE_SET:
-                    mk_ili9225_display_control(true, cmd.data);
-                    break;
-#endif
+            case CORE_CMD_LCD_FLIP:
+                core1_lcd_flip(cmd.data);
+                break;
             case CORE_CMD_NOP:
             default:
                 break;
@@ -162,37 +141,58 @@ _Noreturn void main_core1() {
 }
 
 void lcd_draw_line(struct gb_s *gb, const uint8_t pixels[LCD_WIDTH], const uint_fast8_t line) {
-    union core_cmd cmd{};
+    if (gb_priv.gb->isBuffered()) {
+        uint8_t bufferIndex = gb_priv.gb->getBufferIndex();
 
-    /* Wait until previous line is sent. */
-    while (__atomic_load_n(&lcd_line_busy, __ATOMIC_SEQ_CST))
-        tight_loop_contents();
+        for (uint_fast8_t x = 0; x < LCD_WIDTH; x++) {
+            gb_priv.gb->getSurface(bufferIndex)->setPixel(
+                    x, line, palette[(pixels[x] & LCD_PALETTE_ALL) >> 4][pixels[x] & 3]);
+        }
 
-#if 0
-    memcpy(pixels_buffer, pixels, LCD_WIDTH);
-#else
-    for (uint_fast8_t x = 0; x < LCD_WIDTH; x++) {
-        pixels_buffer[x] = palette[(pixels[x] & LCD_PALETTE_ALL) >> 4][pixels[x] & 3];
-    }
-#endif
+        if (line == LCD_HEIGHT - 1) {
+            // wait until previous surface flip complete
+            while (__atomic_load_n(&lcd_line_busy, __ATOMIC_SEQ_CST))
+                tight_loop_contents();
 
-    /* Populate command. */
-    cmd.cmd = CORE_CMD_LCD_LINE;
-    cmd.data = line;
+            union core_cmd cmd{};
+            cmd.cmd = CORE_CMD_LCD_FLIP;
+            cmd.data = bufferIndex;
+            // flip buffers
+            gb_priv.gb->setBufferIndex(bufferIndex == 0 ? 1 : 0);
+            // send cmd
+            __atomic_store_n(&lcd_line_busy, 1, __ATOMIC_SEQ_CST);
+            multicore_fifo_push_blocking(cmd.full);
+        }
+    } else {
+        // wait until previous line is sent
+        while (__atomic_load_n(&lcd_line_busy, __ATOMIC_SEQ_CST))
+            tight_loop_contents();
 
-    __atomic_store_n(&lcd_line_busy, 1, __ATOMIC_SEQ_CST);
-    multicore_fifo_push_blocking(cmd.full);
+        for (uint_fast8_t x = 0; x < LCD_WIDTH; x++) {
+            pixels_buffer[x] = palette[(pixels[x] & LCD_PALETTE_ALL) >> 4][pixels[x] & 3];
+        }
+
+        union core_cmd cmd{};
+        cmd.cmd = CORE_CMD_LCD_LINE;
+        cmd.data = line;
+        // send cmd
+        __atomic_store_n(&lcd_line_busy, 1, __ATOMIC_SEQ_CST);
+        multicore_fifo_push_blocking(cmd.full);
 
 #if LINUX
-    // no threading for now...
-    //printf("core1_lcd_draw_line\n");
-    core1_lcd_draw_line(cmd.data);
+        // no threading for now...
+        //printf("core1_lcd_draw_line\n");
+        core1_lcd_draw_line(cmd.data);
 #endif
+    }
 }
 
 PeanutGB::PeanutGB(Platform *p) : Core(p) {
-    // create a render surface
-    //p_surface = new mb::Surface({LCD_WIDTH, LCD_HEIGHT});
+    // create some render surfaces (double buffering)
+    if (m_doubleBuffer) {
+        p_surface[0] = new Surface({LCD_WIDTH, LCD_HEIGHT});
+        p_surface[1] = new Surface({LCD_WIDTH, LCD_HEIGHT});
+    }
 
     // cache drawing position
     drawingPos = {
@@ -203,6 +203,8 @@ PeanutGB::PeanutGB(Platform *p) : Core(p) {
     // init audio
     p_platform->getAudio()->setup(AUDIO_SAMPLE_RATE, AUDIO_SAMPLES, audio_callback);
     audio_init();
+
+    gb_priv.gb = this;
 }
 
 bool PeanutGB::loadRom(const std::string &path) {
@@ -228,8 +230,6 @@ bool PeanutGB::loadRom(const uint8_t *buffer, size_t size) {
     multicore_launch_core1(main_core1);
 
     // initialise GB context
-    gb_priv.platform = p_platform;
-    //gb_priv.surface = p_surface;
     ret = gb_init(&gameboy, &gb_rom_read, &gb_cart_ram_read, &gb_cart_ram_write, &gb_error, &gb_priv);
 
     if (ret != GB_INIT_NO_ERROR) {
@@ -300,5 +300,8 @@ bool PeanutGB::loop() {
 }
 
 PeanutGB::~PeanutGB() {
-    //delete (p_surface);
+    if (m_doubleBuffer) {
+        delete (p_surface[0]);
+        delete (p_surface[1]);
+    }
 }

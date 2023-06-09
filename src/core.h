@@ -23,6 +23,8 @@ namespace mb {
 
         virtual bool loadRom(const uint8_t *buffer, size_t size) { return false; }
 
+        virtual Platform *getPlatform() { return p_platform; }
+
     protected:
         Platform *p_platform = nullptr;
     };

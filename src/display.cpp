@@ -2,6 +2,8 @@
 // Created by cpasjuste on 05/06/23.
 //
 
+#include <pico/platform.h>
+#include <pico/time.h>
 #include "display.h"
 
 using namespace mb;
@@ -22,8 +24,9 @@ void Display::drawSurface(Surface *surface, const Utility::Vec2i &pos, const Uti
     if (size == surface->getSize()) {
         auto pixels = surface->getPixels();
         auto pitch = surface->getPitch();
-        for (uint16_t y = 0; y < size.y; y++) {
-            drawPixelLine(pos.x, pos.y + y, surface->getSize().x, (uint16_t *) (pixels + y * pitch));
+        auto width = surface->getSize().x;
+        for (uint8_t y = 0; y < size.y; y++) {
+            drawPixelLine(pos.x, pos.y + y, width, (uint16_t *) (pixels + y * pitch));
         }
     } else {
         // nearest-neighbor scaling
@@ -34,17 +37,16 @@ void Display::drawSurface(Surface *surface, const Utility::Vec2i &pos, const Uti
         auto srcSize = surface->getSize();
         int xRatio = (srcSize.x << 16) / size.x;
         int yRatio = (srcSize.y << 16) / size.y;
-        for (int16_t i = 0; i < size.y; i++) {
-            for (int16_t j = 0; j < size.x; j++) {
-                if (j >= size.x || i >= size.y) {
-                    continue;
-                }
+        for (uint8_t i = 0; i < size.y; i++) {
+            for (uint8_t j = 0; j < size.x; j++) {
+                //if (j >= m_size.x || i >= m_size.y) {
+                //    continue;
+                //}
                 x = (j * xRatio) >> 16;
                 y = (i * yRatio) >> 16;
-                uint16_t p = *(uint16_t *) (pixels + y * pitch + x * bpp);
-                m_line_buffer[(int16_t) (j + pos.x)] = p;
+                m_line_buffer[j + pos.x] = *(uint16_t *) (pixels + y * pitch + x * bpp);
             }
-            drawPixelLine(0, i, m_size.x, m_line_buffer);
+            drawPixelLine(pos.x, i, size.x, m_line_buffer);
         }
     }
 }
