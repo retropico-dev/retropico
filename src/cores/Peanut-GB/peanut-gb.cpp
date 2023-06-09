@@ -162,9 +162,13 @@ void lcd_draw_line(struct gb_s *gb, const uint8_t pixels[LCD_WIDTH], const uint_
             cmd.data = bufferIndex;
             // flip buffers
             gb_priv.gb->setBufferIndex(bufferIndex == 0 ? 1 : 0);
+#if LINUX
+            core1_lcd_flip(cmd.data);
+#else
             // send cmd
             __atomic_store_n(&lcd_line_busy, 1, __ATOMIC_SEQ_CST);
             multicore_fifo_push_blocking(cmd.full);
+#endif
         }
     } else {
         // wait until previous line is sent
@@ -179,13 +183,12 @@ void lcd_draw_line(struct gb_s *gb, const uint8_t pixels[LCD_WIDTH], const uint_
         cmd.cmd = CORE_CMD_LCD_LINE;
         cmd.data = line;
         // send cmd
+#if LINUX
+        core1_lcd_draw_line(cmd.data);
+#else
+
         __atomic_store_n(&lcd_line_busy, 1, __ATOMIC_SEQ_CST);
         multicore_fifo_push_blocking(cmd.full);
-
-#if LINUX
-        // no threading for now...
-        //printf("core1_lcd_draw_line\n");
-        core1_lcd_draw_line(cmd.data);
 #endif
     }
 }
@@ -245,7 +248,9 @@ bool PeanutGB::loadRom(const uint8_t *buffer, size_t size) {
     auto_assign_palette(palette, gb_colour_hash(&gameboy), gb_get_rom_name(&gameboy, rom_title));
 
     gb_init_lcd(&gameboy, &lcd_draw_line);
-    //gameboy.direct.interlace = 1;
+
+    // not enough fps when scaling is used (with double buffering, st7789), enable interlacing
+    if (m_doubleBuffer) gameboy.direct.interlace = 1;
 
     return true;
 }
@@ -268,6 +273,7 @@ bool PeanutGB::loop() {
     //if (frames % 4 == 0) gameboy.direct.joypad = 0xFF;
     gameboy.direct.joypad = 0xFF;
 
+#ifndef LINUX
     int input = getchar_timeout_us(0);
     switch (input) {
         case 's':
@@ -276,6 +282,7 @@ bool PeanutGB::loop() {
         default:
             break;
     }
+#endif
 
     // handle input
     uint16_t buttons = p_platform->getInput()->getButtons();

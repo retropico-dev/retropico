@@ -6,7 +6,6 @@
 #include "platform.h"
 #include "display_linux.h"
 
-
 using namespace mb;
 
 LinuxDisplay::LinuxDisplay() : Display() {
@@ -70,7 +69,8 @@ void LinuxDisplay::drawPixel(int16_t x, int16_t y, uint16_t color) {
     SDL_RenderDrawPoint(p_renderer, x, y);
 }
 
-void LinuxDisplay::drawPixelLine(uint16_t x, uint16_t y, uint16_t width, const uint16_t *pixels) {
+void LinuxDisplay::drawPixelLine(uint16_t x, uint16_t y, uint16_t width,
+                                 const uint16_t *pixels, const Format &format) {
     for (uint16_t i = x; i < width; i++) {
         drawPixel((int16_t) i, (int16_t) y, pixels[i]);
     }
