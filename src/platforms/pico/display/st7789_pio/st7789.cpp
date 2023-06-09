@@ -94,7 +94,6 @@ static inline void st7789_lcd_set_rotation(uint8_t m) {
         sleep_ms(*(cmd + 1) * 5);
         cmd += *cmd + 2;
     }
-    */
 
     st7789_lcd_write_cmd(ST7789_MADCTL);
     switch (m) {
@@ -113,6 +112,7 @@ static inline void st7789_lcd_set_rotation(uint8_t m) {
         default:
             break;
     }
+    */
 }
 
 void st7789_init() {

@@ -8,7 +8,9 @@
 #include <string.h>
 #include <pico/time.h>
 #include <pico/printf.h>
-#include "hardware/gpio.h"
+#include <hardware/clocks.h>
+#include <hardware/gpio.h>
+
 #include "st7789.h"
 
 static struct st7789_config st7789_cfg;
@@ -78,7 +80,11 @@ void st7789_init(const struct st7789_config *config, uint16_t width, uint16_t he
     st7789_width = width;
     st7789_height = height;
 
-    uint16_t rate = spi_init(st7789_cfg.spi, 125 * 1000 * 1000); // 125 MHz (?!)
+    // set SPI clock to use high frequency
+    clock_configure(clk_peri, 0,
+                    CLOCKS_CLK_PERI_CTRL_AUXSRC_VALUE_CLK_SYS,
+                    125 * 1000 * 1000, 125 * 1000 * 1000);
+    uint16_t rate = spi_init(st7789_cfg.spi, 60 * 1000 * 1000); // 30 MHz
     printf("st7789_init: rate: %i\r\n", rate);
 
     if (st7789_cfg.gpio_cs > -1) {

@@ -23,12 +23,12 @@ namespace mb {
 
         void drawPixel(int16_t x, int16_t y, uint16_t color) override;
 
-        //void drawPixelLine(int16_t y, uint8_t *pixels, size_t len) override;
+        void drawPixelLine(uint16_t x, uint16_t y, uint16_t width, const uint16_t *pixels) override;
 
         //void drawSurface(Surface *surface, const Utility::Vec2i &pos, const Utility::Vec2i &size) override;
 
     private:
-        uint8_t *p_pixelBuffer = nullptr;
+        //uint8_t *p_pixelBuffer = nullptr;
     };
 }
 
