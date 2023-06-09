@@ -18,8 +18,11 @@
  */
 
 #include "platform.h"
+#ifdef MB_GB
 #include "peanut-gb.h"
-//#include "infones.h"
+#elif MB_NES
+#include "infones.h"
+#endif
 //#include "gearsystem.h"
 
 using namespace mb;
@@ -29,7 +32,11 @@ int main() {
     int frames = 0;
 
     auto platform = new mb::MBPlatform();
+#ifdef MB_GB
     auto core = new PeanutGB(platform);
+#else
+    auto core = new InfoNES(platform);
+#endif
     //auto core = new InfoNES(platform);
     if (!core->loadRom("/roms/rom.gb")) {
         stdio_flush();

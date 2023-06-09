@@ -71,8 +71,21 @@ void LinuxDisplay::drawPixel(int16_t x, int16_t y, uint16_t color) {
 
 void LinuxDisplay::drawPixelLine(uint16_t x, uint16_t y, uint16_t width,
                                  const uint16_t *pixels, const Format &format) {
-    for (uint16_t i = x; i < width; i++) {
-        drawPixel((int16_t) i, (int16_t) y, pixels[i]);
+    if (format == Format::RGB565) {
+        for (uint16_t i = x; i < width; i++) {
+            drawPixel((int16_t) i, (int16_t) y, pixels[i]);
+        }
+    } else {
+        for (int_fast16_t i = 0; i < width; i++) {
+            uint_fast16_t p = pixels[i];
+            uint_fast8_t red = (p >> 8) & 0xF;
+            uint_fast8_t green = (p >> 4) & 0xF;
+            uint_fast8_t blue = p & 0xF;
+            red = (red << 1) | (red >> 3);
+            green = (green << 2) | (green >> 2);
+            blue = (blue << 1) | (blue >> 3);
+            drawPixel((int16_t) i, (int16_t) y, (red << 11) | (green << 5) | blue);
+        }
     }
 }
 

@@ -47,7 +47,7 @@ set(PLATFORM_FLAGS
 # OK (WIP)
 include(src/cores/Peanut-GB/peanut-gb.cmake)
 # OK (WIP)
-#include(src/cores/InfoNES/infones.cmake)
+include(src/cores/InfoNES/infones.cmake)
 # too slow...
 #include(src/cores/sameboy/sameboy.cmake)
 # too much memory usage
@@ -113,47 +113,62 @@ else ()
     endif ()
 endif ()
 
-# add executable
-add_executable(${CMAKE_PROJECT_NAME}
-        ${PLATFORM_SOURCES}
-        ${CMAKE_SOURCE_DIR}/src/cores/Peanut-GB/peanut-gb.cpp ${CMAKE_SOURCE_DIR}/src/cores/Peanut-GB/rom.c
-        #src/cores/InfoNES/infones.cpp src/cores/InfoNES/work_meter.cpp src/cores/InfoNES/rom.c
-        #src/cores/Gearsystem/gearsystem.cpp
-        )
-
-# add includes
-target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
-        ${PLATFORM_INCLUDES}
-        ${CMAKE_SOURCE_DIR}/src/cores/Peanut-GB
-        #src/cores/InfoNES
-        #src/cores/Gearsystem
-        )
-
-# add definitions
-target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE ${PLATFORM_FLAGS})
-
-# add libs
-target_link_libraries(${CMAKE_PROJECT_NAME}
-        ${PLATFORM_LIBS}
-        peanut-gb
-        #infones
-        #gearsystem
-        )
-
+############
+# gameboy
+############
+add_executable(${CMAKE_PROJECT_NAME}-gameboy ${PLATFORM_SOURCES}
+        ${CMAKE_SOURCE_DIR}/src/cores/Peanut-GB/peanut-gb.cpp ${CMAKE_SOURCE_DIR}/src/cores/Peanut-GB/rom.c)
+# gameboy (includes)
+target_include_directories(${CMAKE_PROJECT_NAME}-gameboy PRIVATE
+        ${PLATFORM_INCLUDES} ${CMAKE_SOURCE_DIR}/src/cores/Peanut-GB)
+# gameboy (definitions)
+target_compile_definitions(${CMAKE_PROJECT_NAME}-gameboy PRIVATE ${PLATFORM_FLAGS} -DMB_GB)
+# gameboy (libs)
+target_link_libraries(${CMAKE_PROJECT_NAME}-gameboy ${PLATFORM_LIBS} peanut-gb)
 # rpi pico build stuff
 if (NOT PLATFORM_LINUX)
     if (PICO_DISPLAY_ST7789_PIO)
-        pico_generate_pio_header(${CMAKE_PROJECT_NAME}
+        pico_generate_pio_header(${CMAKE_PROJECT_NAME}-gameboy
                 ${CMAKE_SOURCE_DIR}/src/platforms/pico/display/st7789_pio/st7789_lcd.pio)
     endif ()
     # audio
-    pico_generate_pio_header(${CMAKE_PROJECT_NAME}
+    pico_generate_pio_header(${CMAKE_PROJECT_NAME}-gameboy
             ${CMAKE_SOURCE_DIR}/src/platforms/pico/i2s/audio_i2s.pio)
     # run from ram
-    pico_set_binary_type(${CMAKE_PROJECT_NAME} copy_to_ram)
+    pico_set_binary_type(${CMAKE_PROJECT_NAME}-gameboy copy_to_ram)
     # enable usb output, disable uart output
-    pico_enable_stdio_usb(${CMAKE_PROJECT_NAME} 1)
-    pico_enable_stdio_uart(${CMAKE_PROJECT_NAME} 0)
+    pico_enable_stdio_usb(${CMAKE_PROJECT_NAME}-gameboy 1)
+    pico_enable_stdio_uart(${CMAKE_PROJECT_NAME}-gameboy 0)
     # create map/bin/hex/uf2 file etc.
-    pico_add_extra_outputs(${CMAKE_PROJECT_NAME})
+    pico_add_extra_outputs(${CMAKE_PROJECT_NAME}-gameboy)
+endif ()
+
+############
+# nes
+############
+add_executable(${CMAKE_PROJECT_NAME}-nes ${PLATFORM_SOURCES}
+        src/cores/InfoNES/infones.cpp src/cores/InfoNES/work_meter.cpp src/cores/InfoNES/rom.c)
+# nes (includes)
+target_include_directories(${CMAKE_PROJECT_NAME}-nes PRIVATE
+        ${PLATFORM_INCLUDES} ${CMAKE_SOURCE_DIR}/src/cores/InfoNES)
+# nes (definitions)
+target_compile_definitions(${CMAKE_PROJECT_NAME}-nes PRIVATE ${PLATFORM_FLAGS} -DMB_NES)
+# nes (libs)
+target_link_libraries(${CMAKE_PROJECT_NAME}-nes ${PLATFORM_LIBS} infones)
+# rpi pico build stuff
+if (NOT PLATFORM_LINUX)
+    if (PICO_DISPLAY_ST7789_PIO)
+        pico_generate_pio_header(${CMAKE_PROJECT_NAME}-nes
+                ${CMAKE_SOURCE_DIR}/src/platforms/pico/display/st7789_pio/st7789_lcd.pio)
+    endif ()
+    # audio
+    pico_generate_pio_header(${CMAKE_PROJECT_NAME}-nes
+            ${CMAKE_SOURCE_DIR}/src/platforms/pico/i2s/audio_i2s.pio)
+    # run from ram (no go with InfoNES)
+    #pico_set_binary_type(${CMAKE_PROJECT_NAME}-nes copy_to_ram)
+    # enable usb output, disable uart output
+    pico_enable_stdio_usb(${CMAKE_PROJECT_NAME}-nes 1)
+    pico_enable_stdio_uart(${CMAKE_PROJECT_NAME}-nes 0)
+    # create map/bin/hex/uf2 file etc.
+    pico_add_extra_outputs(${CMAKE_PROJECT_NAME}-nes)
 endif ()

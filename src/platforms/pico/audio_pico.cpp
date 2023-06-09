@@ -4,10 +4,6 @@
 
 #include "platform.h"
 
-extern "C" {
-#include "minigb_apu.h"
-}
-
 using namespace mb;
 
 PicoAudio::PicoAudio() : Audio() {
