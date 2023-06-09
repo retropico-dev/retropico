@@ -61,6 +61,7 @@ namespace mb {
         Utility::Vec2i getSize() { return m_size; };
 
     protected:
+        uint16_t *m_line_buffer;
         Utility::Vec2i m_size{};
         int m_pitch = 0;
         int m_bpp = 2;

@@ -10,6 +10,8 @@ namespace mb {
     public:
         PicoDisplay();
 
+        ~PicoDisplay() override;
+
         void clear() override;
 
         void flip() override;

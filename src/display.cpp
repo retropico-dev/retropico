@@ -10,18 +10,23 @@ Display::Display(const Utility::Vec2i &size) : Adafruit_GFX(size.x, size.y) {
     m_size = size;
     m_bpp = 2;
     m_pitch = m_size.x * m_bpp;
+
+    // pixel line buffer for drawSurface
+    m_line_buffer = (uint16_t *) malloc(m_pitch);
+    memset(m_line_buffer, 0, m_pitch);
 }
 
 void Display::drawSurface(Surface *surface, const Utility::Vec2i &pos, const Utility::Vec2i &size) {
     if (!surface) return;
 
     if (size == surface->getSize()) {
+        auto pixels = surface->getPixels();
+        auto pitch = surface->getPitch();
         for (uint16_t y = 0; y < size.y; y++) {
-            for (uint16_t x = 0; x < size.x; x++) {
-                drawPixel((int16_t) (x + pos.x), (int16_t) (y + pos.y), surface->getPixel(x, y));
-            }
+            drawPixelLine(pos.x, pos.y + y, surface->getSize().x, (uint16_t *) (pixels + y * pitch));
         }
     } else {
+        // nearest-neighbor scaling
         int x, y;
         auto pitch = surface->getPitch();
         auto bpp = surface->getBpp();
@@ -36,11 +41,10 @@ void Display::drawSurface(Surface *surface, const Utility::Vec2i &pos, const Uti
                 }
                 x = (j * xRatio) >> 16;
                 y = (i * yRatio) >> 16;
-                // big fps drop in surface->getPixel ?!
-                //drawPixel((int16_t) (j + pos.x), (int16_t) (i + pos.y), surface->getPixel(x, y));
                 uint16_t p = *(uint16_t *) (pixels + y * pitch + x * bpp);
-                drawPixel((int16_t) (j + pos.x), (int16_t) (i + pos.y), p);
+                m_line_buffer[(int16_t) (j + pos.x)] = p;
             }
+            drawPixelLine(0, i, m_size.x, m_line_buffer);
         }
     }
 }
