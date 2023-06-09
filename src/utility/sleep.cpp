@@ -3,6 +3,7 @@
 //
 
 #include <cstdio>
+#include <cstdlib>
 #ifndef LINUX
 #include <pico/stdlib.h>
 #include <pico/sleep.h>

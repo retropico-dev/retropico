@@ -2,8 +2,6 @@
 // Created by cpasjuste on 05/06/23.
 //
 
-#include <pico/platform.h>
-#include <pico/time.h>
 #include "display.h"
 
 using namespace mb;
