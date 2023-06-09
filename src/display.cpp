@@ -44,7 +44,7 @@ void Display::drawSurface(Surface *surface, const Utility::Vec2i &pos, const Uti
                 y = (i * yRatio) >> 16;
                 m_line_buffer[j + pos.x] = *(uint16_t *) (pixels + y * pitch + x * bpp);
             }
-            drawPixelLine(pos.x, i, size.x, m_line_buffer);
+            drawPixelLine(pos.x, i + pos.y, size.x, m_line_buffer);
         }
     }
 }
