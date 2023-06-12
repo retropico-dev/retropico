@@ -21,5 +21,9 @@ void PicoAudio::setup(uint16_t rate, uint16_t samples, Audio::AudioCallback cb) 
 }
 
 void PicoAudio::play(const void *data, int samples) {
-    i2s_dma_write(&m_i2s_config, reinterpret_cast<const int16_t *>(data));
+    if (samples > 0) {
+        i2s_write(&m_i2s_config, reinterpret_cast<const int16_t *>(data), samples);
+    } else {
+        i2s_dma_write(&m_i2s_config, reinterpret_cast<const int16_t *>(data));
+    }
 }

@@ -22,7 +22,7 @@ namespace mb {
             p_callback = cb;
         }
 
-        virtual void play(const void *data, int samples) {};
+        virtual void play(const void *data, int samples = 0) {};
 
     protected:
         uint16_t m_rate = 0;

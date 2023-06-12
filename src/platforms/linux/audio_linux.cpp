@@ -5,7 +5,6 @@
 #include "platform.h"
 #include "audio_linux.h"
 
-
 using namespace mb;
 
 LinuxAudio::LinuxAudio() {

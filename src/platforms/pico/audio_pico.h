@@ -14,10 +14,9 @@ namespace mb {
 
         void setup(uint16_t rate, uint16_t samples, AudioCallback cb) override;
 
-        void play(const void *data, int samples) override;
+        void play(const void *data, int samples = 0) override;
 
     private:
-        //uint16_t m_stream[1098]{};
         i2s_config_t m_i2s_config{};
     };
 }

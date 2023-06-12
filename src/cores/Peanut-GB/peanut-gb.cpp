@@ -265,7 +265,7 @@ bool PeanutGB::loop() {
 
 #ifndef LINUX
     audio_callback(nullptr, reinterpret_cast<uint8_t *>(audio_stream), AUDIO_BUFFER_SIZE);
-    gb_priv.gb->getPlatform()->getAudio()->play(audio_stream, AUDIO_BUFFER_SIZE);
+    gb_priv.gb->getPlatform()->getAudio()->play(audio_stream);
 #endif
 
     /* Required since we do not know whether a button remains
