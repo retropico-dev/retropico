@@ -13,7 +13,7 @@ if (NOT PLATFORM_LINUX)
     # note: this must happen before project()
     include(src/platforms/pico/cmake/pico_sdk_import.cmake)
 
-    # for hardware_sleep
+    # for pico_audio_i2s, hardware_sleep
     include(src/platforms/pico/cmake/pico_extras_import.cmake)
 endif ()
 
@@ -66,8 +66,7 @@ if (PLATFORM_LINUX)
 else ()
     file(GLOB TEMP src/platforms/pico/*.c*)
     list(APPEND PLATFORM_SOURCES ${TEMP})
-    list(APPEND PLATFORM_SOURCES src/platforms/pico/i2s/i2s.c)
-    list(APPEND PLATFORM_INCLUDES src/platforms/pico src/platforms/pico/i2s)
+    list(APPEND PLATFORM_INCLUDES src/platforms/pico)
     list(APPEND PLATFORM_FLAGS
             PARAM_ASSERTIONS_DISABLE_ALL=1
             PICO_ENTER_USB_BOOT_ON_EXIT=1
@@ -77,6 +76,8 @@ else ()
             PICO_PRINTF_SUPPORT_EXPONENTIAL=0
             PICO_PRINTF_SUPPORT_LONG_LONG=1
             PICO_PRINTF_SUPPORT_PTRDIFF_T=0
+            PICO_AUDIO_I2S_PIO=1
+            PICO_AUDIO_I2S_DMA_IRQ=1
             #PICO_DEFAULT_UART_TX_PIN=12
             #PICO_DEFAULT_UART_RX_PIN=13
             )
@@ -84,6 +85,7 @@ else ()
             -Wl,--print-memory-usage
             pico_stdlib
             pico_multicore
+            pico_audio_i2s
             hardware_sleep
             hardware_pio
             hardware_dma
@@ -131,9 +133,6 @@ if (NOT PLATFORM_LINUX)
         pico_generate_pio_header(${CMAKE_PROJECT_NAME}-gameboy
                 ${CMAKE_SOURCE_DIR}/src/platforms/pico/display/st7789_pio/st7789_lcd.pio)
     endif ()
-    # audio
-    pico_generate_pio_header(${CMAKE_PROJECT_NAME}-gameboy
-            ${CMAKE_SOURCE_DIR}/src/platforms/pico/i2s/audio_i2s.pio)
     # run from ram
     pico_set_binary_type(${CMAKE_PROJECT_NAME}-gameboy copy_to_ram)
     # enable usb output, disable uart output
@@ -161,9 +160,6 @@ if (NOT PLATFORM_LINUX)
         pico_generate_pio_header(${CMAKE_PROJECT_NAME}-nes
                 ${CMAKE_SOURCE_DIR}/src/platforms/pico/display/st7789_pio/st7789_lcd.pio)
     endif ()
-    # audio
-    pico_generate_pio_header(${CMAKE_PROJECT_NAME}-nes
-            ${CMAKE_SOURCE_DIR}/src/platforms/pico/i2s/audio_i2s.pio)
     # run from ram (no go with InfoNES)
     #pico_set_binary_type(${CMAKE_PROJECT_NAME}-nes copy_to_ram)
     # enable usb output, disable uart output

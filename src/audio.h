@@ -20,14 +20,16 @@ namespace mb {
             m_rate = rate;
             m_samples = samples;
             p_callback = cb;
+            printf("Audio::setup: rate: %i, samples: %i\r\n", m_rate, m_samples);
         }
 
-        virtual void play(const void *data, int samples = 0) {};
+        virtual void play(const void *data, int samples) {};
 
     protected:
         uint16_t m_rate = 0;
         uint16_t m_samples = 0;
         AudioCallback p_callback = nullptr;
+        uint8_t m_volume = 4;
     };
 }
 

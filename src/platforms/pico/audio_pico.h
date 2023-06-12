@@ -5,7 +5,8 @@
 #ifndef MICROBOY_AUDIO_PICO_H
 #define MICROBOY_AUDIO_PICO_H
 
-#include "i2s.h"
+//#include "i2s.h"
+#include <pico/audio_i2s.h>
 
 namespace mb {
     class PicoAudio : public Audio {
@@ -14,10 +15,11 @@ namespace mb {
 
         void setup(uint16_t rate, uint16_t samples, AudioCallback cb) override;
 
-        void play(const void *data, int samples = 0) override;
+        void play(const void *data, int samples) override;
 
     private:
-        i2s_config_t m_i2s_config{};
+        audio_i2s_config_t m_i2s_config{};
+        audio_buffer_pool *p_producer_pool;
     };
 }
 
