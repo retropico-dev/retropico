@@ -41,6 +41,7 @@ union core_cmd {
         uint8_t cmd;
         uint8_t line;
         uint8_t index;
+        uint8_t dummy;
     };
     uint32_t full;
 };
@@ -180,6 +181,7 @@ void __not_in_flash_func(InfoNES_PreDrawLine)(int line) {
 void __not_in_flash_func(InfoNES_PostDrawLine)(int line) {
     //printf("InfoNES_PostDrawLine(%i)\r\n", line);
 #ifdef LINUX
+    // we can't draw outside main thread with sdl2
     core1_lcd_draw_line(line, lineBufferIndex);
 #else
     // send cmd
