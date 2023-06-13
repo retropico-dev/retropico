@@ -14,17 +14,20 @@ namespace mb {
 
         virtual ~Audio() = default;
 
-        virtual void setup(uint16_t rate, uint16_t samples) {
+        virtual void setup(uint16_t rate, uint16_t samples, uint8_t channels = 2) {
             m_rate = rate;
             m_samples = samples;
-            printf("Audio::setup: rate: %i, samples: %i\r\n", m_rate, m_samples);
+            m_channels = channels;
+            printf("Audio::setup: rate: %i, samples: %i, channels: %i\r\n",
+                   m_rate, m_samples, m_channels);
         }
 
         virtual void play(const void *data, int samples) {};
 
     protected:
-        uint16_t m_rate = 0;
-        uint16_t m_samples = 0;
+        uint16_t m_rate = 44100;
+        uint16_t m_samples = 735;
+        uint8_t m_channels = 2;
         uint8_t m_volume = 4;
     };
 }

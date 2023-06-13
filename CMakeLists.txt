@@ -151,7 +151,8 @@ add_executable(${CMAKE_PROJECT_NAME}-nes ${PLATFORM_SOURCES}
 target_include_directories(${CMAKE_PROJECT_NAME}-nes PRIVATE
         ${PLATFORM_INCLUDES} ${CMAKE_SOURCE_DIR}/src/cores/InfoNES)
 # nes (definitions)
-target_compile_definitions(${CMAKE_PROJECT_NAME}-nes PRIVATE ${PLATFORM_FLAGS} -DMB_NES)
+target_compile_definitions(${CMAKE_PROJECT_NAME}-nes PRIVATE ${PLATFORM_FLAGS}
+        -DMB_NES -DPICO_AUDIO_I2S_MONO_INPUT)
 # nes (libs)
 target_link_libraries(${CMAKE_PROJECT_NAME}-nes ${PLATFORM_LIBS} infones)
 # rpi pico build stuff

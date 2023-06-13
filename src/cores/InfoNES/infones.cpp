@@ -26,7 +26,7 @@ const WORD __not_in_flash_func(NesPalette)[64] = {
 static Platform *platform;
 static bool quit = false;
 static bool frameLoaded = false;
-#define LINE_BUFFER_COUNT 32
+#define LINE_BUFFER_COUNT 16
 static WORD lineBufferRGB444[LINE_BUFFER_COUNT][NES_DISP_WIDTH];
 static uint8_t lineBufferIndex = 0;
 extern int SpriteJustHit;
@@ -269,7 +269,7 @@ int InfoNES_Menu() {
 
 void InfoNES_SoundInit() {
     printf("InfoNES_SoundInit\r\n");
-    platform->getAudio()->setup(44100, 735);
+    platform->getAudio()->setup(44100, 735, 1);
 }
 
 int InfoNES_SoundOpen(int samples_per_sync, int sample_rate) {
@@ -293,10 +293,10 @@ void __not_in_flash_func(InfoNES_SoundOutput)
     //printf("InfoNES_SoundOutput: samples = %i\r\n", samples);
     for (uint_fast32_t i = 0; i < samples; i++) {
         int32_t sample = (wave1[i] + wave2[i] + wave3[i] + wave4[i] + wave5[i]) / 5;
-        audio_buffer[audio_index] = audio_buffer[audio_index + 1] = (sample - 128) * 256;
-        audio_index += 2;
-        if (audio_index >= 735 / 2) {
-            platform->getAudio()->play(audio_buffer, audio_index / 2);
+        audio_buffer[audio_index] = (sample - 128) * 256;
+        audio_index++;
+        if (audio_index >= 735) {
+            platform->getAudio()->play(audio_buffer, audio_index);
             audio_index = 0;
         }
     }

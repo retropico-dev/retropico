@@ -13,13 +13,9 @@ LinuxAudio::LinuxAudio() {
     }
 }
 
-void LinuxAudio::setup(uint16_t rate, uint16_t samples) {
-    if (rate == m_rate && samples == m_samples) {
-        return;
-    }
-
+void LinuxAudio::setup(uint16_t rate, uint16_t samples, uint8_t channels) {
     // call base class
-    Audio::setup(rate, samples);
+    Audio::setup(rate, samples, channels);
 
     // first close device if already setup
     if (m_dev != 0u) {
@@ -30,7 +26,7 @@ void LinuxAudio::setup(uint16_t rate, uint16_t samples) {
     SDL_AudioSpec want, got;
     want.freq = rate;
     want.format = AUDIO_S16;
-    want.channels = 2;
+    want.channels = m_channels;
     want.samples = samples;
     want.callback = nullptr;
     want.userdata = nullptr;
@@ -49,7 +45,7 @@ void LinuxAudio::setup(uint16_t rate, uint16_t samples) {
 
 void LinuxAudio::play(const void *data, int samples) {
     if (!m_dev) return;
-    SDL_QueueAudio(m_dev, data, samples * sizeof(int32_t));
+    SDL_QueueAudio(m_dev, data, samples * m_channels * sizeof(int16_t));
 }
 
 LinuxAudio::~LinuxAudio() {

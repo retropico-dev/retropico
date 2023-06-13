@@ -10,15 +10,13 @@
 namespace mb {
     class PicoAudio : public Audio {
     public:
-        explicit PicoAudio();
-
-        void setup(uint16_t rate, uint16_t samples) override;
+        void setup(uint16_t rate, uint16_t samples, uint8_t channels = 2) override;
 
         void play(const void *data, int samples) override;
 
     private:
         audio_i2s_config_t m_i2s_config{};
-        audio_buffer_pool *p_producer_pool;
+        audio_buffer_pool *p_producer_pool = nullptr;
     };
 }
 
