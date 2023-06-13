@@ -95,7 +95,6 @@ void LinuxDisplay::clear() {
 }
 
 void LinuxDisplay::flip() {
-    printf("flip\r\n");
     SDL_RenderPresent(p_renderer);
 }
 

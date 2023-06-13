@@ -207,7 +207,7 @@ PeanutGB::PeanutGB(Platform *p) : Core(p) {
     };
 
     // init audio
-    p_platform->getAudio()->setup(AUDIO_SAMPLE_RATE, AUDIO_SAMPLES, audio_callback);
+    p_platform->getAudio()->setup(AUDIO_SAMPLE_RATE, AUDIO_SAMPLES);
     audio_init();
 
     gb_priv.gb = this;
@@ -263,10 +263,9 @@ bool PeanutGB::loop() {
         tight_loop_contents();
     } while (HEDLEY_LIKELY(gameboy.gb_frame == 0));
 
-#ifndef LINUX
+    // send audio buffer to playback device
     audio_callback(nullptr, reinterpret_cast<uint8_t *>(audio_stream), AUDIO_BUFFER_SIZE);
     gb_priv.gb->getPlatform()->getAudio()->play(audio_stream, AUDIO_SAMPLES);
-#endif
 
     /* Required since we do not know whether a button remains
      * pressed over a serial connection. */

@@ -26,12 +26,13 @@ const WORD __not_in_flash_func(NesPalette)[64] = {
 static Platform *platform;
 static bool quit = false;
 static bool frameLoaded = false;
-static WORD lineBufferRGB444[2][NES_DISP_WIDTH];
+#define LINE_BUFFER_COUNT 32
+static WORD lineBufferRGB444[LINE_BUFFER_COUNT][NES_DISP_WIDTH];
 static uint8_t lineBufferIndex = 0;
 extern int SpriteJustHit;
 static int lcd_line_busy = 0;
 
-_Noreturn void __not_in_flash_func(core1_main)();
+_Noreturn [[noreturn]] void __not_in_flash_func(core1_main)();
 
 union core_cmd {
     struct {
@@ -197,7 +198,10 @@ void __not_in_flash_func(InfoNES_PostDrawLine)(int line) {
     multicore_fifo_push_blocking(cmd.full);
 
     // swap line buffer
-    lineBufferIndex = lineBufferIndex ? 0 : 1;
+    lineBufferIndex++;
+    if (lineBufferIndex == LINE_BUFFER_COUNT) {
+        lineBufferIndex = 0;
+    }
 #endif
 }
 
@@ -244,6 +248,18 @@ void InfoNES_PadState(DWORD *pdwPad1, DWORD *pdwPad2, DWORD *pdwSystem) {
           (buttons & mb::Input::Button::SELECT ? SELECT : 0) |
           (buttons & mb::Input::Button::START ? START : 0) |
           0;
+
+#ifndef LINUX
+    pad = 0;
+    int input = getchar_timeout_us(0);
+    switch (input) {
+        case 's':
+            pad = START;
+            break;
+        default:
+            break;
+    }
+#endif
 }
 
 int InfoNES_Menu() {
@@ -253,7 +269,7 @@ int InfoNES_Menu() {
 
 void InfoNES_SoundInit() {
     printf("InfoNES_SoundInit\r\n");
-    platform->getAudio()->setup(44100, 735, nullptr);
+    platform->getAudio()->setup(44100, 735);
 }
 
 int InfoNES_SoundOpen(int samples_per_sync, int sample_rate) {
@@ -266,43 +282,23 @@ void InfoNES_SoundClose() {
 
 int __not_in_flash_func(InfoNES_GetSoundBufferSize)() {
     //printf("InfoNES_GetSoundBufferSize\r\n");
-    return 735;
+    return 735 * sizeof(uint8_t);
 }
 
-uint8_t audio_buffer[2048];
-int waveptr;
-int wavflag;
+static uint16_t audio_buffer[1024];
+static int audio_index = 0;
 
 void __not_in_flash_func(InfoNES_SoundOutput)
         (int samples, BYTE *wave1, BYTE *wave2, BYTE *wave3, BYTE *wave4, BYTE *wave5) {
     //printf("InfoNES_SoundOutput: samples = %i\r\n", samples);
-
-    /*
-    for (int i = 0; i < samples; i++) {
-        audio_buffer[i] = (wave1[i] + wave2[i] + wave3[i] + wave4[i] + wave5[i]) / 5;
-    }
-
-    platform->getAudio()->play(audio_buffer, samples);
-    */
-
-    for (int i = 0; i < samples; i++) {
-        audio_buffer[waveptr] = (wave1[i] + wave2[i] + wave3[i] + wave4[i] + wave5[i]) / 5;
-        waveptr++;
-        if (waveptr == 2048) {
-            waveptr = 0;
-            wavflag = 2;
-        } else if (waveptr == 1024) {
-            wavflag = 1;
+    for (uint_fast32_t i = 0; i < samples; i++) {
+        int32_t sample = (wave1[i] + wave2[i] + wave3[i] + wave4[i] + wave5[i]) / 5;
+        audio_buffer[audio_index] = audio_buffer[audio_index + 1] = (sample - 128) * 256;
+        audio_index += 2;
+        if (audio_index >= 735 / 2) {
+            platform->getAudio()->play(audio_buffer, audio_index / 2);
+            audio_index = 0;
         }
-    }
-
-    if (wavflag) {
-        //if (write(sound_fd, &final_wave[(wavflag - 1) << 10], 1024) < 1024) {
-        //    InfoNES_MessageBox("wrote less than 1024 bytes\n");
-        //}
-        void *ptr = wavflag == 1 ? audio_buffer : audio_buffer + 1024;
-        platform->getAudio()->play(ptr, 1024);
-        wavflag = 0;
     }
 }
 

@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <unistd.h>
 
-#define _Noreturn
+#define _Noreturn [[noreturn]]
 #define __not_in_flash_func(func_name) func_name
 #define tight_loop_contents() ((void)0)
 #define stdio_flush() fflush(stdout)

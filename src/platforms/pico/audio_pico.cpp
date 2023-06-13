@@ -9,8 +9,8 @@ using namespace mb;
 PicoAudio::PicoAudio() : Audio() {
 }
 
-void PicoAudio::setup(uint16_t rate, uint16_t samples, Audio::AudioCallback cb) {
-    Audio::setup(rate, samples, cb);
+void PicoAudio::setup(uint16_t rate, uint16_t samples) {
+    Audio::setup(rate, samples);
 
     m_i2s_config = {
             .data_pin = 26,
@@ -30,13 +30,13 @@ void PicoAudio::setup(uint16_t rate, uint16_t samples, Audio::AudioCallback cb) 
             .sample_stride = 4
     };
 
-    p_producer_pool = audio_new_producer_pool(&producer_format, 2, samples);
+    p_producer_pool = audio_new_producer_pool(&producer_format, 3, samples);
     const struct audio_format *output_format = audio_i2s_setup(&audio_format, &m_i2s_config);
     if (!output_format) {
         panic("PicoAudio::setup: Unable to open audio device.\n");
     }
 
-    bool ret = audio_i2s_connect_extra(p_producer_pool, false, 2, samples, nullptr);
+    bool ret = audio_i2s_connect_extra(p_producer_pool, false, 3, samples, nullptr);
     if (!ret) {
         panic("PicoAudio::setup: audio_i2s_connect_extra failed\r\n");
     }
@@ -51,10 +51,11 @@ void PicoAudio::play(const void *data, int samples) {
         memcpy(sampleBuffer, data, samples * sizeof(int32_t));
     } else {
         auto dataBuffer = (int16_t *) data;
-        for (uint16_t i = 0; i < (uint16_t) samples * 2; i++) {
+        for (uint_fast16_t i = 0; i < (uint_fast16_t) samples * 2; i++) {
             sampleBuffer[i] = dataBuffer[i] >> m_volume;
         }
     }
+
     buffer->sample_count = samples;
     give_audio_buffer(p_producer_pool, buffer);
 }

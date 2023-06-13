@@ -12,14 +12,19 @@ using namespace mb;
 
 PicoPlatform::PicoPlatform() : Platform() {
     // overclock - the value for VCO set here is meant for least power consumption
+#ifdef MB_NES
+    vreg_set_voltage(VREG_VOLTAGE_1_30);
+    sleep_ms(2);
+    set_sys_clock_khz(300000, true);
+    sleep_ms(2);
+#else
     const unsigned vco = 1596 * 1000 * 1000; // 266MHz
     const unsigned div1 = 6, div2 = 1;
     vreg_set_voltage(VREG_VOLTAGE_DEFAULT);
-    //vreg_set_voltage(VREG_VOLTAGE_1_30);
     sleep_ms(2);
     set_sys_clock_pll(vco, div1, div2);
-    //set_sys_clock_khz(300000, true);
     sleep_ms(2);
+#endif
 
     // initialise USB serial connection for debugging
     stdio_init_all();
