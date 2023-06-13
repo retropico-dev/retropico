@@ -136,7 +136,7 @@ void core1_lcd_draw_line(const uint_fast8_t line, const uint_fast8_t index) {
         platform->getDisplay()->setCursor(0, 4);
     }
 
-    // crop pixel buffer, assume a 240x240 display size for now...
+    // crop line buffer width by 16 pixels (240x240 display)
     auto display = platform->getDisplay();
     display->drawPixelLine(lineBufferRGB444[index] + 8, 240, Display::Format::RGB444);
 
@@ -198,7 +198,6 @@ void __not_in_flash_func(InfoNES_PostDrawLine)(int line) {
 
 void InfoNES_LoadFrame() {
     //printf("InfoNES_LoadFrame\r\n");
-    //platform->getDisplay()->flip();
     frameLoaded = true;
 }
 
