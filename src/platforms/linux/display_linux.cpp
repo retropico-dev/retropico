@@ -30,68 +30,27 @@ LinuxDisplay::LinuxDisplay() : Display() {
     printf("LinuxDisplay: %ix%i (texture pitch: %i)\n", m_size.x, m_size.y, m_pitch);
 }
 
-void LinuxDisplay::drawPixel(int16_t x, int16_t y, uint16_t color) {
-    if ((x < 0) || (y < 0) || x > m_size.x || y > m_size.y) return;
+void LinuxDisplay::setCursor(uint16_t x, uint16_t y) {
+    m_cursor.x = (int16_t) x;
+    m_cursor.y = (int16_t) y;
+}
 
-    // rotation
-    int16_t t;
-    switch (rotation) {
-        case 1:
-            t = x;
-            x = (int16_t) (m_size.x - 1 - y);
-            y = t;
-            break;
-        case 2:
-            x = (int16_t) (m_size.x - 1 - x);
-            y = (int16_t) (m_size.y - 1 - y);
-            break;
-        case 3:
-            t = x;
-            x = y;
-            y = (int16_t) (m_size.y - 1 - t);
-            break;
-    }
-
-#if 1
+void LinuxDisplay::setPixel(uint16_t color) {
     // rgb565 > rgb32
     int32_t r = ((color & 0xF800) >> 11) << 3;
     int32_t g = ((color & 0x7E0) >> 5) << 2;
     int32_t b = ((color & 0x1F)) << 3;
-#else
-    // rgb555 > rgb32
-    int32_t r = ((color & 0x7C00) >> 10) << 3;
-    int32_t g = ((color & 0x3E0) >> 5) << 3;
-    int32_t b = (color & 0x1F) << 3;
-#endif
 
     // draw the pixel to the renderer
     SDL_SetRenderDrawColor(p_renderer, r, g, b, SDL_ALPHA_OPAQUE);
-    SDL_RenderDrawPoint(p_renderer, x, y);
-}
+    SDL_RenderDrawPoint(p_renderer, m_cursor.x, m_cursor.y);
 
-void LinuxDisplay::drawPixelLine(uint16_t x, uint16_t y, uint16_t width,
-                                 const uint16_t *pixels, const Format &format) {
-    if (format == Format::RGB565) {
-        for (uint16_t i = x; i < width; i++) {
-            drawPixel((int16_t) i, (int16_t) y, pixels[i]);
-        }
-    } else {
-        for (int_fast16_t i = 0; i < width; i++) {
-            uint_fast16_t p = pixels[i];
-            uint_fast8_t red = (p >> 8) & 0xF;
-            uint_fast8_t green = (p >> 4) & 0xF;
-            uint_fast8_t blue = p & 0xF;
-            red = (red << 1) | (red >> 3);
-            green = (green << 2) | (green >> 2);
-            blue = (blue << 1) | (blue >> 3);
-            drawPixel((int16_t) i, (int16_t) y, (red << 11) | (green << 5) | blue);
-        }
+    // emulate tft lcd "put_pixel" buffer
+    m_cursor.x++;
+    if (m_cursor.x >= m_size.x) {
+        m_cursor.x = 0;
+        m_cursor.y += 1;
     }
-}
-
-void LinuxDisplay::clear() {
-    SDL_SetRenderDrawColor(p_renderer, 0, 0, 0, 255);
-    SDL_RenderClear(p_renderer);
 }
 
 void LinuxDisplay::flip() {

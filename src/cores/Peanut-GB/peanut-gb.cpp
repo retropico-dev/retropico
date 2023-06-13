@@ -87,13 +87,13 @@ void gb_error(struct gb_s *gb, const enum gb_error_e gb_err, const uint16_t val)
 #endif
 }
 
-static bool m_scale = true;
 static uint16_t pixels_buffer[LCD_WIDTH];
 static Utility::Vec2i drawingPos{};
 
 void core1_lcd_draw_line(const uint_fast8_t line) {
     auto display = gb_priv.gb->getPlatform()->getDisplay();
-    display->drawPixelLine(drawingPos.x, drawingPos.y + line, LCD_WIDTH, pixels_buffer);
+    //display->drawPixelLine(drawingPos.x, drawingPos.y + line, LCD_WIDTH, pixels_buffer);
+    display->drawPixelLine(pixels_buffer, LCD_WIDTH);
 
     if (line == LCD_HEIGHT - 1) {
         display->flip();
@@ -102,20 +102,16 @@ void core1_lcd_draw_line(const uint_fast8_t line) {
     __atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);
 }
 
-void core1_lcd_flip(const uint_fast8_t idx) {
+void core1_lcd_flip(const uint_fast8_t bufferIndex) {
     //printf("core1_lcd_flip(%i)\r\n", idx);
     auto display = gb_priv.gb->getPlatform()->getDisplay();
-    if (m_scale) {
-        auto surfaceSize = gb_priv.gb->getSurface(idx)->getSize();
-        auto displaySize = display->getSize();
-        auto dstSize = Utility::Vec2i(
-                displaySize.x, (int16_t) ((float) displaySize.x * ((float) surfaceSize.y / (float) surfaceSize.x)));
-        auto dstPos = Utility::Vec2i(0, (int16_t) ((displaySize.y - dstSize.y) / 2));
-        display->drawSurface(gb_priv.gb->getSurface(idx), dstPos, dstSize);
-    } else {
-        display->drawSurface(gb_priv.gb->getSurface(idx), drawingPos);
-    }
+    auto surfaceSize = gb_priv.gb->getSurface(bufferIndex)->getSize();
+    auto displaySize = display->getSize();
+    auto dstSize = Utility::Vec2i(
+            displaySize.x, (int16_t) ((float) displaySize.x * ((float) surfaceSize.y / (float) surfaceSize.x)));
+    auto dstPos = Utility::Vec2i(0, (int16_t) ((displaySize.y - dstSize.y) / 2));
 
+    display->drawSurface(gb_priv.gb->getSurface(bufferIndex), dstPos, dstSize);
     display->flip();
 
     __atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);
@@ -186,7 +182,6 @@ void lcd_draw_line(struct gb_s *gb, const uint8_t pixels[LCD_WIDTH], const uint_
 #if LINUX
         core1_lcd_draw_line(cmd.data);
 #else
-
         __atomic_store_n(&lcd_line_busy, 1, __ATOMIC_SEQ_CST);
         multicore_fifo_push_blocking(cmd.full);
 #endif
@@ -250,7 +245,7 @@ bool PeanutGB::loadRom(const uint8_t *buffer, size_t size) {
     gb_init_lcd(&gameboy, &lcd_draw_line);
 
     // not enough fps when scaling is used (with double buffering, st7789), enable interlacing
-    if (m_doubleBuffer) gameboy.direct.interlace = 1;
+    //if (m_doubleBuffer) gameboy.direct.interlace = 1;
 
     return true;
 }

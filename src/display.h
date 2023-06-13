@@ -36,35 +36,45 @@ namespace mb {
         // destroy the display (hardware dependant, to be implemented)
         ~Display() override = default;
 
-        // clear the display (hardware dependant, to be implemented)
-        virtual void clear() {}
+        // set the position inside pixel buffer (hardware dependant, to be implemented)
+        virtual void setCursor(uint16_t x, uint16_t y) {};
+
+        // set pixel color at cursor position
+        virtual void setPixel(uint16_t color) {};
 
         // flip the display (hardware dependant, to be implemented)
         virtual void flip() {}
 
-        // draw a pixel to the display (hardware dependant, to be implemented)
-        void drawPixel(int16_t x, int16_t y, uint16_t color) override {};
+        // clear the display
+        void clear();
 
+        // draw a pixel to the display (slow)
+        void drawPixel(int16_t x, int16_t y, uint16_t color) override;
+
+        // draw a pixel to the display (slow)
         void drawPixel(const Utility::Vec2i &pos, uint16_t color) {
             drawPixel(pos.x, pos.y, color);
         }
 
-        virtual void drawPixelLine(uint16_t x, uint16_t y, uint16_t width,
-                                   const uint16_t *pixels, const Format &format = RGB565) {};
+        // draw a pixel line buffer to the display (fast)
+        void drawPixelLine(const uint16_t *pixels, uint16_t width, const Format &format = RGB565);
 
         // draw a surface (pixel buffer) to the display with scaling if requested
-        virtual void drawSurface(Surface *surface, const Utility::Vec2i &pos, const Utility::Vec2i &size);
+        void drawSurface(Surface *surface, const Utility::Vec2i &pos, const Utility::Vec2i &size);
 
-        virtual void drawSurface(Surface *surface, const Utility::Vec2i &pos) {
+        // draw a surface (pixel buffer) to the display
+        void drawSurface(Surface *surface, const Utility::Vec2i &pos) {
             if (!surface) return;
             drawSurface(surface, pos, surface->getSize());
         }
 
-        virtual void drawSurface(Surface *surface) {
+        // draw a surface (pixel buffer) to the display
+        void drawSurface(Surface *surface) {
             if (!surface) return;
             drawSurface(surface, {0, 0}, surface->getSize());
         }
 
+        // get display size
         Utility::Vec2i getSize() { return m_size; };
 
     protected:

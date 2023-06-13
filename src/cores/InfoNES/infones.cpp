@@ -101,30 +101,18 @@ bool InfoNES::loop() {
     if (InfoNES_Menu() == -1) return false; // quit
 
     while (!frameLoaded) {
-        // Set a flag if a scanning line is a hit in the sprite #0
         if (SpriteJustHit == PPU_Scanline && PPU_ScanTable[PPU_Scanline] == SCAN_ON_SCREEN) {
-            // # of Steps to execute before sprite #0 hit
             int nStep = SPRRAM[SPR_X] * STEP_PER_SCANLINE / NES_DISP_WIDTH;
-
-            // Execute instructions
             K6502_Step(nStep);
-
-            // Set a sprite hit flag
             if ((PPU_R1 & R1_SHOW_SP) && (PPU_R1 & R1_SHOW_SCR))
                 PPU_R2 |= R2_HIT_SP;
-
-            // NMI is required if there is necessity
             if ((PPU_R0 & R0_NMI_SP) && (PPU_R1 & R1_SHOW_SP))
                 NMI_REQ;
-
-            // Execute instructions
             K6502_Step(STEP_PER_SCANLINE - nStep);
         } else {
-            // Execute instructions
             K6502_Step(STEP_PER_SCANLINE);
         }
 
-        // Frame IRQ in H-Sync
         FrameStep += STEP_PER_SCANLINE;
         if (FrameStep > STEP_PER_FRAME && FrameIRQ_Enable) {
             FrameStep %= STEP_PER_FRAME;
@@ -132,14 +120,8 @@ bool InfoNES::loop() {
             APU_Reg[0x4015] |= 0x40;
         }
 
-        // A mapper function in H-Sync
         MapperHSync();
-
-        // A function in H-Sync
         if (InfoNES_HSync() == -1) return false;
-
-        // HSYNC Wait
-        //InfoNES_Wait();
     }
 
     frameLoaded = false;
@@ -150,9 +132,18 @@ bool InfoNES::loop() {
 InfoNES::~InfoNES() = default;
 
 void core1_lcd_draw_line(const uint_fast8_t line, const uint_fast8_t index) {
+    if (line == 4) {
+        platform->getDisplay()->setCursor(0, 4);
+    }
+
     // crop pixel buffer, assume a 240x240 display size for now...
     auto display = platform->getDisplay();
-    display->drawPixelLine(0, line, 240, lineBufferRGB444[index] + 8, Display::Format::RGB444);
+    display->drawPixelLine(lineBufferRGB444[index] + 8, 240, Display::Format::RGB444);
+
+    if (line == 235) {
+        platform->getDisplay()->flip();
+        platform->getDisplay()->setCursor(0, 0);
+    }
 
     // signal we are done
     //__atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);
@@ -207,7 +198,7 @@ void __not_in_flash_func(InfoNES_PostDrawLine)(int line) {
 
 void InfoNES_LoadFrame() {
     //printf("InfoNES_LoadFrame\r\n");
-    platform->getDisplay()->flip();
+    //platform->getDisplay()->flip();
     frameLoaded = true;
 }
 

@@ -12,9 +12,11 @@ using namespace mb;
 
 PicoPlatform::PicoPlatform() : Platform() {
     // overclock - the value for VCO set here is meant for least power consumption
-#ifdef MB_NES
+#if 0
+    //vreg_set_voltage(VREG_VOLTAGE_1_15);
     vreg_set_voltage(VREG_VOLTAGE_1_30);
     sleep_ms(2);
+    //set_sys_clock_khz(280000, true);
     set_sys_clock_khz(300000, true);
     sleep_ms(2);
 #else
