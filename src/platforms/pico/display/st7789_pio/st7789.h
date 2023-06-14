@@ -5,13 +5,6 @@
 #ifndef MICROBOY_ST7789_H
 #define MICROBOY_ST7789_H
 
-#define PIN_DC      16  // SPI0 RX
-#define PIN_CS      17  // SPI0 CSn
-#define PIN_CLK     18  // SPI0 SCK
-#define PIN_DIN     19  // SPI0 TX  (MOSI)
-#define PIN_BL      20  // GPIO
-#define PIN_RESET   21  // GPIO
-
 #define DISPLAY_WIDTH 240
 #define DISPLAY_HEIGHT 240
 

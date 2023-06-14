@@ -3,6 +3,7 @@
 //
 
 #include "platform.h"
+#include "pinout.h"
 
 using namespace mb;
 
@@ -10,8 +11,8 @@ void PicoAudio::setup(uint16_t rate, uint16_t samples, uint8_t channels) {
     Audio::setup(rate, samples, channels);
 
     m_i2s_config = {
-            .data_pin = 26,
-            .clock_pin_base = 27,
+            .data_pin = AUDIO_PIN_DATA,
+            .clock_pin_base = AUDIO_PIN_CLOCK,
             .dma_channel = 0,
             .pio_sm = 1
     };
