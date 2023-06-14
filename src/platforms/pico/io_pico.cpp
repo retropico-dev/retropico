@@ -63,6 +63,9 @@ uint8_t *PicoIo::load(const std::string &romPath, size_t *size) {
         restore_interrupts(ints);
     }
 
+    // sync
+    f_sync(&fp);
+
     // close file
     f_close(&fp);
 
