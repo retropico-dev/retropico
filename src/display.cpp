@@ -99,11 +99,11 @@ void Display::drawSurface(Surface *surface, const Utility::Vec2i &pos, const Uti
     }
 }
 
-void Display::clear() {
+void Display::clear(uint16_t color) {
     setCursor(0, 0);
     for (int y = 0; y < m_size.x; ++y) {
         for (int x = 0; x < m_size.y; ++x) {
-            setPixel(0x0000);
+            setPixel(color);
         }
     }
 }

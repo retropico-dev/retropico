@@ -29,12 +29,14 @@ endif ()
 # set source files
 file(GLOB PLATFORM_SOURCES
         src/*.c*
+        src/ui/*.c*
         src/utility/*.c*
         src/compat/*.c*
         external/misc/Adafruit-GFX-Library/Adafruit_GFX.cpp
         )
 set(PLATFORM_INCLUDES
         src
+        src/ui
         src/utility
         src/compat
         external/misc/Adafruit-GFX-Library

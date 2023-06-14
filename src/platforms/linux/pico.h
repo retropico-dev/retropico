@@ -10,6 +10,7 @@
 
 #define _Noreturn [[noreturn]]
 #define __not_in_flash_func(func_name) func_name
+#define in_ram(func_name) func_name
 #define tight_loop_contents() ((void)0)
 #define stdio_flush() fflush(stdout)
 #define reset_usb_boot(x, y) ((void)0)

@@ -21,7 +21,7 @@ namespace mb {
 
         virtual bool loadRom(const std::string &path) { return false; }
 
-        virtual bool loadRom(const uint8_t *buffer, size_t size) { return false; }
+        virtual bool loadRom(Io::FileBuffer file) { return false; }
 
         virtual Platform *getPlatform() { return p_platform; }
 

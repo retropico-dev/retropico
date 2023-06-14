@@ -60,37 +60,36 @@ InfoNES::InfoNES(Platform *p) : Core(p) {
 }
 
 bool InfoNES::loadRom(const std::string &path) {
-    size_t size;
-    uint8_t *rom = p_platform->getIo()->load(path, &size);
-    if (!rom) {
+    auto file = p_platform->getIo()->load(path);
+    if (!file.data) {
         printf("InfoNES::loadRom: failed to load rom (%s)\r\n", path.c_str());
         return false;
     }
 
-    return loadRom(rom, size);
+    return loadRom(file);
 }
 
-bool InfoNES::loadRom(const uint8_t *buffer, size_t size) {
-    memcpy(&NesHeader, buffer, sizeof(NesHeader));
+bool InfoNES::loadRom(Io::FileBuffer file) {
+    memcpy(&NesHeader, file.data, sizeof(NesHeader));
     if (memcmp(NesHeader.byID, "NES\x1a", 4) != 0) {
         return false;
     }
 
-    buffer += sizeof(NesHeader);
+    file.data += sizeof(NesHeader);
     memset(SRAM, 0, SRAM_SIZE);
     if (NesHeader.byInfo1 & 4) {
-        memcpy(&SRAM[0x1000], buffer, 512);
-        buffer += 512;
+        memcpy(&SRAM[0x1000], file.data, 512);
+        file.data += 512;
     }
 
     auto romSize = NesHeader.byRomSize * 0x4000;
-    ROM = (BYTE *) buffer;
-    buffer += romSize;
+    ROM = (BYTE *) file.data;
+    file.data += romSize;
 
     if (NesHeader.byVRomSize > 0) {
         auto vSize = NesHeader.byVRomSize * 0x2000;
-        VROM = (BYTE *) buffer;
-        buffer += vSize;
+        VROM = (BYTE *) file.data;
+        file.data += vSize;
     }
 
     if (InfoNES_Reset() < 0) {

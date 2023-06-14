@@ -16,7 +16,7 @@ namespace mb {
 
         bool loadRom(const std::string &path) override;
 
-        bool loadRom(const uint8_t *buffer, size_t size) override;
+        bool loadRom(Io::FileBuffer file) override;
 
         bool loop() override;
     };

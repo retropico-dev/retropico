@@ -46,7 +46,7 @@ namespace mb {
         virtual void flip() {}
 
         // clear the display
-        void clear();
+        void clear(uint16_t color = White);
 
         // draw a pixel to the display (slow)
         void drawPixel(int16_t x, int16_t y, uint16_t color) override;
@@ -72,6 +72,15 @@ namespace mb {
         void drawSurface(Surface *surface) {
             if (!surface) return;
             drawSurface(surface, {0, 0}, surface->getSize());
+        }
+
+        void drawText(int16_t x, int16_t y, const std::string &text) {
+            Adafruit_GFX::setCursor(x, y);
+            print(text.c_str());
+        }
+
+        void drawText(const Utility::Vec2i &pos, const std::string &text) {
+            drawText(pos.x, pos.y, text);
         }
 
         // get display size

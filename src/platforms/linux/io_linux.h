@@ -8,7 +8,9 @@
 namespace mb {
     class LinuxIo : public Io {
     public:
-        uint8_t *load(const std::string &romPath, size_t *size) override;
+        FileBuffer load(const std::string &path) override;
+
+        std::vector<std::string> getDir(const std::string &path, int maxFiles = IO_MAX_FILES) override;
     };
 }
 

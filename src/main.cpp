@@ -18,6 +18,7 @@
  */
 
 #include "platform.h"
+#include "ui.h"
 #ifdef MB_GB
 #include "peanut-gb.h"
 #elif MB_NES
@@ -27,10 +28,24 @@
 using namespace mb;
 
 int main() {
-    mb::Clock clock;
+    Clock clock;
     int frames = 0;
 
-    auto platform = new mb::MBPlatform();
+    auto platform = new MBPlatform();
+    auto ui = new Ui(platform);
+#if 1
+    // main loop
+    while (ui->loop()) {
+        // fps
+        if (clock.getElapsedTime().asSeconds() >= 1) {
+            printf("fps: %i\r\n", (int) ((float) frames / clock.restart().asSeconds()));
+            frames = 0;
+        }
+
+        // increment frames for fps counter
+        frames++;
+    }
+#else
 #ifdef MB_GB
     std::string romPath = "/roms/gameboy/rom.gb";
     auto core = new PeanutGB(platform);
@@ -54,7 +69,9 @@ int main() {
         // increment frames for fps counter
         frames++;
     }
+#endif
 
+    delete (ui);
     delete (platform);
 
     return 0;
