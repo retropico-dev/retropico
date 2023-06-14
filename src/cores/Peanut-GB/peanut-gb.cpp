@@ -48,7 +48,7 @@ static struct gb_priv gb_priv{};
 
 static struct gb_s gameboy;
 
-uint8_t gb_rom_read(struct gb_s *gb, const uint_fast32_t addr) {
+uint8_t in_ram(gb_rom_read)(struct gb_s *gb, const uint_fast32_t addr) {
     (void) gb;
 #ifdef ENABLE_RAM_BANK
     if (addr < sizeof(rom_bank0)) {
@@ -59,12 +59,12 @@ uint8_t gb_rom_read(struct gb_s *gb, const uint_fast32_t addr) {
     return gb_rom[addr];
 }
 
-uint8_t gb_cart_ram_read(struct gb_s *gb, const uint_fast32_t addr) {
+uint8_t in_ram(gb_cart_ram_read)(struct gb_s *gb, const uint_fast32_t addr) {
     (void) gb;
     return gb_ram[addr];
 }
 
-void gb_cart_ram_write(struct gb_s *gb, const uint_fast32_t addr, const uint8_t val) {
+void in_ram(gb_cart_ram_write)(struct gb_s *gb, const uint_fast32_t addr, const uint8_t val) {
     (void) gb;
     gb_ram[addr] = val;
 }
@@ -90,7 +90,7 @@ void gb_error(struct gb_s *gb, const enum gb_error_e gb_err, const uint16_t val)
 static uint16_t pixels_buffer[LCD_WIDTH];
 static Utility::Vec2i drawingPos{};
 
-void core1_lcd_draw_line(const uint_fast8_t line) {
+void in_ram(core1_lcd_draw_line)(const uint_fast8_t line) {
     auto display = gb_priv.gb->getPlatform()->getDisplay();
     //display->drawPixelLine(drawingPos.x, drawingPos.y + line, LCD_WIDTH, pixels_buffer);
     display->drawPixelLine(pixels_buffer, LCD_WIDTH);
@@ -102,7 +102,7 @@ void core1_lcd_draw_line(const uint_fast8_t line) {
     __atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);
 }
 
-void core1_lcd_flip(const uint_fast8_t bufferIndex) {
+void in_ram(core1_lcd_flip)(const uint_fast8_t bufferIndex) {
     //printf("core1_lcd_flip(%i)\r\n", idx);
     auto display = gb_priv.gb->getPlatform()->getDisplay();
     auto surfaceSize = gb_priv.gb->getSurface(bufferIndex)->getSize();
@@ -117,7 +117,7 @@ void core1_lcd_flip(const uint_fast8_t bufferIndex) {
     __atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);
 }
 
-_Noreturn void main_core1() {
+_Noreturn void in_ram(main_core1)() {
     union core_cmd cmd{};
 
     // handle commands coming from core0
@@ -139,7 +139,7 @@ _Noreturn void main_core1() {
     HEDLEY_UNREACHABLE();
 }
 
-void lcd_draw_line(struct gb_s *gb, const uint8_t pixels[LCD_WIDTH], const uint_fast8_t line) {
+void in_ram(lcd_draw_line)(struct gb_s *gb, const uint8_t pixels[LCD_WIDTH], const uint_fast8_t line) {
     if (gb_priv.gb->isBuffered()) {
         uint8_t bufferIndex = gb_priv.gb->getBufferIndex();
 
@@ -250,7 +250,7 @@ bool PeanutGB::loadRom(const uint8_t *buffer, size_t size) {
     return true;
 }
 
-bool PeanutGB::loop() {
+bool in_ram(PeanutGB::loop)() {
     gameboy.gb_frame = 0;
 
     do {
