@@ -10,8 +10,6 @@
 using namespace mb;
 
 #define FLASH_TARGET_OFFSET (1024 * 1024)
-//extern "C" const unsigned char flash_rom[];
-//extern "C" unsigned int flash_rom_len;
 
 PicoIo::PicoIo() : Io() {
     p_sd = sd_get_by_num(0);
@@ -46,8 +44,6 @@ uint8_t *PicoIo::load(const std::string &romPath, size_t *size) {
         printf(".");
         stdio_flush();
 
-        // we can't read and write from flash as the same time
-        //memcpy(buffer, flash_rom + i, FLASH_SECTOR_SIZE);
         fr = f_read(&fp, buffer, FLASH_SECTOR_SIZE, &br);
         if (FR_OK != fr) {
             printf("\r\nPicoIo::load: f_read error: %s (%d)\n", FRESULT_str(fr), fr);

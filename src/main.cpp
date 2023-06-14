@@ -23,7 +23,6 @@
 #elif MB_NES
 #include "infones.h"
 #endif
-//#include "gearsystem.h"
 
 using namespace mb;
 

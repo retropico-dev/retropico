@@ -122,7 +122,7 @@ endif ()
 # gameboy
 ############
 add_executable(${CMAKE_PROJECT_NAME}-gameboy ${PLATFORM_SOURCES}
-        ${CMAKE_SOURCE_DIR}/src/cores/Peanut-GB/peanut-gb.cpp ${CMAKE_SOURCE_DIR}/src/cores/Peanut-GB/rom.c)
+        ${CMAKE_SOURCE_DIR}/src/cores/Peanut-GB/peanut-gb.cpp)
 # gameboy (includes)
 target_include_directories(${CMAKE_PROJECT_NAME}-gameboy PRIVATE
         ${PLATFORM_INCLUDES} ${CMAKE_SOURCE_DIR}/src/cores/Peanut-GB)
@@ -149,7 +149,7 @@ endif ()
 # nes
 ############
 add_executable(${CMAKE_PROJECT_NAME}-nes ${PLATFORM_SOURCES}
-        src/cores/InfoNES/infones.cpp src/cores/InfoNES/work_meter.cpp src/cores/InfoNES/rom.c)
+        src/cores/InfoNES/infones.cpp src/cores/InfoNES/work_meter.cpp)
 # nes (includes)
 target_include_directories(${CMAKE_PROJECT_NAME}-nes PRIVATE
         ${PLATFORM_INCLUDES} ${CMAKE_SOURCE_DIR}/src/cores/InfoNES)
