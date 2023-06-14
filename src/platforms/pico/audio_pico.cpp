@@ -8,6 +8,9 @@
 using namespace mb;
 
 void PicoAudio::setup(uint16_t rate, uint16_t samples, uint8_t channels) {
+    printf("PicoAudio: rate: %i, samples: %i, channels: %i\r\n",
+           m_rate, m_samples, m_channels);
+
     Audio::setup(rate, samples, channels);
 
     m_i2s_config = {
@@ -40,6 +43,8 @@ void PicoAudio::setup(uint16_t rate, uint16_t samples, uint8_t channels) {
     }
 
     audio_i2s_set_enabled(true);
+
+    printf("\r\n");
 }
 
 void PicoAudio::play(const void *data, int samples) {

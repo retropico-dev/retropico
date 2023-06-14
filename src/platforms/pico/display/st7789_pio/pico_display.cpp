@@ -11,7 +11,7 @@
 using namespace mb;
 
 PicoDisplay::PicoDisplay() : Display({DISPLAY_WIDTH, DISPLAY_HEIGHT}) {
-    printf("PicoDisplay(): %ix%i\r\n", m_size.x, m_size.y);
+    printf("PicoDisplay: st7789 pio @ %ix%i\r\n", m_size.x, m_size.y);
 
     // init st7789 display
     st7789_init();

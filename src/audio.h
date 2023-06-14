@@ -18,8 +18,6 @@ namespace mb {
             m_rate = rate;
             m_samples = samples;
             m_channels = channels;
-            printf("Audio::setup: rate: %i, samples: %i, channels: %i\r\n",
-                   m_rate, m_samples, m_channels);
         }
 
         virtual void play(const void *data, int samples) {};

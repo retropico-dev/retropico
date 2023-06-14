@@ -5,7 +5,6 @@
 #include <pico/time.h>
 #include <pico/stdlib.h>
 #include <hardware/vreg.h>
-#include <class/cdc/cdc_device.h>
 #include "platform.h"
 
 using namespace mb;
@@ -32,8 +31,9 @@ PicoPlatform::PicoPlatform() : Platform() {
     stdio_init_all();
 #ifndef NDEBUG
     // wait for usb serial
-    while (!tud_cdc_connected()) { sleep_ms(100); }
+    while (!stdio_usb_connected()) { sleep_ms(100); }
 #endif
+    printf("\r\nPicoPlatform: pico\r\n");
 
     p_display = new PicoDisplay();
     p_audio = new PicoAudio();
