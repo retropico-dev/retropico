@@ -13,3 +13,6 @@
 [submodule "external/cores/InfoNES"]
 	path = external/cores/InfoNES
 	url = https://github.com/Cpasjuste/pico-infones.git
+[submodule "external/misc/no-OS-FatFS-SD-SPI-RPi-Pico"]
+	path = external/misc/no-OS-FatFS-SD-SPI-RPi-Pico
+	url = https://github.com/Cpasjuste/no-OS-FatFS-SD-SPI-RPi-Pico.git

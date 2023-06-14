@@ -91,6 +91,9 @@ else ()
             hardware_dma
             #hardware_flash
             )
+    # spi sdcard driver
+    add_subdirectory(external/misc/no-OS-FatFS-SD-SPI-RPi-Pico/FatFs_SPI)
+    list(APPEND PLATFORM_LIBS FatFs_SPI)
     # display driver
     if (PICO_DISPLAY_SSD1306)
         list(APPEND PLATFORM_SOURCES
@@ -134,7 +137,7 @@ if (NOT PLATFORM_LINUX)
                 ${CMAKE_SOURCE_DIR}/src/platforms/pico/display/st7789_pio/st7789_lcd.pio)
     endif ()
     # run from ram
-    pico_set_binary_type(${CMAKE_PROJECT_NAME}-gameboy copy_to_ram)
+    #pico_set_binary_type(${CMAKE_PROJECT_NAME}-gameboy copy_to_ram)
     # enable usb output, disable uart output
     pico_enable_stdio_usb(${CMAKE_PROJECT_NAME}-gameboy 1)
     pico_enable_stdio_uart(${CMAKE_PROJECT_NAME}-gameboy 0)

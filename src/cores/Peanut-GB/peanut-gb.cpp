@@ -210,7 +210,7 @@ PeanutGB::PeanutGB(Platform *p) : Core(p) {
 
 bool PeanutGB::loadRom(const std::string &path) {
     size_t size;
-    uint8_t *rom = p_platform->getIo()->load("/roms/rom.gb", &size);
+    uint8_t *rom = p_platform->getIo()->load(path, &size);
     if (!rom) {
         printf("PeanutGB::loadRom: failed to load rom (%s)\r\n", path.c_str());
         return false;

@@ -19,6 +19,8 @@
 #include "audio_pico.h"
 #include "io_pico.h"
 
+#define in_ram __not_in_flash_func
+
 namespace mb {
     class PicoPlatform : public Platform {
     public:

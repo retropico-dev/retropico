@@ -12,8 +12,8 @@
 
 using namespace mb;
 
-#define CC(x) (((x >> 1) & 15) | (((x >> 6) & 15) << 4) | (((x >> 11) & 15) << 8))
-const WORD __not_in_flash_func(NesPalette)[64] = {
+#define CC(x) ((((x) >> 1) & 15) | ((((x) >> 6) & 15) << 4) | ((((x) >> 11) & 15) << 8))
+const WORD in_ram(NesPalette)[64] = {
         CC(0x39ce), CC(0x1071), CC(0x0015), CC(0x2013), CC(0x440e), CC(0x5402), CC(0x5000), CC(0x3c20),
         CC(0x20a0), CC(0x0100), CC(0x0140), CC(0x00e2), CC(0x0ceb), CC(0x0000), CC(0x0000), CC(0x0000),
         CC(0x5ef7), CC(0x01dd), CC(0x10fd), CC(0x401e), CC(0x5c17), CC(0x700b), CC(0x6ca0), CC(0x6521),
@@ -31,8 +31,11 @@ static WORD lineBufferRGB444[LINE_BUFFER_COUNT][NES_DISP_WIDTH];
 static uint8_t lineBufferIndex = 0;
 extern int SpriteJustHit;
 static int lcd_line_busy = 0;
+// audio
+static uint16_t audio_buffer[1024];
+static int audio_buffer_index = 0;
 
-_Noreturn [[noreturn]] void __not_in_flash_func(core1_main)();
+_Noreturn void in_ram(core1_main)();
 
 union core_cmd {
     struct {
@@ -50,13 +53,15 @@ InfoNES::InfoNES(Platform *p) : Core(p) {
     // crappy
     platform = p;
 
+    platform->getAudio()->setup(44100, 735, 1);
+
     // start Core1, which processes requests to the LCD
     multicore_launch_core1(core1_main);
 }
 
 bool InfoNES::loadRom(const std::string &path) {
     size_t size;
-    uint8_t *rom = p_platform->getIo()->load("/roms/rom.nes", &size);
+    uint8_t *rom = p_platform->getIo()->load(path, &size);
     if (!rom) {
         printf("InfoNES::loadRom: failed to load rom (%s)\r\n", path.c_str());
         return false;
@@ -98,7 +103,7 @@ bool InfoNES::loadRom(const uint8_t *buffer, size_t size) {
     return true;
 }
 
-bool InfoNES::loop() {
+bool in_ram(InfoNES::loop)() {
     if (InfoNES_Menu() == -1) return false; // quit
 
     while (!frameLoaded) {
@@ -132,7 +137,7 @@ bool InfoNES::loop() {
 
 InfoNES::~InfoNES() = default;
 
-void core1_lcd_draw_line(const uint_fast8_t line, const uint_fast8_t index) {
+void in_ram(core1_lcd_draw_line)(const uint_fast8_t line, const uint_fast8_t index) {
     if (line == 4) {
         platform->getDisplay()->setCursor(0, 4);
     }
@@ -150,7 +155,7 @@ void core1_lcd_draw_line(const uint_fast8_t line, const uint_fast8_t index) {
     //__atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);
 }
 
-_Noreturn void __not_in_flash_func(core1_main)() {
+_Noreturn void in_ram(core1_main)() {
     union core_cmd cmd{};
 
     while (true) {
@@ -168,7 +173,7 @@ _Noreturn void __not_in_flash_func(core1_main)() {
     HEDLEY_UNREACHABLE();
 }
 
-void __not_in_flash_func(InfoNES_PreDrawLine)(int line) {
+void in_ram(InfoNES_PreDrawLine)(int line) {
     //printf("InfoNES_PreDrawLine(%i)\r\n", line);
 
     // wait until previous line is sent
@@ -178,7 +183,7 @@ void __not_in_flash_func(InfoNES_PreDrawLine)(int line) {
     InfoNES_SetLineBuffer(lineBufferRGB444[lineBufferIndex], NES_DISP_WIDTH);
 }
 
-void __not_in_flash_func(InfoNES_PostDrawLine)(int line) {
+void in_ram(InfoNES_PostDrawLine)(int line) {
     //printf("InfoNES_PostDrawLine(%i)\r\n", line);
 #ifdef LINUX
     // we can't draw outside main thread with sdl2
@@ -198,7 +203,7 @@ void __not_in_flash_func(InfoNES_PostDrawLine)(int line) {
 #endif
 }
 
-void InfoNES_LoadFrame() {
+void in_ram(InfoNES_LoadFrame)() {
     //printf("InfoNES_LoadFrame\r\n");
     frameLoaded = true;
 }
@@ -214,7 +219,7 @@ void InfoNES_ReleaseRom() {
     VROM = nullptr;
 }
 
-void InfoNES_PadState(DWORD *pdwPad1, DWORD *pdwPad2, DWORD *pdwSystem) {
+void in_ram(InfoNES_PadState)(DWORD *pdwPad1, DWORD *pdwPad2, DWORD *pdwSystem) {
     static constexpr int LEFT = 1 << 6;
     static constexpr int RIGHT = 1 << 7;
     static constexpr int UP = 1 << 4;
@@ -261,7 +266,6 @@ int InfoNES_Menu() {
 
 void InfoNES_SoundInit() {
     printf("InfoNES_SoundInit\r\n");
-    platform->getAudio()->setup(44100, 735, 1);
 }
 
 int InfoNES_SoundOpen(int samples_per_sync, int sample_rate) {
@@ -272,24 +276,20 @@ int InfoNES_SoundOpen(int samples_per_sync, int sample_rate) {
 void InfoNES_SoundClose() {
 }
 
-int __not_in_flash_func(InfoNES_GetSoundBufferSize)() {
+int in_ram(InfoNES_GetSoundBufferSize)() {
     //printf("InfoNES_GetSoundBufferSize\r\n");
     return 735 * sizeof(uint8_t);
 }
 
-static uint16_t audio_buffer[1024];
-static int audio_index = 0;
-
-void __not_in_flash_func(InfoNES_SoundOutput)
-        (int samples, BYTE *wave1, BYTE *wave2, BYTE *wave3, BYTE *wave4, BYTE *wave5) {
+void in_ram(InfoNES_SoundOutput)(int samples, BYTE *w1, BYTE *w2, BYTE *w3, BYTE *w4, BYTE *w5) {
     //printf("InfoNES_SoundOutput: samples = %i\r\n", samples);
     for (uint_fast32_t i = 0; i < samples; i++) {
-        int32_t sample = (wave1[i] + wave2[i] + wave3[i] + wave4[i] + wave5[i]) / 5;
-        audio_buffer[audio_index] = (sample - 128) * 256;
-        audio_index++;
-        if (audio_index >= 735) {
-            platform->getAudio()->play(audio_buffer, audio_index);
-            audio_index = 0;
+        int32_t sample = (w1[i] + w2[i] + w3[i] + w4[i] + w5[i]) / 5;
+        audio_buffer[audio_buffer_index] = (sample - 128) * 256;
+        audio_buffer_index++;
+        if (audio_buffer_index >= 735) {
+            platform->getAudio()->play(audio_buffer, audio_buffer_index);
+            audio_buffer_index = 0;
         }
     }
 }

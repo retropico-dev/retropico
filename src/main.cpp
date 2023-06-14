@@ -33,12 +33,13 @@ int main() {
 
     auto platform = new mb::MBPlatform();
 #ifdef MB_GB
+    std::string romPath = "/roms/gameboy/rom.gb";
     auto core = new PeanutGB(platform);
 #else
+    std::string romPath = "/roms/nes/rom.nes";
     auto core = new InfoNES(platform);
 #endif
-    //auto core = new InfoNES(platform);
-    if (!core->loadRom("/roms/rom.gb")) {
+    if (!core->loadRom(romPath)) {
         stdio_flush();
         while (true) { __wfi(); }
     }
