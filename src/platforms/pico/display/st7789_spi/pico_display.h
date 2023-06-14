@@ -17,18 +17,9 @@ namespace mb {
     public:
         PicoDisplay();
 
-        void clear() override;
+        void setCursor(uint16_t x, uint16_t y) override;
 
-        void flip() override;
-
-        void drawPixel(int16_t x, int16_t y, uint16_t color) override;
-
-        void drawPixelLine(uint16_t x, uint16_t y, uint16_t width, const uint16_t *pixels) override;
-
-        //void drawSurface(Surface *surface, const Utility::Vec2i &pos, const Utility::Vec2i &size) override;
-
-    private:
-        //uint8_t *p_pixelBuffer = nullptr;
+        void setPixel(uint16_t color) override;
     };
 }
 
