@@ -71,6 +71,7 @@ uint8_t *PicoIo::load(const std::string &romPath, size_t *size) {
     // set file size if needed
     if (*size) *size = fs;
 
+    stdio_flush();
     printf(" done\r\n");
 
     return (uint8_t *) (XIP_BASE + FLASH_TARGET_OFFSET);
