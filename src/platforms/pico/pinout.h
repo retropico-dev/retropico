@@ -19,9 +19,19 @@
 #define SD_PIN_MOSI     19  // SPI0 TX
 #define SD_PIN_MISO     20  // SPI0 RX
 
-// ANALOG AUDIO PINS
+// AUDIO PINS (I2S, DIGITAL)
 #define AUDIO_PIN_DATA  26  // DIN
 #define AUDIO_PIN_CLOCK 27  // BCLK
-//#define AUDIO_PIN_LRC   28  // LRC (MUST BE AUDIO_PIN_CLOCK + 1)
+#define AUDIO_PIN_LRC   28  // LRC (MUST BE AUDIO_PIN_CLOCK + 1)
+
+// BUTTONS PINS
+#define BTN_PIN_B1      (-1)
+#define BTN_PIN_B2      (-1)
+#define BTN_PIN_START   (-1)
+#define BTN_PIN_SELECT  (-1)
+#define BTN_PIN_LEFT    (-1)
+#define BTN_PIN_RIGHT   (-1)
+#define BTN_PIN_UP      (-1)
+#define BTN_PIN_DOWN    (-1)
 
 #endif //MICROBOY_PINOUT_H

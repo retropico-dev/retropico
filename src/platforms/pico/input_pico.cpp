@@ -3,6 +3,7 @@
 //
 
 #include "platform.h"
+#include "pinout.h"
 
 using namespace mb;
 
@@ -12,14 +13,14 @@ struct Mapping {
 };
 
 const Mapping mapping[MAX_BUTTONS] = {
-        {Input::Button::B1,     -1},
-        {Input::Button::B2,     -1},
-        {Input::Button::START,  -1},
-        {Input::Button::SELECT, -1},
-        {Input::Button::LEFT,   -1},
-        {Input::Button::RIGHT,  -1},
-        {Input::Button::UP,     -1},
-        {Input::Button::DOWN,   -1}
+        {Input::Button::B1,     BTN_PIN_B1},
+        {Input::Button::B2,     BTN_PIN_B2},
+        {Input::Button::START,  BTN_PIN_START},
+        {Input::Button::SELECT, BTN_PIN_SELECT},
+        {Input::Button::LEFT,   BTN_PIN_LEFT},
+        {Input::Button::RIGHT,  BTN_PIN_RIGHT},
+        {Input::Button::UP,     BTN_PIN_UP},
+        {Input::Button::DOWN,   BTN_PIN_DOWN}
 };
 
 PicoInput::PicoInput() : Input() {
