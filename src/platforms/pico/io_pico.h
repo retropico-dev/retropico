@@ -12,7 +12,7 @@ namespace mb {
     public:
         PicoIo();
 
-        uint8_t *load(const std::string &romPath, size_t *size) override;
+        FileBuffer load(const std::string &path, const Target &target = Flash) override;
 
     private:
         sd_card_t *p_sd = nullptr;

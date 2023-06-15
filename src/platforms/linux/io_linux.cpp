@@ -11,7 +11,7 @@
 
 using namespace mb;
 
-Io::FileBuffer LinuxIo::load(const std::string &path) {
+Io::FileBuffer LinuxIo::load(const std::string &path, const Target &target) {
     Io::FileBuffer fileBuffer;
 
     // remove "/"

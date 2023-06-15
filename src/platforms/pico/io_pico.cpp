@@ -15,9 +15,10 @@ PicoIo::PicoIo() : Io() {
     p_sd = sd_get_by_num(0);
 }
 
-uint8_t *PicoIo::load(const std::string &romPath, size_t *size) {
+Io::FileBuffer PicoIo::load(const std::string &path, const Target &target) {
     uint8_t buffer[FLASH_SECTOR_SIZE];
-    FSIZE_t fs;
+    Io::FileBuffer fileBuffer;
+    FSIZE_t size;
     FRESULT fr;
     UINT br;
     FIL fp;
@@ -25,22 +26,24 @@ uint8_t *PicoIo::load(const std::string &romPath, size_t *size) {
     // mount sdcard
     bool res = mount();
     if (!res) {
-        return nullptr;
+        return {};
     }
 
     // open file for reading
-    fr = f_open(&fp, romPath.c_str(), FA_READ);
+    fr = f_open(&fp, path.c_str(), FA_READ);
     if (FR_OK != fr && FR_EXIST != fr) {
-        printf("PicoIo::load: f_open(%s) error: %s (%d)\n", romPath.c_str(), FRESULT_str(fr), fr);
+        printf("PicoIo::load: f_open(%s) error: %s (%d)\n", path.c_str(), FRESULT_str(fr), fr);
         unmount();
-        return nullptr;
+        return fileBuffer;
     }
 
     // get file size
-    fs = f_size(&fp);
+    size = f_size(&fp);
 
-    printf("\r\nPicoIo::load: %s, writing file to flash (size: %llu) ", romPath.c_str(), fs);
-    for (uint32_t i = 0; i < fs; i += FLASH_SECTOR_SIZE) {
+    stdio_flush();
+    printf("\r\nPicoIo::load: %s, writing file to flash (size: %llu) ", path.c_str(), size);
+
+    for (uint32_t i = 0; i < size; i += FLASH_SECTOR_SIZE) {
         printf(".");
         stdio_flush();
 
@@ -68,13 +71,14 @@ uint8_t *PicoIo::load(const std::string &romPath, size_t *size) {
     // unmount sdcard
     unmount();
 
-    // set file size if needed
-    if (*size) *size = fs;
+    // set return data
+    fileBuffer.data = (uint8_t *) (XIP_BASE + FLASH_TARGET_OFFSET);
+    fileBuffer.size = size;
 
-    stdio_flush();
     printf(" done\r\n");
+    stdio_flush();
 
-    return (uint8_t *) (XIP_BASE + FLASH_TARGET_OFFSET);
+    return fileBuffer;
 }
 
 bool PicoIo::mount() {

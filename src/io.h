@@ -15,13 +15,14 @@
 namespace mb {
     class Io {
     public:
+        enum Target {
+            Flash,
+            Ram
+        };
+
         struct FileBuffer {
             uint8_t *data = nullptr;
             size_t size = 0;
-
-            ~FileBuffer() {
-                if (data) free(data);
-            }
         };
 
         Io() = default;
@@ -30,7 +31,7 @@ namespace mb {
             printf("~Io()\n");
         }
 
-        virtual FileBuffer load(const std::string &path) { return {}; }
+        virtual FileBuffer load(const std::string &path, const Target &target = Flash) { return {}; }
 
         virtual std::vector<std::string> getDir(const std::string &path, int maxFiles = IO_MAX_FILES) { return {}; }
 

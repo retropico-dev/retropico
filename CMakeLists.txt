@@ -3,7 +3,15 @@ cmake_minimum_required(VERSION 3.13)
 # linux platform
 option(PLATFORM_LINUX "Linux target platform" OFF)
 
+# microboy default board is adafruit feather rp2040
+if (NOT PLATFORM_LINUX)
+    if (NOT PICO_BOARD)
+        set(PICO_BOARD "adafruit_feather_rp2040")
+    endif ()
+endif ()
+
 # pico options
+option(PICO_STDIO_UART "Pico UART debug" ON)
 option(PICO_DISPLAY_ST7789_PIO "Pico ST7789 display driver (pio)" ON)
 option(PICO_DISPLAY_ST7789_SPI "Pico ST7789 display driver (spi, slow)" OFF)
 option(PICO_DISPLAY_SSD1306 "Pico SSD1306 display driver (debug)" OFF)
@@ -50,10 +58,6 @@ set(PLATFORM_FLAGS
 include(src/cores/Peanut-GB/peanut-gb.cmake)
 # OK (WIP)
 include(src/cores/InfoNES/infones.cmake)
-# too slow...
-#include(src/cores/sameboy/sameboy.cmake)
-# too much memory usage
-#include(src/cores/Gearsystem/gearsystem.cmake)
 
 if (PLATFORM_LINUX)
     file(GLOB_RECURSE TEMP src/platforms/linux/*.c*)
@@ -91,7 +95,7 @@ else ()
             hardware_sleep
             hardware_pio
             hardware_dma
-            #hardware_flash
+            hardware_flash
             )
     # spi sdcard driver
     add_subdirectory(external/misc/no-OS-FatFS-SD-SPI-RPi-Pico/FatFs_SPI)
@@ -140,9 +144,14 @@ if (NOT PLATFORM_LINUX)
     endif ()
     # run from ram
     #pico_set_binary_type(${CMAKE_PROJECT_NAME}-gameboy copy_to_ram)
-    # enable usb output, disable uart output
-    pico_enable_stdio_usb(${CMAKE_PROJECT_NAME}-gameboy 1)
-    pico_enable_stdio_uart(${CMAKE_PROJECT_NAME}-gameboy 0)
+    # debug output
+    if (PICO_STDIO_UART)
+        pico_enable_stdio_usb(${CMAKE_PROJECT_NAME}-gameboy 0)
+        pico_enable_stdio_uart(${CMAKE_PROJECT_NAME}-gameboy 1)
+    else ()
+        pico_enable_stdio_usb(${CMAKE_PROJECT_NAME}-gameboy 1)
+        pico_enable_stdio_uart(${CMAKE_PROJECT_NAME}-gameboy 0)
+    endif ()
     # create map/bin/hex/uf2 file etc.
     pico_add_extra_outputs(${CMAKE_PROJECT_NAME}-gameboy)
 endif ()
@@ -168,9 +177,14 @@ if (NOT PLATFORM_LINUX)
     endif ()
     # run from ram (no go with InfoNES)
     #pico_set_binary_type(${CMAKE_PROJECT_NAME}-nes copy_to_ram)
-    # enable usb output, disable uart output
-    pico_enable_stdio_usb(${CMAKE_PROJECT_NAME}-nes 1)
-    pico_enable_stdio_uart(${CMAKE_PROJECT_NAME}-nes 0)
+    # debug output
+    if (PICO_STDIO_UART)
+        pico_enable_stdio_usb(${CMAKE_PROJECT_NAME}-gameboy 0)
+        pico_enable_stdio_uart(${CMAKE_PROJECT_NAME}-gameboy 1)
+    else ()
+        pico_enable_stdio_usb(${CMAKE_PROJECT_NAME}-gameboy 1)
+        pico_enable_stdio_uart(${CMAKE_PROJECT_NAME}-gameboy 0)
+    endif ()
     # create map/bin/hex/uf2 file etc.
     pico_add_extra_outputs(${CMAKE_PROJECT_NAME}-nes)
 endif ()

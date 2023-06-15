@@ -30,8 +30,10 @@ PicoPlatform::PicoPlatform() : Platform() {
     // initialise USB serial connection for debugging
     stdio_init_all();
 #ifndef NDEBUG
+#ifndef LIB_PICO_STDIO_UART
     // wait for usb serial
     while (!stdio_usb_connected()) { sleep_ms(100); }
+#endif
 #endif
     printf("\r\nPicoPlatform: pico\r\n");
 

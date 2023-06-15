@@ -209,20 +209,22 @@ PeanutGB::PeanutGB(Platform *p) : Core(p) {
 }
 
 bool PeanutGB::loadRom(const std::string &path) {
-    size_t size;
-    uint8_t *rom = p_platform->getIo()->load(path, &size);
-    if (!rom) {
+    Io::FileBuffer fileBuffer = p_platform->getIo()->load(path);
+    if (!fileBuffer.data) {
         printf("PeanutGB::loadRom: failed to load rom (%s)\r\n", path.c_str());
         return false;
     }
 
-    return loadRom(rom, size);
+    printf("PeanutGB::loadRom: data: %p, size: %i\r\n",
+           fileBuffer.data, fileBuffer.size);
+
+    return loadRom(fileBuffer);
 }
 
-bool PeanutGB::loadRom(const uint8_t *buffer, size_t size) {
+bool PeanutGB::loadRom(Io::FileBuffer file) {
     enum gb_init_error_e ret;
 
-    gb_rom = buffer;
+    gb_rom = file.data;
 #ifdef ENABLE_RAM_BANK
     memcpy(rom_bank0, buffer, sizeof(rom_bank0));
 #endif

@@ -32,8 +32,8 @@ int main() {
     int frames = 0;
 
     auto platform = new MBPlatform();
-    auto ui = new Ui(platform);
-#if 1
+    //auto ui = new Ui(platform);
+#if 0
     // main loop
     while (ui->loop()) {
         // fps
@@ -71,7 +71,7 @@ int main() {
     }
 #endif
 
-    delete (ui);
+    //delete (ui);
     delete (platform);
 
     return 0;

@@ -14,7 +14,7 @@
 #define LCD_PIN_RESET   13  // GPIO
 
 // SPI SDCARD PINS
-#define SD_PIN_CS       1   // SPI0 CSn
+#define SD_PIN_CS       6   // SPI0 CSn
 #define SD_PIN_CLK      18  // SPI0 SCK
 #define SD_PIN_MOSI     19  // SPI0 TX
 #define SD_PIN_MISO     20  // SPI0 RX

@@ -25,7 +25,7 @@ static spi_t spis[] = {  // One for each SPI.
                 .miso_gpio = SD_PIN_MISO,   // GPIO
                 .mosi_gpio = SD_PIN_MOSI,
                 .sck_gpio = SD_PIN_CLK,
-                .baud_rate = 12500 * 1000,
+                .baud_rate = 5000 * 1000,
                 //.baud_rate = 25 * 1000 * 1000, // Actual frequency: 20833333.
         }
 };
