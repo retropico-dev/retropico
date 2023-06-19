@@ -46,7 +46,7 @@ namespace mb {
         virtual void flip() {}
 
         // clear the display
-        void clear(uint16_t color = White);
+        void clear(uint16_t color = Black);
 
         // draw a pixel to the display (slow)
         void drawPixel(int16_t x, int16_t y, uint16_t color) override;
