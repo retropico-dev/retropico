@@ -97,6 +97,10 @@ bool Ui::loop() {
             if (index > m_files.size() - 1) index = (int) m_files.size() - 1;
             setSelection(index);
         }
+    } else if (buttons & Input::Button::B1) {
+        m_rom = p_platform->getIo()->getRomPath() + "/" + m_files[m_file_index];
+        p_platform->getInput()->setRepeatDelay(0);
+        return false;
     }
 
     // restore repeat delay for game

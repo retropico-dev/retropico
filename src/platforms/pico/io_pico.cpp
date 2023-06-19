@@ -81,6 +81,12 @@ Io::FileBuffer PicoIo::load(const std::string &path, const Target &target) {
     return fileBuffer;
 }
 
+// TODO
+std::vector<std::string> PicoIo::getDir(const std::string &path, int maxFiles) {
+    std::vector<std::string> files;
+    return files;
+}
+
 bool PicoIo::mount() {
     FRESULT fr = f_mount(&p_sd->fatfs, p_sd->pcName, 1);
     if (FR_OK != fr) {

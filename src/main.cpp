@@ -32,8 +32,9 @@ int main() {
     int frames = 0;
 
     auto platform = new MBPlatform();
-    //auto ui = new Ui(platform);
-#if 0
+    /*
+    auto ui = new Ui(platform);
+
     // main loop
     while (ui->loop()) {
         // fps
@@ -45,18 +46,23 @@ int main() {
         // increment frames for fps counter
         frames++;
     }
-#else
+
+    std::string romPath = ui->getRom();
+    */
 #ifdef MB_GB
-    std::string romPath = "/roms/gameboy/rom.gb";
     auto core = new PeanutGB(platform);
+    std::string romPath = "/roms/gameboy/rom.gb";
 #else
-    std::string romPath = "/roms/nes/rom.nes";
     auto core = new InfoNES(platform);
+    std::string romPath = "/roms/nes/rom.nes";
 #endif
     if (!core->loadRom(romPath)) {
         stdio_flush();
         while (true) { __wfi(); }
     }
+
+    // clear...
+    platform->getDisplay()->clear();
 
     // emulation loop
     while (core->loop()) {
@@ -69,7 +75,6 @@ int main() {
         // increment frames for fps counter
         frames++;
     }
-#endif
 
     //delete (ui);
     delete (platform);

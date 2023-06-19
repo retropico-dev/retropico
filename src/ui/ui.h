@@ -23,10 +23,13 @@ namespace mb {
 
         explicit Ui(Platform *platform);
 
+        std::string getRom() { return m_rom; };
+
         bool loop();
 
     private:
         Platform *p_platform;
+        std::string m_rom;
         std::vector<std::string> m_files;
         int m_max_lines = 0;
         int m_line_height = 0;
