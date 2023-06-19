@@ -92,7 +92,7 @@ static Utility::Vec2i drawingPos{};
 
 void in_ram(core1_lcd_draw_line)(const uint_fast8_t line) {
     auto display = gb_priv.gb->getPlatform()->getDisplay();
-    //display->drawPixelLine(drawingPos.x, drawingPos.y + line, LCD_WIDTH, pixels_buffer);
+    display->setCursor(drawingPos.x, drawingPos.y + line);
     display->drawPixelLine(pixels_buffer, LCD_WIDTH);
 
     if (line == LCD_HEIGHT - 1) {
@@ -215,7 +215,7 @@ bool PeanutGB::loadRom(const std::string &path) {
         return false;
     }
 
-    printf("PeanutGB::loadRom: data: %p, size: %i\r\n",
+    printf("PeanutGB::loadRom: data: %p, size: %zu\r\n",
            fileBuffer.data, fileBuffer.size);
 
     return loadRom(fileBuffer);
@@ -269,17 +269,6 @@ bool in_ram(PeanutGB::loop)() {
     //if (frames % 4 == 0) gameboy.direct.joypad = 0xFF;
     gameboy.direct.joypad = 0xFF;
 
-#ifndef LINUX
-    int input = getchar_timeout_us(0);
-    switch (input) {
-        case 's':
-            gameboy.direct.joypad_bits.start = 0;
-            break;
-        default:
-            break;
-    }
-#endif
-
     // handle input
     uint16_t buttons = p_platform->getInput()->getButtons();
     if (buttons > 0 && !(buttons & mb::Input::Button::DELAY)) {
@@ -315,6 +304,10 @@ bool in_ram(PeanutGB::loop)() {
             p_platform->getInput()->setRepeatDelay(0);
         }
     }
+
+#if !defined(LINUX) && !defined(NDEBUG)
+    if (getchar_timeout_us(0) == 's') gameboy.direct.joypad_bits.start = 0;
+#endif
 
     return true;
 }

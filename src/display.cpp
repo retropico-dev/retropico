@@ -45,11 +45,11 @@ void Display::drawPixel(int16_t x, int16_t y, uint16_t color) {
 // faster
 void Display::drawPixelLine(const uint16_t *pixels, uint16_t width, const Format &format) {
     if (format == Format::RGB565) {
-        for (int_fast16_t i = 0; i < width; i++) {
+        for (uint_fast16_t i = 0; i < width; i++) {
             setPixel(pixels[i]);
         }
     } else {
-        for (int_fast16_t i = 0; i < width; i++) {
+        for (uint_fast16_t i = 0; i < width; i++) {
             uint_fast16_t p = pixels[i];
             uint_fast8_t red = (p >> 8) & 0xF;
             uint_fast8_t green = (p >> 4) & 0xF;
@@ -74,15 +74,18 @@ void Display::drawSurface(Surface *surface, const Utility::Vec2i &pos, const Uti
             drawPixelLine((uint16_t *) (pixels + y * pitch), width);
         }
     } else {
+#if 1
         // nearest-neighbor scaling
         int x, y;
         auto pitch = surface->getPitch();
         auto bpp = surface->getBpp();
         auto pixels = surface->getPixels();
         auto srcSize = surface->getSize();
-        int xRatio = (srcSize.x << 16) / size.x;
-        int yRatio = (srcSize.y << 16) / size.y;
+        int xRatio = (srcSize.x << 16) / size.x + 1;
+        int yRatio = (srcSize.y << 16) / size.y + 1;
+
         setCursor(pos.x, pos.y);
+
         for (uint8_t i = 0; i < size.y; i++) {
             for (uint8_t j = 0; j < size.x; j++) {
                 x = (j * xRatio) >> 16;
@@ -96,8 +99,55 @@ void Display::drawSurface(Surface *surface, const Utility::Vec2i &pos, const Uti
                 drawPixelLine(m_line_buffer, size.x);
             }
         }
+#else
+        // bilinear interpolation
+        int x_ratio = (srcWidth << 16) / dstWidth + 1;
+        int y_ratio = (srcHeight << 16) / dstHeight + 1;
+        int x, y, x_diff, y_diff;
+        uint16_t a, b, c, d;
+
+        for (int i = 0; i < dstHeight; i++) {
+            y = (i * y_ratio) >> 16;
+            y_diff = ((i * y_ratio) >> 8) & 0xFF;
+
+            for (int j = 0; j < dstWidth; j++) {
+                x = (j * x_ratio) >> 16;
+                x_diff = ((j * x_ratio) >> 8) & 0xFF;
+
+                a = srcBuffer[(y * srcWidth) + x];
+                b = srcBuffer[(y * srcWidth) + x + 1];
+                c = srcBuffer[((y + 1) * srcWidth) + x];
+                d = srcBuffer[((y + 1) * srcWidth) + x + 1];
+
+                uint16_t red = (((a & 0xF800) >> 11) * (256 - x_diff) * (256 - y_diff) +
+                                ((b & 0xF800) >> 11) * x_diff * (256 - y_diff) +
+                                ((c & 0xF800) >> 11) * y_diff * (256 - x_diff) +
+                                ((d & 0xF800) >> 11) * x_diff * y_diff) >> 16;
+
+                uint16_t green = (((a & 0x07E0) >> 5) * (256 - x_diff) * (256 - y_diff) +
+                                  ((b & 0x07E0) >> 5) * x_diff * (256 - y_diff) +
+                                  ((c & 0x07E0) >> 5) * y_diff * (256 - x_diff) +
+                                  ((d & 0x07E0) >> 5) * x_diff * y_diff) >> 16;
+
+                uint16_t blue = ((a & 0x001F) * (256 - x_diff) * (256 - y_diff) +
+                                 (b & 0x001F) * x_diff * (256 - y_diff) +
+                                 (c & 0x001F) * y_diff * (256 - x_diff) +
+                                 (d & 0x001F) * x_diff * y_diff) >> 16;
+
+                //drawPixel(j, i, pixel);
+                m_line_buffer[j + pos.x] = (red << 11) | (green << 5) | blue;
+            }
+            if (size.x == m_size.x) {
+                drawPixelLine(m_line_buffer, size.x);
+            } else {
+                setCursor(pos.x, i + pos.y);
+                drawPixelLine(m_line_buffer, size.x);
+            }
+        }
+#endif
     }
 }
+
 
 void Display::clear(uint16_t color) {
     setCursor(0, 0);
@@ -106,4 +156,8 @@ void Display::clear(uint16_t color) {
             setPixel(color);
         }
     }
+}
+
+Display::~Display() {
+    free(m_line_buffer);
 }

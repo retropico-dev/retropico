@@ -34,7 +34,7 @@ namespace mb {
         explicit Display(const Utility::Vec2i &size = {240, 240});
 
         // destroy the display (hardware dependant, to be implemented)
-        ~Display() override = default;
+        ~Display() override;
 
         // set the position inside pixel buffer (hardware dependant, to be implemented)
         virtual void setCursor(uint16_t x, uint16_t y) {};
