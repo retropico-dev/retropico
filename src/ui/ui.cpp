@@ -98,7 +98,7 @@ bool Ui::loop() {
             setSelection(index);
         }
     } else if (buttons & Input::Button::B1) {
-        m_rom = p_platform->getIo()->getRomPath() + "/" + m_files[m_file_index];
+        m_rom = p_platform->getIo()->getRomPath() + "/" + m_files[m_file_index + m_highlight_index];
         p_platform->getInput()->setRepeatDelay(0);
         return false;
     }

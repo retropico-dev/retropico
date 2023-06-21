@@ -1,17 +1,16 @@
 cmake_minimum_required(VERSION 3.13)
+#set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON")
 
 # linux platform
 option(PLATFORM_LINUX "Linux target platform" OFF)
 
 # microboy default board is adafruit feather rp2040
-if (NOT PLATFORM_LINUX)
-    if (NOT PICO_BOARD)
-        set(PICO_BOARD "adafruit_feather_rp2040")
-    endif ()
+if (NOT PLATFORM_LINUX AND NOT PICO_BOARD)
+    set(PICO_BOARD "adafruit_feather_rp2040")
 endif ()
 
 # pico options
-option(PICO_STDIO_UART "Pico UART debug" ON)
+option(PICO_STDIO_UART "Pico UART debug" OFF)
 option(PICO_DISPLAY_ST7789_PIO "Pico ST7789 display driver (pio)" ON)
 option(PICO_DISPLAY_ST7789_SPI "Pico ST7789 display driver (spi, slow)" OFF)
 option(PICO_DISPLAY_SSD1306 "Pico SSD1306 display driver (debug)" OFF)
@@ -143,7 +142,7 @@ if (NOT PLATFORM_LINUX)
                 ${CMAKE_SOURCE_DIR}/src/platforms/pico/display/st7789_pio/st7789_lcd.pio)
     endif ()
     # run from ram
-    #pico_set_binary_type(${CMAKE_PROJECT_NAME}-gameboy copy_to_ram)
+    pico_set_binary_type(${CMAKE_PROJECT_NAME}-gameboy copy_to_ram)
     # debug output
     if (PICO_STDIO_UART)
         pico_enable_stdio_usb(${CMAKE_PROJECT_NAME}-gameboy 0)

@@ -7,12 +7,14 @@
 
 #include <string>
 #include "platform.h"
+#include "ui.h"
 
 namespace mb {
     class Core {
     public:
-        explicit Core(Platform *platform) {
+        explicit Core(Platform *platform/*, Ui *ui*/) {
             p_platform = platform;
+            //p_ui = ui;
         }
 
         virtual ~Core() = default;
@@ -26,7 +28,8 @@ namespace mb {
         virtual Platform *getPlatform() { return p_platform; }
 
     protected:
-        Platform *p_platform = nullptr;
+        Platform *p_platform;
+        //Ui *p_ui;
     };
 }
 

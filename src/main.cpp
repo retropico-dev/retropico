@@ -48,20 +48,20 @@ int main() {
     }
 
     std::string romPath = ui->getRom();
-    */
+     */
+
 #ifdef MB_GB
-    auto core = new PeanutGB(platform);
     std::string romPath = "/roms/gameboy/rom.gb";
+    auto core = new PeanutGB(platform);
 #else
     auto core = new InfoNES(platform);
-    std::string romPath = "/roms/nes/rom.nes";
 #endif
     if (!core->loadRom(romPath)) {
         stdio_flush();
         while (true) { __wfi(); }
     }
 
-    // clear...
+    // clear ui...
     platform->getDisplay()->clear();
 
     // emulation loop

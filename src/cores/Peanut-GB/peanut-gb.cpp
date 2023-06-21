@@ -114,25 +114,35 @@ void in_ram(core1_lcd_flip)(const uint_fast8_t bufferIndex) {
     display->drawSurface(gb_priv.gb->getSurface(bufferIndex), dstPos, dstSize);
     display->flip();
 
-    __atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);
+    if (!gb_priv.gb->isFrameSkipEnabled()) {
+        __atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);
+    }
 }
 
 _Noreturn void in_ram(main_core1)() {
     union core_cmd cmd{};
+    bool fs = gb_priv.gb->isFrameSkipEnabled();
+    bool ret = true;
 
     // handle commands coming from core0
     while (true) {
-        cmd.full = multicore_fifo_pop_blocking();
-        switch (cmd.cmd) {
-            case CORE_CMD_LCD_LINE:
-                core1_lcd_draw_line(cmd.data);
-                break;
-            case CORE_CMD_LCD_FLIP:
-                core1_lcd_flip(cmd.data);
-                break;
-            case CORE_CMD_NOP:
-            default:
-                break;
+        if (fs) {
+            ret = multicore_fifo_pop_timeout_us(1000, &cmd.full);
+        } else {
+            cmd.full = multicore_fifo_pop_blocking();
+        }
+        if (ret) {
+            switch (cmd.cmd) {
+                case CORE_CMD_LCD_LINE:
+                    core1_lcd_draw_line(cmd.data);
+                    break;
+                case CORE_CMD_LCD_FLIP:
+                    core1_lcd_flip(cmd.data);
+                    break;
+                case CORE_CMD_NOP:
+                default:
+                    break;
+            }
         }
     }
 
@@ -140,18 +150,20 @@ _Noreturn void in_ram(main_core1)() {
 }
 
 void in_ram(lcd_draw_line)(struct gb_s *gb, const uint8_t pixels[LCD_WIDTH], const uint_fast8_t line) {
-    if (gb_priv.gb->isBuffered()) {
+    if (gb_priv.gb->isScalingEnabled()) {
         uint8_t bufferIndex = gb_priv.gb->getBufferIndex();
-
+        auto surface = gb_priv.gb->getSurface(bufferIndex);
         for (uint_fast8_t x = 0; x < LCD_WIDTH; x++) {
-            gb_priv.gb->getSurface(bufferIndex)->setPixel(
-                    x, line, palette[(pixels[x] & LCD_PALETTE_ALL) >> 4][pixels[x] & 3]);
+            surface->setPixel(x, line,
+                              palette[(pixels[x] & LCD_PALETTE_ALL) >> 4][pixels[x] & 3]);
         }
 
         if (line == LCD_HEIGHT - 1) {
-            // wait until previous surface flip complete
-            while (__atomic_load_n(&lcd_line_busy, __ATOMIC_SEQ_CST))
-                tight_loop_contents();
+            if (!gb_priv.gb->isFrameSkipEnabled()) {
+                // wait until previous surface flip complete
+                while (__atomic_load_n(&lcd_line_busy, __ATOMIC_SEQ_CST))
+                    tight_loop_contents();
+            }
 
             union core_cmd cmd{};
             cmd.cmd = CORE_CMD_LCD_FLIP;
@@ -162,8 +174,12 @@ void in_ram(lcd_draw_line)(struct gb_s *gb, const uint8_t pixels[LCD_WIDTH], con
             core1_lcd_flip(cmd.data);
 #else
             // send cmd
-            __atomic_store_n(&lcd_line_busy, 1, __ATOMIC_SEQ_CST);
-            multicore_fifo_push_blocking(cmd.full);
+            if (!gb_priv.gb->isFrameSkipEnabled()) {
+                __atomic_store_n(&lcd_line_busy, 1, __ATOMIC_SEQ_CST);
+                multicore_fifo_push_blocking(cmd.full);
+            } else {
+                multicore_fifo_push_timeout_us(cmd.full, 1000);
+            }
 #endif
         }
     } else {
@@ -190,9 +206,11 @@ void in_ram(lcd_draw_line)(struct gb_s *gb, const uint8_t pixels[LCD_WIDTH], con
 
 PeanutGB::PeanutGB(Platform *p) : Core(p) {
     // create some render surfaces (double buffering)
-    if (m_doubleBuffer) {
+    if (m_scaling) {
         p_surface[0] = new Surface({LCD_WIDTH, LCD_HEIGHT});
+#if MB_DOUBLE_BUFFER
         p_surface[1] = new Surface({LCD_WIDTH, LCD_HEIGHT});
+#endif
     }
 
     // cache drawing position
@@ -313,7 +331,7 @@ bool in_ram(PeanutGB::loop)() {
 }
 
 PeanutGB::~PeanutGB() {
-    if (m_doubleBuffer) {
+    if (m_scaling) {
         delete (p_surface[0]);
         delete (p_surface[1]);
     }
