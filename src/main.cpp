@@ -21,8 +21,10 @@
 #include "ui.h"
 #ifdef MB_GB
 #include "peanut-gb.h"
+#define MBCore PeanutGB
 #elif MB_NES
 #include "infones.h"
+#define MBCore InfoNES
 #endif
 
 using namespace mb;
@@ -32,7 +34,6 @@ int main() {
     int frames = 0;
 
     auto platform = new MBPlatform();
-    /*
     auto ui = new Ui(platform);
 
     // main loop
@@ -48,14 +49,7 @@ int main() {
     }
 
     std::string romPath = ui->getRom();
-     */
-
-#ifdef MB_GB
-    std::string romPath = "/roms/gameboy/rom.gb";
-    auto core = new PeanutGB(platform);
-#else
-    auto core = new InfoNES(platform);
-#endif
+    auto core = new MBCore(platform);
     if (!core->loadRom(romPath)) {
         stdio_flush();
         while (true) { __wfi(); }

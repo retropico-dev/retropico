@@ -42,6 +42,38 @@ uint16_t PicoInput::getButtons() {
         if (map.pin != -1) m_buttons |= gpio_get(map.pin) ? 0 : map.button;
     }
 
+#ifndef NDEBUG
+    int c = getchar_timeout_us(0);
+    switch (c) {
+        case 49: // NUMPAD 1
+            m_buttons |= B1;
+            break;
+        case 50: // NUMPAD 2
+            m_buttons |= B2;
+            break;
+        case 52: // NUMPAD 4
+            m_buttons |= SELECT;
+            break;
+        case 53: // NUMPAD 5
+            m_buttons |= START;
+            break;
+        case 65: // ARROW UP
+            m_buttons |= UP;
+            break;
+        case 66: // ARROW DOWN
+            m_buttons |= DOWN;
+            break;
+        case 67: // ARROW RIGHT
+            m_buttons |= RIGHT;
+            break;
+        case 68: // ARROW LEFT
+            m_buttons |= LEFT;
+            break;
+        default:
+            break;
+    }
+#endif
+
     // handle repeat delay
     return Input::getButtons();
 }

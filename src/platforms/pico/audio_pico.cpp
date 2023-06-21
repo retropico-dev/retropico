@@ -16,7 +16,7 @@ void PicoAudio::setup(uint16_t rate, uint16_t samples, uint8_t channels) {
     m_i2s_config = {
             .data_pin = AUDIO_PIN_DATA,
             .clock_pin_base = AUDIO_PIN_CLOCK,
-            .dma_channel = 0,
+            .dma_channel = 2,
             .pio_sm = 1
     };
 

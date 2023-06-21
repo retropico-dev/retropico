@@ -244,10 +244,6 @@ void in_ram(InfoNES_PadState)(DWORD *pdwPad1, DWORD *pdwPad2, DWORD *pdwSystem) 
           (buttons & mb::Input::Button::SELECT ? SELECT : 0) |
           (buttons & mb::Input::Button::START ? START : 0) |
           0;
-
-#if !defined(LINUX) && !defined(NDEBUG)
-    if (getchar_timeout_us(0) == 's') pad = START;
-#endif
 }
 
 int InfoNES_Menu() {

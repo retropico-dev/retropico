@@ -10,7 +10,7 @@ if (NOT PLATFORM_LINUX AND NOT PICO_BOARD)
 endif ()
 
 # pico options
-option(PICO_STDIO_UART "Pico UART debug" OFF)
+option(PICO_STDIO_UART "Pico UART debug" ON)
 option(PICO_DISPLAY_ST7789_PIO "Pico ST7789 display driver (pio)" ON)
 option(PICO_DISPLAY_ST7789_SPI "Pico ST7789 display driver (spi, slow)" OFF)
 option(PICO_DISPLAY_SSD1306 "Pico SSD1306 display driver (debug)" OFF)

@@ -81,9 +81,34 @@ Io::FileBuffer PicoIo::load(const std::string &path, const Target &target) {
     return fileBuffer;
 }
 
-// TODO
 std::vector<std::string> PicoIo::getDir(const std::string &path, int maxFiles) {
     std::vector<std::string> files;
+    DIR dir;
+    FILINFO fno;
+    FRESULT fr;
+
+    // mount sdcard
+    bool res = mount();
+    if (!res) {
+        return files;
+    }
+
+    fr = f_opendir(&dir, path.c_str());
+    if (fr == FR_OK) {
+        for (;;) {
+            if (files.size() >= maxFiles) break;
+            fr = f_readdir(&dir, &fno);
+            if (fr != FR_OK || fno.fname[0] == 0) break;
+            if (!(fno.fattrib & AM_DIR)) {
+                files.emplace_back(fno.fname);
+            }
+        }
+        f_closedir(&dir);
+    }
+
+    // unmount sdcard
+    unmount();
+
     return files;
 }
 

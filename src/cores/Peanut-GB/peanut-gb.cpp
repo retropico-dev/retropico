@@ -323,10 +323,6 @@ bool in_ram(PeanutGB::loop)() {
         }
     }
 
-#if !defined(LINUX) && !defined(NDEBUG)
-    if (getchar_timeout_us(0) == 's') gameboy.direct.joypad_bits.start = 0;
-#endif
-
     return true;
 }
 
