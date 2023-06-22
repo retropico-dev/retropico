@@ -7,6 +7,10 @@
 
 #include <cstdint>
 #include <string>
+#include <malloc.h>
+
+extern "C" char __StackLimit;
+extern "C" char __bss_end__;
 
 namespace mb {
     class Utility {
@@ -43,6 +47,27 @@ namespace mb {
         static std::string removeExt(const std::string &str);
 
         static std::string baseName(const std::string &path);
+
+        static inline int getTotalHeap() {
+#ifdef LINUX
+            return 0;
+#else
+            return &__StackLimit - &__bss_end__;
+#endif
+        }
+
+        static inline int getUsedHeap() {
+#ifdef LINUX
+            return 0;
+#else
+            struct mallinfo m = mallinfo();
+            return m.uordblks;
+#endif
+        }
+
+        static inline int getFreeHeap() {
+            return getTotalHeap() - getUsedHeap();
+        }
     };
 }
 

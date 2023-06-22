@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-#define IO_MAX_FILES 1024
+#define IO_MAX_FILES 512
 
 namespace mb {
     class Io {

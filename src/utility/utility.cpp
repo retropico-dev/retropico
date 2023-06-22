@@ -2,6 +2,7 @@
 // Created by cpasjuste on 30/05/23.
 //
 
+#include <malloc.h>
 #include "utility.h"
 
 using namespace mb;

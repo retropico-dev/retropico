@@ -28,12 +28,12 @@ static Core *core;
 static bool quit = false;
 static bool frameLoaded = false;
 #define LINE_BUFFER_COUNT 16
-static WORD lineBufferRGB444[LINE_BUFFER_COUNT][NES_DISP_WIDTH];
+static WORD in_ram(lineBufferRGB444)[LINE_BUFFER_COUNT][NES_DISP_WIDTH];
 static uint8_t lineBufferIndex = 0;
 extern int SpriteJustHit;
 static int lcd_line_busy = 0;
 // audio
-static uint16_t audio_buffer[1024];
+static uint16_t in_ram(audio_buffer)[1024];
 static int audio_buffer_index = 0;
 
 int InfoNES_LoadSRAM(const std::string &path);
@@ -258,10 +258,9 @@ void in_ram(InfoNES_PadState)(DWORD *pdwPad1, DWORD *pdwPad2, DWORD *pdwSystem) 
 
     uint16_t buttons = platform->getInput()->getButtons();
 
-    // exit requested (linux)
-    //if (buttons & Input::Button::START && buttons & Input::Button::SELECT
-    //   || buttons & mb::Input::Button::QUIT) {
-    if (getchar_timeout_us(0) == 'q') {
+    // exit requested
+    if (buttons & Input::Button::START && buttons & Input::Button::SELECT
+        || buttons & mb::Input::Button::QUIT) {
         InfoNES_SaveSRAM(core->getSramPath());
         InfoNES_Fin();
         return;

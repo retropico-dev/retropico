@@ -40,7 +40,10 @@ int main() {
     while (ui->loop()) {
         // fps
         if (clock.getElapsedTime().asSeconds() >= 1) {
-            printf("fps: %i\r\n", (int) ((float) frames / clock.restart().asSeconds()));
+            auto percent = (uint16_t) (((float) Utility::getUsedHeap() / (float) Utility::getTotalHeap()) * 100);
+            printf("fps: %i, heap: %i/%i (%i%%)\r\n",
+                   (int) ((float) frames / clock.restart().asSeconds()),
+                   Utility::getUsedHeap(), Utility::getTotalHeap(), percent);
             frames = 0;
         }
 
@@ -68,7 +71,10 @@ int main() {
 
         // fps
         if (clock.getElapsedTime().asSeconds() >= 1) {
-            printf("fps: %i\r\n", (int) ((float) frames / clock.restart().asSeconds()));
+            auto percent = (uint16_t) (((float) Utility::getUsedHeap() / (float) Utility::getTotalHeap()) * 100);
+            printf("fps: %i, heap: %i/%i (%i%%)\r\n",
+                   (int) ((float) frames / clock.restart().asSeconds()),
+                   Utility::getUsedHeap(), Utility::getTotalHeap(), percent);
             frames = 0;
         }
 

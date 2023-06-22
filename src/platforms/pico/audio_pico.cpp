@@ -47,7 +47,7 @@ void PicoAudio::setup(uint16_t rate, uint16_t samples, uint8_t channels) {
     printf("\r\n");
 }
 
-void PicoAudio::play(const void *data, int samples) {
+void in_ram(PicoAudio::play)(const void *data, int samples) {
     auto buffer = take_audio_buffer(p_producer_pool, true);
     auto sampleBuffer = (int16_t *) buffer->buffer->bytes;
     if (m_volume == 0) {

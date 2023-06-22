@@ -227,7 +227,7 @@ PeanutGB::PeanutGB(Platform *p) : Core(p) {
 }
 
 bool PeanutGB::loadRom(const std::string &path) {
-    Io::FileBuffer fileBuffer = p_platform->getIo()->load(path);
+    Io::FileBuffer fileBuffer = p_platform->getIo()->read(path, Io::Target::FlashRomData);
     if (!fileBuffer.data) {
         printf("PeanutGB::loadRom: failed to load rom (%s)\r\n", path.c_str());
         return false;
