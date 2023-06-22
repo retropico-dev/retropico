@@ -9,7 +9,8 @@
 #include <string>
 #include <vector>
 
-#define IO_MAX_FILES 512
+#define IO_MAX_FILES 2048
+#define IO_MAX_PATH 128
 
 namespace mb {
     class Io {
@@ -26,6 +27,15 @@ namespace mb {
             size_t size = 0;
         };
 
+        struct FileListBuffer {
+            uint8_t *data = nullptr;
+            int count = 0;
+
+            [[nodiscard]] char *get(int idx) const {
+                return (char *) &data[idx * IO_MAX_PATH];
+            }
+        };
+
         Io() = default;
 
         virtual ~Io() {
@@ -36,7 +46,7 @@ namespace mb {
 
         virtual bool write(const std::string &path, const FileBuffer &fileBuffer) { return false; }
 
-        virtual std::vector<std::string> getDir(const std::string &path, int maxFiles = IO_MAX_FILES) { return {}; }
+        virtual FileListBuffer getDir(const std::string &path) { return {}; }
 
         virtual void createDir(const std::string &path) {};
 

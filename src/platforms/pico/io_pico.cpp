@@ -140,35 +140,66 @@ bool PicoIo::write(const std::string &path, const Io::FileBuffer &fileBuffer) {
     return res;
 }
 
-std::vector<std::string> PicoIo::getDir(const std::string &path, int maxFiles) {
-    std::vector<std::string> files;
-    DIR dir;
+// static getDir filename allocation
+static char m_files_buffer[FLASH_SECTOR_SIZE / IO_MAX_PATH][IO_MAX_PATH];
+
+// load array of filenames to flash for memory reduction
+Io::FileListBuffer PicoIo::getDir(const std::string &path) {
+    Io::FileListBuffer fileListBuffer;
+    uint32_t offsetBase = m_flash_offset_misc;
+    uint32_t fileCountTotal = 0;
+    uint32_t fileCountCurrent = 0;
     FILINFO fno;
     FRESULT fr;
+    DIR dir;
 
     // mount sdcard
     bool res = mount();
     if (!res) {
-        return files;
+        return fileListBuffer;
     }
 
     fr = f_opendir(&dir, path.c_str());
     if (fr == FR_OK) {
+        // 32 x 128 chars max
+        uint32_t maxFiles = FLASH_SECTOR_SIZE / IO_MAX_PATH;
+        memset(m_files_buffer, 0, sizeof(m_files_buffer));
+
         for (;;) {
-            if (files.size() >= maxFiles) break;
+            if (fileCountTotal >= IO_MAX_FILES) break;
+
             fr = f_readdir(&dir, &fno);
             if (fr != FR_OK || fno.fname[0] == 0) break;
+
             if (!(fno.fattrib & AM_DIR)) {
-                files.emplace_back(fno.fname);
+                strncpy(m_files_buffer[fileCountCurrent], fno.fname, IO_MAX_PATH - 1);
+                fileCountTotal++;
+                fileCountCurrent++;
+                if (fileCountCurrent == maxFiles) { // FLASH_SECTOR_SIZE
+                    // disable interrupts...
+                    uint32_t ints = save_and_disable_interrupts();
+                    // flash
+                    flash_range_erase(m_flash_offset_misc, FLASH_SECTOR_SIZE);
+                    flash_range_program(m_flash_offset_misc, (uint8_t *) m_files_buffer, FLASH_SECTOR_SIZE);
+                    // restore interrupts...
+                    restore_interrupts(ints);
+                    m_flash_offset_misc += FLASH_SECTOR_SIZE;
+                    fileCountCurrent = 0;
+                    memset(m_files_buffer, 0, sizeof(m_files_buffer));
+                }
             }
         }
+
         f_closedir(&dir);
     }
 
     // unmount sdcard
     unmount();
 
-    return files;
+    fileListBuffer.data = (uint8_t *) (XIP_BASE + offsetBase);
+    fileListBuffer.count = (int) fileCountTotal;
+
+    return fileListBuffer;
 }
 
 void PicoIo::createDir(const std::string &path) {

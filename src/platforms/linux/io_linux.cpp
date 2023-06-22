@@ -66,28 +66,38 @@ bool LinuxIo::write(const std::string &path, const Io::FileBuffer &fileBuffer) {
     return true;
 }
 
-std::vector<std::string> LinuxIo::getDir(const std::string &path, int maxFiles) {
+static char m_files_buffer[IO_MAX_FILES][IO_MAX_PATH];
+
+Io::FileListBuffer LinuxIo::getDir(const std::string &path) {
     struct stat st{};
     struct dirent *dir;
-    std::vector<std::string> files;
+    int fileCount = 0;
+    Io::FileListBuffer fileListBuffer;
+
     // remove "/"
     std::string newPath = path;
     if (newPath[0] == '/') newPath.erase(0, 1);
 
+    memset(m_files_buffer, 0, sizeof(m_files_buffer));
+
     DIR *d = opendir(newPath.c_str());
     if (d) {
         while ((dir = readdir(d)) != nullptr) {
-            if (files.size() >= maxFiles) break;
+            if (fileCount >= IO_MAX_FILES) break;
 
             std::string filePath = newPath + "/" + dir->d_name;
             if (stat(filePath.c_str(), &st) == 0 && S_ISREG(st.st_mode)) {
-                files.emplace_back(dir->d_name);
+                strncpy(m_files_buffer[fileCount], dir->d_name, IO_MAX_PATH - 1);
+                fileCount++;
             }
         }
         closedir(d);
     }
 
-    return files;
+    fileListBuffer.data = (uint8_t *) m_files_buffer;
+    fileListBuffer.count = fileCount;
+
+    return fileListBuffer;
 }
 
 void LinuxIo::createDir(const std::string &path) {

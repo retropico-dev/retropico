@@ -27,18 +27,18 @@ namespace mb {
 
         bool loop();
 
+        void flip();
+
     private:
         Platform *p_platform;
         std::string m_rom;
-        std::vector<std::string> m_files;
+        Io::FileListBuffer m_files;
         int m_max_lines = 0;
         int m_line_height = 0;
         int m_file_index = 0;
         int m_highlight_index = 0;
 
         void setSelection(int index);
-
-        void flip();
     };
 }
 

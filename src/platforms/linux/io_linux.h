@@ -12,7 +12,7 @@ namespace mb {
 
         bool write(const std::string &path, const FileBuffer &fileBuffer) override;
 
-        std::vector<std::string> getDir(const std::string &path, int maxFiles = IO_MAX_FILES) override;
+        FileListBuffer getDir(const std::string &path) override;
 
         void createDir(const std::string &path) override;
     };

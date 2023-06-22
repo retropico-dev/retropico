@@ -27,11 +27,11 @@ void Ui::setSelection(int index) {
     if (index < m_max_lines / 2) {
         m_file_index = 0;
         m_highlight_index = 0;
-    } else if (index > m_files.size() - m_max_lines / 2) {
+    } else if (index > m_files.count - m_max_lines / 2) {
         m_highlight_index = m_max_lines / 2;
-        m_file_index = (int) (m_files.size() - 1 - m_highlight_index);
-        if (m_highlight_index >= m_files.size()) {
-            m_highlight_index = (int) (m_files.size() - 1);
+        m_file_index = m_files.count - 1 - m_highlight_index;
+        if (m_highlight_index >= m_files.count) {
+            m_highlight_index = m_files.count - 1;
             m_file_index = 0;
         }
     } else {
@@ -63,20 +63,19 @@ bool Ui::loop() {
             m_highlight_index--;
         }
         if (m_highlight_index < 0) {
-            m_highlight_index = m_files.size() < m_max_lines - 1 ?
-                                (int) m_files.size() - 1 : (int) m_max_lines - 1;
-            m_file_index = (int) m_files.size() - 1 - m_highlight_index;
+            m_highlight_index = m_files.count < m_max_lines - 1 ? m_files.count - 1 : m_max_lines - 1;
+            m_file_index = m_files.count - 1 - m_highlight_index;
         }
         flip();
     } else if (buttons & Input::Button::DOWN) {
         int index = m_file_index + m_highlight_index;
         int middle = m_max_lines / 2;
-        if (m_highlight_index >= middle && index + middle < (int) m_files.size()) {
+        if (m_highlight_index >= middle && index + middle < m_files.count) {
             m_file_index++;
         } else {
             m_highlight_index++;
         }
-        if (m_highlight_index >= m_max_lines || m_file_index + m_highlight_index >= (int) m_files.size()) {
+        if (m_highlight_index >= m_max_lines || m_file_index + m_highlight_index >= m_files.count) {
             m_file_index = 0;
             m_highlight_index = 0;
         }
@@ -88,13 +87,13 @@ bool Ui::loop() {
             setSelection(index);
         }
     } else if (buttons & Input::Button::RIGHT) {
-        if (m_file_index < m_files.size()) {
+        if (m_file_index < m_files.count) {
             int index = m_file_index + m_max_lines;
-            if (index > m_files.size() - 1) index = (int) m_files.size() - 1;
+            if (index > m_files.count - 1) index = m_files.count - 1;
             setSelection(index);
         }
     } else if (buttons & Input::Button::B1) {
-        m_rom = p_platform->getIo()->getRomPath() + "/" + m_files[m_file_index + m_highlight_index];
+        m_rom = Io::getRomPath() + "/" + m_files.get(m_file_index + m_highlight_index);
         p_platform->getInput()->setRepeatDelay(0);
         return false;
     }
@@ -112,14 +111,15 @@ void Ui::flip() {
     display->setTextColor(Color::Yellow);
 
     for (int i = 0; i < m_max_lines; i++) {
-        if (m_file_index + i >= m_files.size()) break;
+        if (m_file_index + i >= m_files.count) break;
 
         auto y = (int16_t) ((m_line_height * i) + 6);
         if (i == m_highlight_index) {
             display->fillRect(1, (int16_t) (y - 4), (int16_t) (display->getSize().x - 3),
                               (int16_t) (m_line_height + 2), Color::Green);
         }
-        display->drawText(6, y, m_files.at(i + m_file_index));
+
+        display->drawText(6, y, m_files.get(i + m_file_index));
     }
 
     display->drawRect(0, 0, display->getSize().x, display->getSize().y, Color::Red);
