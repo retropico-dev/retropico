@@ -34,28 +34,38 @@ int main() {
     int frames = 0;
 
     auto platform = new MBPlatform();
+    auto core = new MBCore(platform);
     auto ui = new Ui(platform);
 
-    // main loop
-    while (ui->loop()) {
-        // fps
-        if (clock.getElapsedTime().asSeconds() >= 1) {
-            auto percent = (uint16_t) (((float) Utility::getUsedHeap() / (float) Utility::getTotalHeap()) * 100);
-            printf("fps: %i, heap: %i/%i (%i%%)\r\n",
-                   (int) ((float) frames / clock.restart().asSeconds()),
-                   Utility::getUsedHeap(), Utility::getTotalHeap(), percent);
-            frames = 0;
+    // if no valid rom was found in flash load ui
+    if (!platform->getIo()->isRomInFlash()) {
+        // main loop
+        while (ui->loop()) {
+            // fps
+            if (clock.getElapsedTime().asSeconds() >= 1) {
+                auto percent = (uint16_t) (((float) Utility::getUsedHeap() / (float) Utility::getTotalHeap()) * 100);
+                printf("fps: %i, heap: %i/%i (%i free - %i%%)\r\n",
+                       (int) ((float) frames / clock.restart().asSeconds()),
+                       Utility::getUsedHeap(), Utility::getTotalHeap(), Utility::getFreeHeap(), percent);
+                frames = 0;
+            }
+
+            // increment frames for fps counter
+            frames++;
         }
-
-        // increment frames for fps counter
-        frames++;
-    }
-
-    std::string romPath = ui->getRom();
-    auto core = new MBCore(platform);
-    if (!core->loadRom(romPath)) {
-        stdio_flush();
-        while (true) { __wfi(); }
+        if (!core->loadRom(ui->getRom())) {
+            stdio_flush();
+            while (true) { __wfi(); }
+        }
+    } else {
+        Io::FileBuffer buffer{
+                .data = (uint8_t *) (XIP_BASE + FLASH_TARGET_OFFSET_ROM_DATA),
+                .size = 1024 * 1024
+        };
+        if (!core->loadRom(buffer)) {
+            stdio_flush();
+            while (true) { __wfi(); }
+        }
     }
 
     // emulation loop
@@ -72,9 +82,9 @@ int main() {
         // fps
         if (clock.getElapsedTime().asSeconds() >= 1) {
             auto percent = (uint16_t) (((float) Utility::getUsedHeap() / (float) Utility::getTotalHeap()) * 100);
-            printf("fps: %i, heap: %i/%i (%i%%)\r\n",
+            printf("fps: %i, heap: %i/%i (%i free - %i%%)\r\n",
                    (int) ((float) frames / clock.restart().asSeconds()),
-                   Utility::getUsedHeap(), Utility::getTotalHeap(), percent);
+                   Utility::getUsedHeap(), Utility::getTotalHeap(), Utility::getFreeHeap(), percent);
             frames = 0;
         }
 
