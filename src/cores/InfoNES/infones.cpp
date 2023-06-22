@@ -84,27 +84,28 @@ bool InfoNES::loadRom(const std::string &path) {
 }
 
 bool InfoNES::loadRom(Io::FileBuffer file) {
-    memcpy(&NesHeader, file.data, sizeof(NesHeader));
+    uint8_t *data = file.data;
+    memcpy(&NesHeader, data, sizeof(NesHeader));
     if (memcmp(NesHeader.byID, "NES\x1a", 4) != 0) {
         printf("InfoNES::loadRom: NES header not found in rom...\n");
         return false;
     }
 
-    file.data += sizeof(NesHeader);
+    data += sizeof(NesHeader);
     memset(SRAM, 0, SRAM_SIZE);
     if (NesHeader.byInfo1 & 4) {
-        memcpy(&SRAM[0x1000], file.data, 512);
-        file.data += 512;
+        memcpy(&SRAM[0x1000], data, 512);
+        data += 512;
     }
 
     auto romSize = NesHeader.byRomSize * 0x4000;
-    ROM = (BYTE *) file.data;
-    file.data += romSize;
+    ROM = (BYTE *) data;
+    data += romSize;
 
     if (NesHeader.byVRomSize > 0) {
         auto vSize = NesHeader.byVRomSize * 0x2000;
-        VROM = (BYTE *) file.data;
-        file.data += vSize;
+        VROM = (BYTE *) data;
+        data += vSize;
     }
 
     if (InfoNES_Reset() < 0) {
@@ -117,11 +118,15 @@ bool InfoNES::loadRom(Io::FileBuffer file) {
     // finally, load SRAM if any
     InfoNES_LoadSRAM(m_sramPath);
 
+    p_platform->getDisplay()->clear();
+
+    quit = false;
+
     return true;
 }
 
 bool in_ram(InfoNES::loop)() {
-    if (InfoNES_Menu() == -1) return false; // quit
+    if (InfoNES_Menu() == -1) return false;
 
     while (!frameLoaded) {
         if (SpriteJustHit == PPU_Scanline && PPU_ScanTable[PPU_Scanline] == SCAN_ON_SCREEN) {
@@ -233,8 +238,10 @@ int InfoNES_ReadRom(const char *pszFileName) {
 
 void InfoNES_ReleaseRom() {
     printf("InfoNES_ReleaseRom\r\n");
-    ROM = nullptr;
-    VROM = nullptr;
+    // memory leak on linux, we don't care...
+    //ROM = nullptr;
+    //VROM = nullptr;
+    quit = true;
 }
 
 void in_ram(InfoNES_PadState)(DWORD *pdwPad1, DWORD *pdwPad2, DWORD *pdwSystem) {
@@ -252,9 +259,11 @@ void in_ram(InfoNES_PadState)(DWORD *pdwPad1, DWORD *pdwPad2, DWORD *pdwSystem) 
     uint16_t buttons = platform->getInput()->getButtons();
 
     // exit requested (linux)
-    if (buttons & mb::Input::Button::QUIT) {
+    //if (buttons & Input::Button::START && buttons & Input::Button::SELECT
+    //   || buttons & mb::Input::Button::QUIT) {
+    if (getchar_timeout_us(0) == 'q') {
         InfoNES_SaveSRAM(core->getSramPath());
-        quit = true;
+        InfoNES_Fin();
         return;
     }
 

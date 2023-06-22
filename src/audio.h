@@ -26,7 +26,7 @@ namespace mb {
         uint16_t m_rate = 44100;
         uint16_t m_samples = 735;
         uint8_t m_channels = 2;
-        uint8_t m_volume = 1;
+        uint8_t m_volume = 2;
     };
 }
 

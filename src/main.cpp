@@ -55,11 +55,17 @@ int main() {
         while (true) { __wfi(); }
     }
 
-    // clear ui...
-    platform->getDisplay()->clear();
-
     // emulation loop
-    while (core->loop()) {
+    while (true) {
+        if (!core->loop()) {
+            if (!ui->loop()) {
+                if (!core->loadRom(ui->getRom())) {
+                    stdio_flush();
+                    while (true) { __wfi(); }
+                }
+            }
+        }
+
         // fps
         if (clock.getElapsedTime().asSeconds() >= 1) {
             printf("fps: %i\r\n", (int) ((float) frames / clock.restart().asSeconds()));

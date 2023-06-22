@@ -53,7 +53,7 @@ bool Ui::loop() {
     uint16_t buttons = p_platform->getInput()->getButtons();
 
     // exit requested (linux)
-    if (buttons & mb::Input::Button::QUIT) {
+    if (buttons & Input::Button::QUIT) {
         p_platform->getInput()->setRepeatDelay(0);
         return false;
     }

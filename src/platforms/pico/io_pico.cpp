@@ -174,6 +174,13 @@ std::vector<std::string> PicoIo::getDir(const std::string &path, int maxFiles) {
 void PicoIo::createDir(const std::string &path) {
     const char *p;
     char *temp;
+    FRESULT fr;
+
+    // add "/"
+    std::string newPath = path;
+    if (newPath[newPath.size() - 1] != '/') {
+        newPath = newPath + "/";
+    }
 
     // mount sdcard
     bool res = mount();
@@ -181,21 +188,20 @@ void PicoIo::createDir(const std::string &path) {
         return;
     }
 
-    temp = static_cast<char *>(calloc(1, strlen(path.c_str()) + 1));
-    p = path.c_str();
+    temp = static_cast<char *>(calloc(1, strlen(newPath.c_str()) + 1));
+    p = newPath.c_str();
 
     while ((p = strchr(p, '/')) != nullptr) {
-        if (p != path.c_str() && *(p - 1) == '/') {
+        if (p != newPath.c_str() && *(p - 1) == '/') {
             p++;
             continue;
         }
-        memcpy(temp, path.c_str(), p - path.c_str());
-        temp[p - path.c_str()] = '\0';
+        memcpy(temp, newPath.c_str(), p - newPath.c_str());
+        temp[p - newPath.c_str()] = '\0';
         p++;
-        if (f_mkdir(temp) != FR_OK) {
-            if (errno != EEXIST) {
-                break;
-            }
+        fr = f_mkdir(temp);
+        if (fr != FR_OK && fr != FR_EXIST) {
+            break;
         }
     }
 
