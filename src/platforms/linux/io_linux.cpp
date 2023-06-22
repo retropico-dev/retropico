@@ -11,7 +11,7 @@
 
 using namespace mb;
 
-Io::FileBuffer LinuxIo::load(const std::string &path, const Target &target) {
+Io::FileBuffer LinuxIo::read(const std::string &path, const Target &target) {
     Io::FileBuffer fileBuffer;
 
     // remove "/"
@@ -44,6 +44,28 @@ Io::FileBuffer LinuxIo::load(const std::string &path, const Target &target) {
     return fileBuffer;
 }
 
+bool LinuxIo::write(const std::string &path, const Io::FileBuffer &fileBuffer) {
+    // remove "/"
+    std::string newPath = path;
+    if (newPath[0] == '/') newPath.erase(0, 1);
+
+    std::ofstream os(newPath, std::ios::binary | std::ios::out);
+    if (!os.good()) {
+        printf("LinuxIo::write: could not open file (%s)\r\n", newPath.c_str());
+        os.close();
+        return false;
+    }
+
+    if (!os.write((const char *) fileBuffer.data, (std::streamsize) fileBuffer.size)) {
+        printf("LinuxIo::write: could not write to file (%s)\r\n", newPath.c_str());
+        return false;
+    }
+
+    os.close();
+
+    return true;
+}
+
 std::vector<std::string> LinuxIo::getDir(const std::string &path, int maxFiles) {
     struct stat st{};
     struct dirent *dir;
@@ -66,4 +88,35 @@ std::vector<std::string> LinuxIo::getDir(const std::string &path, int maxFiles) 
     }
 
     return files;
+}
+
+void LinuxIo::createDir(const std::string &path) {
+    const char *p;
+    char *temp;
+    // remove "/"
+    std::string newPath = path;
+    if (newPath[0] == '/') newPath.erase(0, 1);
+    if (newPath[newPath.size() - 1] != '/') {
+        newPath = newPath + "/";
+    }
+
+    temp = static_cast<char *>(calloc(1, strlen(newPath.c_str()) + 1));
+    p = newPath.c_str();
+
+    while ((p = strchr(p, '/')) != nullptr) {
+        if (p != newPath.c_str() && *(p - 1) == '/') {
+            p++;
+            continue;
+        }
+        memcpy(temp, newPath.c_str(), p - newPath.c_str());
+        temp[p - newPath.c_str()] = '\0';
+        p++;
+        if (mkdir(temp, 0774) != 0) {
+            if (errno != EEXIST) {
+                break;
+            }
+        }
+    }
+
+    free(temp);
 }

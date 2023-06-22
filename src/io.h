@@ -10,13 +10,14 @@
 #include <vector>
 
 #define IO_MAX_FILES 1024
-#define IO_MAX_PATH 32
 
 namespace mb {
     class Io {
     public:
         enum Target {
-            Flash,
+            FlashRomHeader,
+            FlashRomData,
+            FlashMisc,
             Ram
         };
 
@@ -31,15 +32,27 @@ namespace mb {
             printf("~Io()\n");
         }
 
-        virtual FileBuffer load(const std::string &path, const Target &target = Flash) { return {}; }
+        virtual FileBuffer read(const std::string &path, const Target &target = FlashMisc) { return {}; }
+
+        virtual bool write(const std::string &path, const FileBuffer &fileBuffer) { return false; }
 
         virtual std::vector<std::string> getDir(const std::string &path, int maxFiles = IO_MAX_FILES) { return {}; }
+
+        virtual void createDir(const std::string &path) {};
 
         static std::string getRomPath() {
 #if MB_GB
             return "/roms/gameboy";
 #else
             return "/roms/nes";
+#endif
+        }
+
+        static std::string getSavePath() {
+#if MB_GB
+            return "/saves/gameboy";
+#else
+            return "/saves/nes";
 #endif
         }
     };

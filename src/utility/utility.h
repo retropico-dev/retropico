@@ -6,6 +6,7 @@
 #define MICROBOY_UTILITY_H
 
 #include <cstdint>
+#include <string>
 
 namespace mb {
     class Utility {
@@ -38,6 +39,10 @@ namespace mb {
                 return {(int16_t) (x * i), (int16_t) (y * i)};
             }
         };
+
+        static std::string removeExt(const std::string &str);
+
+        static std::string baseName(const std::string &path);
     };
 }
 

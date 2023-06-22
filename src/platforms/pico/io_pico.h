@@ -7,17 +7,26 @@
 
 #include "sd_card.h"
 
+#define FLASH_TARGET_OFFSET_ROM_HEADER (1024 * 1024)
+#define FLASH_TARGET_OFFSET_ROM_DATA (FLASH_TARGET_OFFSET_ROM_HEADER + FLASH_SECTOR_SIZE)
+#define FLASH_TARGET_OFFSET_MISC (FLASH_TARGET_OFFSET_ROM_DATA + (1024 * 1024))
+
 namespace mb {
     class PicoIo : public Io {
     public:
         PicoIo();
 
-        FileBuffer load(const std::string &path, const Target &target = Flash) override;
+        FileBuffer read(const std::string &path, const Target &target = FlashMisc) override;
+
+        bool write(const std::string &path, const FileBuffer &fileBuffer) override;
 
         std::vector<std::string> getDir(const std::string &path, int maxFiles = IO_MAX_FILES) override;
 
+        void createDir(const std::string &path) override;
+
     private:
         sd_card_t *p_sd = nullptr;
+        size_t m_flash_offset_misc = FLASH_TARGET_OFFSET_MISC;
 
         bool mount();
 

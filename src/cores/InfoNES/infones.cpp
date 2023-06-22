@@ -24,6 +24,7 @@ const WORD in_ram(NesPalette)[64] = {
         CC(0x7f94), CC(0x73f4), CC(0x57d7), CC(0x5bf9), CC(0x4ffe), CC(0x0000), CC(0x0000), CC(0x0000)};
 
 static Platform *platform;
+static Core *core;
 static bool quit = false;
 static bool frameLoaded = false;
 #define LINE_BUFFER_COUNT 16
@@ -34,6 +35,10 @@ static int lcd_line_busy = 0;
 // audio
 static uint16_t audio_buffer[1024];
 static int audio_buffer_index = 0;
+
+int InfoNES_LoadSRAM(const std::string &path);
+
+int InfoNES_SaveSRAM(const std::string &path);
 
 _Noreturn void in_ram(core1_main)();
 
@@ -52,19 +57,28 @@ union core_cmd {
 InfoNES::InfoNES(Platform *p) : Core(p) {
     // crappy
     platform = p;
+    core = this;
 
-    platform->getAudio()->setup(44100, 735, 1);
+    // create saves directory
+    p_platform->getIo()->createDir(Io::getSavePath());
+
+    // setup audio
+    p_platform->getAudio()->setup(44100, 735, 1);
 
     // start Core1, which processes requests to the LCD
     multicore_launch_core1(core1_main);
 }
 
 bool InfoNES::loadRom(const std::string &path) {
-    auto file = p_platform->getIo()->load(path);
+    auto file = p_platform->getIo()->read(path, Io::Target::FlashRomData);
     if (!file.data) {
         printf("InfoNES::loadRom: failed to load rom (%s)\r\n", path.c_str());
         return false;
     }
+
+    m_romPath = path;
+    m_sramPath = Io::getSavePath() + "/"
+                 + Utility::removeExt(Utility::baseName(m_romPath)) + ".srm";
 
     return loadRom(file);
 }
@@ -72,6 +86,7 @@ bool InfoNES::loadRom(const std::string &path) {
 bool InfoNES::loadRom(Io::FileBuffer file) {
     memcpy(&NesHeader, file.data, sizeof(NesHeader));
     if (memcmp(NesHeader.byID, "NES\x1a", 4) != 0) {
+        printf("InfoNES::loadRom: NES header not found in rom...\n");
         return false;
     }
 
@@ -98,6 +113,9 @@ bool InfoNES::loadRom(Io::FileBuffer file) {
     }
 
     InfoNES_Init();
+
+    // finally, load SRAM if any
+    InfoNES_LoadSRAM(m_sramPath);
 
     return true;
 }
@@ -173,6 +191,7 @@ _Noreturn void in_ram(core1_main)() {
 }
 
 void in_ram(InfoNES_PreDrawLine)(int line) {
+    (void) line;
     //printf("InfoNES_PreDrawLine(%i)\r\n", line);
 
     // wait until previous line is sent
@@ -227,11 +246,17 @@ void in_ram(InfoNES_PadState)(DWORD *pdwPad1, DWORD *pdwPad2, DWORD *pdwSystem) 
     static constexpr int START = 1 << 3;
     static constexpr int A = 1 << 0;
     static constexpr int B = 1 << 1;
+    (void) pdwPad1;
+    (void) pdwSystem;
 
     uint16_t buttons = platform->getInput()->getButtons();
 
     // exit requested (linux)
-    if (buttons & mb::Input::Button::QUIT) exit(0); // TODO: clean exit..
+    if (buttons & mb::Input::Button::QUIT) {
+        InfoNES_SaveSRAM(core->getSramPath());
+        quit = true;
+        return;
+    }
 
     // emulation inputs
     auto &pad = *pdwPad1;
@@ -282,10 +307,134 @@ void in_ram(InfoNES_SoundOutput)(int samples, BYTE *w1, BYTE *w2, BYTE *w3, BYTE
 }
 
 void InfoNES_MessageBox(const char *pszMsg, ...) {
-    printf("[MSG]");
+    printf("[InfoNES]");
     va_list args;
     va_start(args, pszMsg);
     vprintf(pszMsg, args);
     va_end(args);
     printf("\n");
+}
+
+static int nSRAM_SaveFlag;
+
+int InfoNES_LoadSRAM(const std::string &path) {
+    Io::FileBuffer fileBuffer;
+    unsigned char chData;
+    unsigned char chTag;
+    int nRunLen;
+    int nDecoded;
+    int nDecLen;
+    int nIdx;
+
+    nSRAM_SaveFlag = 0;
+
+    if (!ROM_SRAM) {
+        printf("InfoNES_LoadSRAM: game does not support SRAM, skipping...\r\n");
+        return 1;
+    }
+
+    nSRAM_SaveFlag = 1;
+
+    fileBuffer = platform->getIo()->read(path, Io::Target::FlashMisc);
+    if (!fileBuffer.data) {
+        printf("InfoNES_LoadSRAM: could not load SRAM: invalid file (%s)\r\n", path.c_str());
+        return -1;
+    } else if (fileBuffer.size != SRAM_SIZE) {
+        printf("InfoNES_LoadSRAM: could not load SRAM: invalid file size (%s)\r\n", path.c_str());
+#if LINUX
+        free(fileBuffer.data);
+#endif
+        return -1;
+    }
+
+    nDecoded = 0;
+    nDecLen = 0;
+    chTag = fileBuffer.data[nDecoded++];
+
+    while (nDecLen < 8192) {
+        chData = fileBuffer.data[nDecoded++];
+        if (chData == chTag) {
+            chData = fileBuffer.data[nDecoded++];
+            nRunLen = fileBuffer.data[nDecoded++];
+            for (nIdx = 0; nIdx < nRunLen + 1; ++nIdx) {
+                SRAM[nDecLen++] = chData;
+            }
+        } else {
+            SRAM[nDecLen++] = chData;
+        }
+    }
+
+    printf("InfoNES_LoadSRAM: loaded SRAM from %s\r\n", path.c_str());
+
+    return 1;
+}
+
+int InfoNES_SaveSRAM(const std::string &path) {
+    unsigned char pDstBuf[SRAM_SIZE];
+    Io::FileBuffer fileBuffer;
+    int nUsedTable[256];
+    unsigned char chData;
+    unsigned char chPrevData;
+    unsigned char chTag;
+    int nIdx;
+    int nEncoded;
+    int nEncLen;
+    int nRunLen;
+
+    if (!nSRAM_SaveFlag)
+        return 0;
+
+    memset(nUsedTable, 0, sizeof nUsedTable);
+
+    for (nIdx = 0; nIdx < SRAM_SIZE; ++nIdx) {
+        ++nUsedTable[SRAM[nIdx++]];
+    }
+    for (nIdx = 1, chTag = 0; nIdx < 256; ++nIdx) {
+        if (nUsedTable[nIdx] < nUsedTable[chTag])
+            chTag = nIdx;
+    }
+
+    nEncoded = 0;
+    nEncLen = 0;
+    nRunLen = 1;
+
+    pDstBuf[nEncLen++] = chTag;
+
+    chPrevData = SRAM[nEncoded++];
+
+    while (nEncoded < SRAM_SIZE && nEncLen < SRAM_SIZE - 133) {
+        chData = SRAM[nEncoded++];
+
+        if (chPrevData == chData && nRunLen < 256)
+            ++nRunLen;
+        else {
+            if (nRunLen >= 4 || chPrevData == chTag) {
+                pDstBuf[nEncLen++] = chTag;
+                pDstBuf[nEncLen++] = chPrevData;
+                pDstBuf[nEncLen++] = nRunLen - 1;
+            } else {
+                for (nIdx = 0; nIdx < nRunLen; ++nIdx)
+                    pDstBuf[nEncLen++] = chPrevData;
+            }
+
+            chPrevData = chData;
+            nRunLen = 1;
+        }
+
+    }
+    if (nRunLen >= 4 || chPrevData == chTag) {
+        pDstBuf[nEncLen++] = chTag;
+        pDstBuf[nEncLen++] = chPrevData;
+        pDstBuf[nEncLen++] = nRunLen - 1;
+    } else {
+        for (nIdx = 0; nIdx < nRunLen; ++nIdx)
+            pDstBuf[nEncLen++] = chPrevData;
+    }
+
+    fileBuffer.data = pDstBuf;
+    fileBuffer.size = SRAM_SIZE;
+
+    printf("InfoNES_SaveSRAM: saving SRAM to %s\r\n", path.c_str());
+
+    return platform->getIo()->write(path, fileBuffer) == true;
 }
