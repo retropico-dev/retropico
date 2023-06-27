@@ -58,6 +58,7 @@ int main() {
             while (true) { __wfi(); }
         }
     } else {
+#ifndef LINUX
         Io::FileBuffer buffer{
                 .data = (uint8_t *) (XIP_BASE + FLASH_TARGET_OFFSET_ROM_DATA),
                 .size = 1024 * 1024
@@ -66,6 +67,7 @@ int main() {
             stdio_flush();
             while (true) { __wfi(); }
         }
+#endif
     }
 
     // emulation loop

@@ -170,7 +170,7 @@ void in_ram(core1_lcd_draw_line)(const uint_fast8_t line, const uint_fast8_t ind
 
     if (line == 235) {
         platform->getDisplay()->flip();
-        platform->getDisplay()->setCursor(0, 0);
+        //platform->getDisplay()->setCursor(0, 0);
     }
 
     // signal we are done

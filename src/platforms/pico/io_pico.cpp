@@ -143,6 +143,8 @@ bool PicoIo::write(const std::string &path, const Io::FileBuffer &fileBuffer) {
 // static getDir filename allocation
 static char m_files_buffer[FLASH_SECTOR_SIZE / IO_MAX_PATH][IO_MAX_PATH];
 
+#warning TODO: handle < FLASH_SECTOR_SIZE buffer
+
 // load array of filenames to flash for memory reduction
 Io::FileListBuffer PicoIo::getDir(const std::string &path) {
     Io::FileListBuffer fileListBuffer;
