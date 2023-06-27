@@ -120,6 +120,7 @@ void in_ram(core1_lcd_flip)(const uint_fast8_t bufferIndex) {
 }
 
 _Noreturn void in_ram(main_core1)() {
+#ifndef LINUX
     union core_cmd cmd{};
     bool fs = gb_priv.gb->isFrameSkipEnabled();
     bool ret = true;
@@ -147,6 +148,7 @@ _Noreturn void in_ram(main_core1)() {
     }
 
     HEDLEY_UNREACHABLE();
+#endif
 }
 
 void in_ram(lcd_draw_line)(struct gb_s *gb, const uint8_t pixels[LCD_WIDTH], const uint_fast8_t line) {
@@ -204,7 +206,7 @@ void in_ram(lcd_draw_line)(struct gb_s *gb, const uint8_t pixels[LCD_WIDTH], con
     }
 }
 
-PeanutGB::PeanutGB(Platform *p) : Core(p) {
+PeanutGB::PeanutGB(Platform *p, Ui *ui) : Core(p, ui) {
     // create some render surfaces (double buffering)
     if (m_scaling) {
         p_surface[0] = new Surface({LCD_WIDTH, LCD_HEIGHT});
@@ -222,6 +224,9 @@ PeanutGB::PeanutGB(Platform *p) : Core(p) {
     // init audio
     p_platform->getAudio()->setup(AUDIO_SAMPLE_RATE, AUDIO_SAMPLES);
     audio_init();
+
+    // clear display
+    p_platform->getDisplay()->clear();
 
     gb_priv.gb = this;
 }

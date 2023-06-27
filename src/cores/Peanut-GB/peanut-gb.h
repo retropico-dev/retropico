@@ -17,7 +17,7 @@
 namespace mb {
     class PeanutGB : public Core {
     public:
-        explicit PeanutGB(Platform *platform);
+        explicit PeanutGB(Platform *platform, Ui *ui);
 
         ~PeanutGB() override;
 
