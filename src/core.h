@@ -12,9 +12,9 @@
 namespace mb {
     class Core {
     public:
-        explicit Core(Platform *platform/*, Ui *ui*/) {
+        explicit Core(Platform *platform, Ui *ui) {
             p_platform = platform;
-            //p_ui = ui;
+            p_ui = ui;
         }
 
         virtual ~Core() = default;
@@ -31,9 +31,11 @@ namespace mb {
 
         virtual Platform *getPlatform() { return p_platform; }
 
+        virtual Ui *getUi() { return p_ui; }
+
     protected:
         Platform *p_platform;
-        //Ui *p_ui;
+        Ui *p_ui;
         std::string m_romPath;
         std::string m_sramPath;
     };

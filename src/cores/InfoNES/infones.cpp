@@ -25,7 +25,7 @@ const WORD in_ram(NesPalette)[64] = {
 
 static Platform *platform;
 static Core *core;
-static bool quit = false;
+static bool stopped = false;
 static bool frameLoaded = false;
 #define LINE_BUFFER_COUNT 16
 static WORD in_ram(lineBufferRGB444)[LINE_BUFFER_COUNT][NES_DISP_WIDTH];
@@ -54,7 +54,7 @@ union core_cmd {
     uint32_t full;
 };
 
-InfoNES::InfoNES(Platform *p) : Core(p) {
+InfoNES::InfoNES(Platform *p, Ui *ui) : Core(p, ui) {
     // crappy
     platform = p;
     core = this;
@@ -120,7 +120,7 @@ bool InfoNES::loadRom(Io::FileBuffer file) {
 
     p_platform->getDisplay()->clear();
 
-    quit = false;
+    stopped = false;
 
     return true;
 }
@@ -128,7 +128,7 @@ bool InfoNES::loadRom(Io::FileBuffer file) {
 bool in_ram(InfoNES::loop)() {
     if (InfoNES_Menu() == -1) return false;
 
-    while (!frameLoaded) {
+    while (!frameLoaded && !stopped) {
         if (SpriteJustHit == PPU_Scanline && PPU_ScanTable[PPU_Scanline] == SCAN_ON_SCREEN) {
             int nStep = SPRRAM[SPR_X] * STEP_PER_SCANLINE / NES_DISP_WIDTH;
             K6502_Step(nStep);
@@ -241,7 +241,7 @@ void InfoNES_ReleaseRom() {
     // memory leak on linux, we don't care...
     //ROM = nullptr;
     //VROM = nullptr;
-    quit = true;
+    stopped = true;
 }
 
 void in_ram(InfoNES_PadState)(DWORD *pdwPad1, DWORD *pdwPad2, DWORD *pdwSystem) {
@@ -263,6 +263,7 @@ void in_ram(InfoNES_PadState)(DWORD *pdwPad1, DWORD *pdwPad2, DWORD *pdwSystem) 
         || buttons & mb::Input::Button::QUIT) {
         InfoNES_SaveSRAM(core->getSramPath());
         InfoNES_Fin();
+        core->getUi()->flip();
         return;
     }
 
@@ -281,7 +282,7 @@ void in_ram(InfoNES_PadState)(DWORD *pdwPad1, DWORD *pdwPad2, DWORD *pdwSystem) 
 
 int InfoNES_Menu() {
     //printf("InfoNES_Menu\r\n");
-    return quit ? -1 : 0;
+    return stopped ? -1 : 0;
 }
 
 void InfoNES_SoundInit() {

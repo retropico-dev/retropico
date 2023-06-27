@@ -34,8 +34,8 @@ int main() {
     int frames = 0;
 
     auto platform = new MBPlatform();
-    auto core = new MBCore(platform);
     auto ui = new Ui(platform);
+    auto core = new MBCore(platform, ui);
 
     // if no valid rom was found in flash load ui
     if (!platform->getIo()->isRomInFlash()) {
