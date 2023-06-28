@@ -334,6 +334,8 @@ bool in_ram(PeanutGB::loop)() {
 PeanutGB::~PeanutGB() {
     if (m_scaling) {
         delete (p_surface[0]);
+#if MB_DOUBLE_BUFFER
         delete (p_surface[1]);
+#endif
     }
 }

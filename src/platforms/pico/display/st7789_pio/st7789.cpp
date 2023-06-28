@@ -26,13 +26,13 @@ static const uint8_t st7789_init_seq[] = {
         0                           // Terminate list
 };
 
-static inline void st7789_lcd_set_dc_cs(bool dc, bool cs) {
+static inline void __not_in_flash_func(st7789_lcd_set_dc_cs)(bool dc, bool cs) {
     sleep_us(1);
     gpio_put_masked((1u << LCD_PIN_DC) | (1u << LCD_PIN_CS), !!dc << LCD_PIN_DC | !!cs << LCD_PIN_CS);
     sleep_us(1);
 }
 
-static inline void st7789_lcd_write_cmd(const uint8_t *cmd, size_t count) {
+static inline void __not_in_flash_func(st7789_lcd_write_cmd)(const uint8_t *cmd, size_t count) {
     st7789_lcd_wait_idle(m_pio, m_sm);
     st7789_lcd_set_dc_cs(false, false);
     st7789_lcd_put(m_pio, m_sm, *cmd++);
@@ -46,7 +46,7 @@ static inline void st7789_lcd_write_cmd(const uint8_t *cmd, size_t count) {
     st7789_lcd_set_dc_cs(true, true);
 }
 
-static inline void st7789_lcd_write_cmd(uint8_t cmd) {
+static inline void __not_in_flash_func(st7789_lcd_write_cmd)(uint8_t cmd) {
     st7789_lcd_wait_idle(m_pio, m_sm);
     st7789_lcd_set_dc_cs(false, false);
     st7789_lcd_put(m_pio, m_sm, cmd);
@@ -63,7 +63,7 @@ static inline void st7789_lcd_init(const uint8_t *init_seq) {
     }
 }
 
-static inline void st7789_lcd_set_cursor(uint16_t x, uint16_t y) {
+static inline void __not_in_flash_func(st7789_lcd_set_cursor)(uint16_t x, uint16_t y) {
     const uint8_t st7789_cursor_seq[] = {
             5, 0, ST7789_CASET, (uint8_t) (x >> 8), (uint8_t) (x & 0xff), DISPLAY_WIDTH >> 8, DISPLAY_WIDTH & 0xff,
             5, 0, ST7789_RASET, (uint8_t) (y >> 8), (uint8_t) (y & 0xff), DISPLAY_HEIGHT >> 8, DISPLAY_HEIGHT & 0xff,
@@ -134,16 +134,16 @@ void st7789_init() {
     gpio_put(LCD_PIN_BL, true);
 }
 
-void st7789_start_pixels() {
+void __not_in_flash_func(st7789_start_pixels)() {
     st7789_lcd_write_cmd(ST7789_RAMWR);
     st7789_lcd_set_dc_cs(true, false);
 }
 
-void st7789_put(uint16_t pixel) {
+void __not_in_flash_func(st7789_put)(uint16_t pixel) {
     st7789_lcd_put(m_pio, m_sm, pixel >> 8);
     st7789_lcd_put(m_pio, m_sm, pixel & 0xff);
 }
 
-void st7789_set_cursor(uint16_t x, uint16_t y) {
+void __not_in_flash_func(st7789_set_cursor)(uint16_t x, uint16_t y) {
     st7789_lcd_set_cursor(x, y);
 }

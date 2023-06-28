@@ -44,9 +44,9 @@ int main() {
             // fps
             if (clock.getElapsedTime().asSeconds() >= 1) {
                 auto percent = (uint16_t) (((float) Utility::getUsedHeap() / (float) Utility::getTotalHeap()) * 100);
-                printf("fps: %i, heap: %i/%i (%i free - %i%%)\r\n",
+                printf("fps: %i, heap: %i/%i (%i%%)\r\n",
                        (int) ((float) frames / clock.restart().asSeconds()),
-                       Utility::getUsedHeap(), Utility::getTotalHeap(), Utility::getFreeHeap(), percent);
+                       Utility::getUsedHeap(), Utility::getTotalHeap(), percent);
                 frames = 0;
             }
 
@@ -84,9 +84,9 @@ int main() {
         // fps
         if (clock.getElapsedTime().asSeconds() >= 1) {
             auto percent = (uint16_t) (((float) Utility::getUsedHeap() / (float) Utility::getTotalHeap()) * 100);
-            printf("fps: %i, heap: %i/%i (%i free - %i%%)\r\n",
+            printf("fps: %i, heap: %i/%i (%i%%)\r\n",
                    (int) ((float) frames / clock.restart().asSeconds()),
-                   Utility::getUsedHeap(), Utility::getTotalHeap(), Utility::getFreeHeap(), percent);
+                   Utility::getUsedHeap(), Utility::getTotalHeap(), percent);
             frames = 0;
         }
 
