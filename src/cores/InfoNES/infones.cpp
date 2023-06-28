@@ -33,7 +33,7 @@ static uint8_t lineBufferIndex = 0;
 extern int SpriteJustHit;
 static int lcd_line_busy = 0;
 // audio
-static uint16_t in_ram(audio_buffer)[1024];
+static int16_t in_ram(audio_buffer)[1024];
 static int audio_buffer_index = 0;
 
 int InfoNES_LoadSRAM(const std::string &path);
@@ -304,9 +304,15 @@ int in_ram(InfoNES_GetSoundBufferSize)() {
 
 void in_ram(InfoNES_SoundOutput)(int samples, BYTE *w1, BYTE *w2, BYTE *w3, BYTE *w4, BYTE *w5) {
     //printf("InfoNES_SoundOutput: samples = %i\r\n", samples);
+    uint8_t byte;
+    int32_t sample;
+
     for (uint_fast32_t i = 0; i < samples; i++) {
-        int32_t sample = (w1[i] + w2[i] + w3[i] + w4[i] + w5[i]) / 5;
-        audio_buffer[audio_buffer_index] = (sample - 128) * 256;
+        byte = (w1[i] + w2[i] + w3[i] + w4[i] + w5[i]) / 5;
+        sample = (byte - 128) * 256;
+        if (sample > 32767) sample = 32767;
+        else if (sample < -32768) sample = -32768;
+        audio_buffer[audio_buffer_index] = (int16_t) sample;
         audio_buffer_index++;
         if (audio_buffer_index >= 735) {
             platform->getAudio()->play(audio_buffer, audio_buffer_index);
