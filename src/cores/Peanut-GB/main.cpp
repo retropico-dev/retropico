@@ -26,7 +26,7 @@ int main() {
     Clock clock;
     int frames = 0;
 
-    auto platform = new MBPlatform();
+    auto platform = new MBPlatform(false);
     auto core = new PeanutGB(platform);
 
 #ifndef LINUX

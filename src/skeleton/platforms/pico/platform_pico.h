@@ -24,7 +24,7 @@
 namespace mb {
     class PicoPlatform : public Platform {
     public:
-        PicoPlatform();
+        explicit PicoPlatform(bool doubleBuffer);
 
         ~PicoPlatform() override;
 

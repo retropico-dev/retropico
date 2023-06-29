@@ -11,7 +11,7 @@
 
 using namespace mb;
 
-PicoPlatform::PicoPlatform() : Platform() {
+PicoPlatform::PicoPlatform(bool doubleBuffer) : Platform(doubleBuffer) {
     // overclock - the value for VCO set here is meant for least power consumption
 #if MB_GB
     vreg_set_voltage(VREG_VOLTAGE_1_15);
@@ -37,7 +37,7 @@ PicoPlatform::PicoPlatform() : Platform() {
 #endif
     printf("\r\nPicoPlatform: pico\r\n");
 
-    p_display = new PicoDisplay();
+    p_display = new PicoDisplay(doubleBuffer);
     p_audio = new PicoAudio();
     p_input = new PicoInput();
     p_io = new PicoIo();

@@ -8,7 +8,7 @@
 namespace mb {
     class PicoDisplay : public Display {
     public:
-        PicoDisplay();
+        PicoDisplay(bool doubleBuffer);
 
         void setCursor(uint16_t x, uint16_t y) override;
 

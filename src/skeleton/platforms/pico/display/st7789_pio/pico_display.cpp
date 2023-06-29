@@ -23,7 +23,7 @@ union core_cmd {
     uint32_t full;
 };
 
-PicoDisplay::PicoDisplay() : Display({DISPLAY_WIDTH, DISPLAY_HEIGHT}) {
+PicoDisplay::PicoDisplay(bool doubleBuffer) : Display({DISPLAY_WIDTH, DISPLAY_HEIGHT}) {
     printf("PicoDisplay: st7789 pio @ %ix%i\r\n", m_size.x, m_size.y);
 
     // ...
@@ -32,6 +32,7 @@ PicoDisplay::PicoDisplay() : Display({DISPLAY_WIDTH, DISPLAY_HEIGHT}) {
     // init st7789 display
     st7789_init();
 
+    m_doubleBuffer = doubleBuffer;
     if (m_doubleBuffer) {
         p_pixelBuffer[0] = (uint8_t *) malloc(m_size.x * m_size.y * m_bpp);
         p_pixelBuffer[1] = (uint8_t *) malloc(m_size.x * m_size.y * m_bpp);

@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD 17)
 # set source files
 file(GLOB UI_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.c*)
 set(UI_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR})
+set(UI_FLAGS -DMB_UI)
 
 ####################
 # skeleton library
