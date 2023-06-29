@@ -4,7 +4,6 @@
 
 #include "platform.h"
 #include "ui.h"
-
 #include "Fonts/FreeSans9pt7b.h"
 
 using namespace mb;
@@ -127,12 +126,19 @@ void Ui::flip() {
         if (i == m_highlight_index) {
             display->fillRect(1, (int16_t) (y - 4), (int16_t) (display->getSize().x - 3),
                               (int16_t) (m_line_height + 2), Color::Green);
+            display->drawFastHLine(1, (int16_t) (y - 3), (int16_t) (display->getSize().x - 3), Color::Red);
+            display->drawFastHLine(1, (int16_t) (y - 4), (int16_t) (display->getSize().x - 3), Color::Red);
+            display->drawFastHLine(1, (int16_t) ((y - 3) + (m_line_height + 2)),
+                                   (int16_t) (display->getSize().x - 3), Color::Red);
+            display->drawFastHLine(1, (int16_t) ((y - 4) + (m_line_height + 2)),
+                                   (int16_t) (display->getSize().x - 3), Color::Red);
         }
 
-        display->drawText(6, y + 13, m_files.get(i + m_file_index));
+        display->drawText(6, (int16_t) (y + 13), m_files.get(i + m_file_index));
     }
 
     display->drawRect(0, 0, display->getSize().x, display->getSize().y, Color::Red);
+    display->drawRect(1, 1, display->getSize().x - 2, display->getSize().y - 2, Color::Red);
 
     display->flip();
 }
