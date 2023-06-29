@@ -251,7 +251,8 @@ bool PicoIo::isRomInFlash() {
         return false;
     }
 #else
-#error TODO
+#warning TODO: isRomInFlash
+    return false;
 #endif
 
     return true;

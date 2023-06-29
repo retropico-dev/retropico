@@ -123,6 +123,54 @@ else ()
     endif ()
 endif ()
 
+#############
+# bootloader
+#############
+if (NOT PLATFORM_LINUX)
+    function(set_linker_script TARGET script)
+        target_link_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/bootloader)
+        pico_set_linker_script(${TARGET} ${CMAKE_CURRENT_SOURCE_DIR}/src/bootloader/${script})
+
+        # Add dependencies on the 'included' linker scripts so that the target gets
+        # rebuilt if they are changed
+        pico_add_link_depend(${TARGET} ${CMAKE_CURRENT_SOURCE_DIR}/src/bootloader/memmap_defines.ld)
+        pico_add_link_depend(${TARGET} ${CMAKE_CURRENT_SOURCE_DIR}/src/bootloader/memmap_default.ld)
+    endfunction()
+
+    set(BOOTLOADER bootloader)
+
+    add_executable(${BOOTLOADER})
+
+    target_sources(${BOOTLOADER} PUBLIC
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/bootloader/flashloader.c
+            )
+
+    target_link_libraries(${BOOTLOADER} PRIVATE
+            hardware_structs
+            hardware_sync
+            hardware_flash
+            hardware_watchdog
+            hardware_resets
+            hardware_xosc
+            hardware_clocks
+            hardware_pll
+            hardware_dma
+            pico_platform
+            pico_standard_link
+            pico_divider
+            )
+
+    pico_add_uf2_output(${BOOTLOADER})
+    pico_set_program_name(${BOOTLOADER} ${BOOTLOADER})
+    target_compile_options(${BOOTLOADER} PRIVATE -Wall -Wextra -Wno-ignored-qualifiers -Os)
+
+    # Use a separate linker script for the flashloader to make sure it is built
+    # to run at the right location and cannot overflow into the applications's
+    # address space
+    set_linker_script(${BOOTLOADER} memmap_flashloader.ld)
+    set(BOOTLOADER_UF2 ${CMAKE_CURRENT_BINARY_DIR}/${BOOTLOADER}.uf2)
+endif ()
+
 ############
 # gameboy
 ############
@@ -142,7 +190,7 @@ if (NOT PLATFORM_LINUX)
                 ${CMAKE_SOURCE_DIR}/src/platforms/pico/display/st7789_pio/st7789_lcd.pio)
     endif ()
     # run from ram
-    pico_set_binary_type(${CMAKE_PROJECT_NAME}-gameboy copy_to_ram)
+    #pico_set_binary_type(${CMAKE_PROJECT_NAME}-gameboy copy_to_ram)
     # debug output
     if (PICO_STDIO_UART)
         pico_enable_stdio_usb(${CMAKE_PROJECT_NAME}-gameboy 0)
@@ -153,6 +201,10 @@ if (NOT PLATFORM_LINUX)
     endif ()
     # create map/bin/hex/uf2 file etc.
     pico_add_extra_outputs(${CMAKE_PROJECT_NAME}-gameboy)
+    # Use a separate linker script for the application to make sure it is built
+    # to run at the right location (after the flashloader).
+    set_linker_script(${CMAKE_PROJECT_NAME}-gameboy memmap_gb.ld)
+    set(GAMEBOY_UF2 ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}-gameboy.uf2)
 endif ()
 
 ############
@@ -186,4 +238,22 @@ if (NOT PLATFORM_LINUX)
     endif ()
     # create map/bin/hex/uf2 file etc.
     pico_add_extra_outputs(${CMAKE_PROJECT_NAME}-nes)
+    # Use a separate linker script for the application to make sure it is built
+    # to run at the right location (after the flashloader).
+    set_linker_script(${CMAKE_PROJECT_NAME}-nes memmap_nes.ld)
+    set(NES_UF2 ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}-nes.uf2)
+endif ()
+
+# Combine the flashloader and application into one flashable UF2 image
+if (NOT PLATFORM_LINUX)
+    set(COMPLETE_UF2 ${CMAKE_CURRENT_BINARY_DIR}/microboy.uf2)
+
+    find_package(Python3 REQUIRED COMPONENTS Interpreter)
+    add_custom_command(OUTPUT ${COMPLETE_UF2} DEPENDS ${BOOTLOADER} ${CMAKE_PROJECT_NAME}-nes ${CMAKE_PROJECT_NAME}-gameboy
+            COMMENT "Building full UF2 image"
+            COMMAND ${Python3_EXECUTABLE}
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/bootloader/uf2tool.py
+            -o ${COMPLETE_UF2} ${BOOTLOADER_UF2} ${NES_UF2} ${GAMEBOY_UF2}
+            )
+    add_custom_target(microboy ALL DEPENDS ${COMPLETE_UF2})
 endif ()

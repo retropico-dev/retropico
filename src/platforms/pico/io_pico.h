@@ -6,10 +6,7 @@
 #define MICROBOY_IO_PICO_H
 
 #include "sd_card.h"
-
-#define FLASH_TARGET_OFFSET_ROM_HEADER (1024 * 1024)
-#define FLASH_TARGET_OFFSET_ROM_DATA (FLASH_TARGET_OFFSET_ROM_HEADER + FLASH_SECTOR_SIZE)
-#define FLASH_TARGET_OFFSET_MISC (FLASH_TARGET_OFFSET_ROM_DATA + FLASH_BLOCK_SIZE + (1024 * 1024)) // 1MB max rom size
+#include "bootloader/flashloader.h"
 
 namespace mb {
     class PicoIo : public Io {
