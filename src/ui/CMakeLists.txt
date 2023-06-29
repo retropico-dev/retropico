@@ -6,8 +6,14 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
 # set source files
-file(GLOB UI_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.c*)
-set(UI_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR})
+file(GLOB UI_SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/*.c*
+        ${CMAKE_CURRENT_SOURCE_DIR}/widgets/*.c*
+        )
+set(UI_INCLUDES
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/widgets
+        )
 set(UI_FLAGS -DMB_UI)
 
 ####################

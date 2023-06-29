@@ -43,7 +43,7 @@ PicoDisplay::PicoDisplay(bool doubleBuffer) : Display({DISPLAY_WIDTH, DISPLAY_HE
     PicoDisplay::clear();
 }
 
-void in_ram(PicoDisplay::setCursor)(uint16_t x, uint16_t y) {
+void PicoDisplay::setCursor(uint16_t x, uint16_t y) {
     if (m_doubleBuffer) {
         m_cursor = {(int16_t) x, (int16_t) y};
     } else {
@@ -51,7 +51,7 @@ void in_ram(PicoDisplay::setCursor)(uint16_t x, uint16_t y) {
     }
 }
 
-void in_ram(PicoDisplay::setPixel)(uint16_t color) {
+void PicoDisplay::setPixel(uint16_t color) {
     if (m_doubleBuffer) {
         *(uint16_t *) (getPixelBuffer(m_bufferIndex) + m_cursor.y * m_pitch + m_cursor.x * m_bpp) = color;
         // emulate tft lcd "put_pixel"
@@ -67,11 +67,18 @@ void in_ram(PicoDisplay::setPixel)(uint16_t color) {
 
 void PicoDisplay::clear(uint16_t color) {
     if (m_doubleBuffer) {
-        if (color == Color::Black) {
-            memset((uint16_t *) getPixelBuffer(m_bufferIndex), color, m_size.x * m_size.y * m_bpp);
+        if (color == Color::Black || color == Color::White) {
+            auto buffer = (uint16_t *) getPixelBuffer(m_bufferIndex);
+            memset(buffer, color, m_size.x * m_size.y * m_bpp);
         } else {
-            for (uint_fast16_t i = 0; i < m_size.x * m_size.y * m_bpp; i += 2) {
-                memcpy(getPixelBuffer(m_bufferIndex) + i, &color, sizeof(uint16_t));
+            auto buffer = getPixelBuffer(m_bufferIndex);
+            int size = m_pitch * m_size.y;
+            uint64_t color64 = (uint64_t) color << 48;
+            color64 |= (uint64_t) color << 32;
+            color64 |= (uint64_t) color << 16;
+            color64 |= color;
+            for (uint_fast16_t i = 0; i < size; i += 8) {
+                *(uint64_t *) (buffer + i) = color64;
             }
         }
     } else {
@@ -101,7 +108,7 @@ _Noreturn static void in_ram(core1_main)() {
     }
 }
 
-void in_ram(PicoDisplay::flip)() {
+void PicoDisplay::flip() {
     if (m_doubleBuffer) {
         // wait until previous flip on core1 complete
         while (__atomic_load_n(&core1_busy, __ATOMIC_SEQ_CST)) tight_loop_contents();

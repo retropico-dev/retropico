@@ -44,6 +44,33 @@ namespace mb {
             }
         };
 
+        struct Vec4i {
+            int16_t x;
+            int16_t y;
+            int16_t w;
+            int16_t h;
+
+            Vec4i() : x(0), y(0), w(0), h(0) {}
+
+            Vec4i(const int16_t x, const int16_t y, const int16_t w, const int16_t h)
+                    : x(x), y(y), w(w), h(h) {}
+
+            Vec4i operator+(const Vec4i &rhs) const {
+                return {(int16_t) (x + rhs.x), (int16_t) (y + rhs.y),
+                        (int16_t) (w + rhs.w), (int16_t) (h + rhs.h)};
+            }
+
+            Vec4i operator-(const Vec4i &rhs) const {
+                return {(int16_t) (x - rhs.x), (int16_t) (y - rhs.y),
+                        (int16_t) (w - rhs.w), (int16_t) (h - rhs.h)};
+            }
+
+            Vec4i operator*(const int16_t i) const {
+                return {(int16_t) (x * i), (int16_t) (y * i),
+                        (int16_t) (w * i), (int16_t) (h * i)};
+            }
+        };
+
         static std::string removeExt(const std::string &str);
 
         static std::string baseName(const std::string &path);

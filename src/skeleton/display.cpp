@@ -2,7 +2,7 @@
 // Created by cpasjuste on 05/06/23.
 //
 
-#include "display.h"
+#include "platform.h"
 
 using namespace mb;
 
@@ -17,25 +17,29 @@ Display::Display(const Utility::Vec2i &size) : Adafruit_GFX(size.x, size.y) {
 }
 
 // very slow, obviously...
-void Display::drawPixel(int16_t x, int16_t y, uint16_t color) {
+void in_ram(Display::drawPixel)(int16_t x, int16_t y, uint16_t color) {
     if ((x < 0) || (y < 0) || x > m_size.x || y > m_size.y) return;
 
-    int16_t t;
-    switch (rotation) {
-        case 1:
-            t = x;
-            x = (int16_t) (m_size.x - 1 - y);
-            y = t;
-            break;
-        case 2:
-            x = (int16_t) (m_size.x - 1 - x);
-            y = (int16_t) (m_size.y - 1 - y);
-            break;
-        case 3:
-            t = x;
-            x = y;
-            y = (int16_t) (m_size.y - 1 - t);
-            break;
+    if (rotation) {
+        int16_t t;
+        switch (rotation) {
+            case 1:
+                t = x;
+                x = (int16_t) (m_size.x - 1 - y);
+                y = t;
+                break;
+            case 2:
+                x = (int16_t) (m_size.x - 1 - x);
+                y = (int16_t) (m_size.y - 1 - y);
+                break;
+            case 3:
+                t = x;
+                x = y;
+                y = (int16_t) (m_size.y - 1 - t);
+                break;
+            default:
+                break;
+        }
     }
 
     setCursor(x, y);
@@ -43,7 +47,7 @@ void Display::drawPixel(int16_t x, int16_t y, uint16_t color) {
 }
 
 // faster
-void Display::drawPixelLine(const uint16_t *pixels, uint16_t width, const Format &format) {
+void in_ram(Display::drawPixelLine)(const uint16_t *pixels, uint16_t width, const Format &format) {
     if (format == Format::RGB565) {
         for (uint_fast16_t i = 0; i < width; i++) {
             setPixel(pixels[i]);
@@ -62,7 +66,7 @@ void Display::drawPixelLine(const uint16_t *pixels, uint16_t width, const Format
     }
 }
 
-void Display::drawSurface(Surface *surface, const Utility::Vec2i &pos, const Utility::Vec2i &size) {
+void in_ram(Display::drawSurface)(Surface *surface, const Utility::Vec2i &pos, const Utility::Vec2i &size) {
     if (!surface) return;
 
     if (size == surface->getSize()) {
@@ -148,7 +152,7 @@ void Display::drawSurface(Surface *surface, const Utility::Vec2i &pos, const Uti
     }
 }
 
-void Display::clear(uint16_t color) {
+void in_ram(Display::clear)(uint16_t color) {
     setCursor(0, 0);
     for (int y = 0; y < m_size.y; y++) {
         for (int x = 0; x < m_size.x; x++) {

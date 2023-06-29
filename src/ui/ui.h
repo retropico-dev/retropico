@@ -9,10 +9,13 @@
 
 #define UI_FONT_HEIGHT 16
 
+extern mb::Platform *s_platform;
+
 namespace mb {
     class Ui {
     public:
         enum Color {
+            Black = 0x0000,
             Red = 0xC083,
             Yellow = 0xF5C1,
             Green = 0x0388,
@@ -28,6 +31,10 @@ namespace mb {
         bool loop();
 
         void flip();
+
+        static Platform *getPlatform();
+
+        static Display *getDisplay();
 
     private:
         Platform *p_platform;

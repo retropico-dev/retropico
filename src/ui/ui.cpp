@@ -7,8 +7,11 @@
 
 using namespace mb;
 
+//...
+mb::Platform *s_platform;
+
 Ui::Ui(Platform *platform) {
-    p_platform = platform;
+    p_platform = s_platform = platform;
     p_platform->getDisplay()->setTextSize(2);
     p_platform->getDisplay()->setTextWrap(false);
     m_files = p_platform->getIo()->getDir(Io::getRomPath());
@@ -41,7 +44,7 @@ void Ui::setSelection(int index) {
         m_highlight_index = m_max_lines / 2;
         m_file_index = index - m_highlight_index;
     }
-    flip();
+    //flip();
 }
 
 bool Ui::loop() {
@@ -66,7 +69,7 @@ bool Ui::loop() {
             m_highlight_index = m_files.count < m_max_lines - 1 ? m_files.count - 1 : m_max_lines - 1;
             m_file_index = m_files.count - 1 - m_highlight_index;
         }
-        flip();
+        //flip();
     } else if (buttons & Input::Button::DOWN) {
         int index = m_file_index + m_highlight_index;
         int middle = m_max_lines / 2;
@@ -79,7 +82,7 @@ bool Ui::loop() {
             m_file_index = 0;
             m_highlight_index = 0;
         }
-        flip();
+        //flip();
     } else if (buttons & Input::Button::LEFT) {
         if (m_file_index > 0) {
             int index = m_file_index - m_max_lines;
@@ -102,13 +105,16 @@ bool Ui::loop() {
         }
     }
 
+    flip();
+
     return true;
 }
 
 void Ui::flip() {
     auto display = p_platform->getDisplay();
 
-    display->clear(Color::GrayDark);
+    //display->clear(Color::GrayDark);
+    display->clear(Color::Black);
     display->setTextColor(Color::Yellow);
 
     for (int i = 0; i < m_max_lines; i++) {
@@ -126,4 +132,12 @@ void Ui::flip() {
     display->drawRect(0, 0, display->getSize().x, display->getSize().y, Color::Red);
 
     display->flip();
+}
+
+Platform *Ui::getPlatform() {
+    return s_platform;
+}
+
+Display *Ui::getDisplay() {
+    return s_platform->getDisplay();
 }
