@@ -5,6 +5,8 @@
 #include "platform.h"
 #include "ui.h"
 
+#include "Fonts/FreeSans9pt7b.h"
+
 using namespace mb;
 
 //...
@@ -12,7 +14,8 @@ mb::Platform *s_platform;
 
 Ui::Ui(Platform *platform) {
     p_platform = s_platform = platform;
-    p_platform->getDisplay()->setTextSize(2);
+    p_platform->getDisplay()->setFont(&FreeSans9pt7b);
+    p_platform->getDisplay()->setTextSize(1);
     p_platform->getDisplay()->setTextWrap(false);
     m_files = p_platform->getIo()->getDir(Io::getRomPath());
 
@@ -126,7 +129,7 @@ void Ui::flip() {
                               (int16_t) (m_line_height + 2), Color::Green);
         }
 
-        display->drawText(6, y, m_files.get(i + m_file_index));
+        display->drawText(6, y + 13, m_files.get(i + m_file_index));
     }
 
     display->drawRect(0, 0, display->getSize().x, display->getSize().y, Color::Red);
