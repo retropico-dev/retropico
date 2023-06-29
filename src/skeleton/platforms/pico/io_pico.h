@@ -21,8 +21,6 @@ namespace mb {
 
         void createDir(const std::string &path) override;
 
-        bool isRomInFlash() override;
-
     private:
         sd_card_t *p_sd = nullptr;
         size_t m_flash_offset_misc = FLASH_TARGET_OFFSET_MISC;

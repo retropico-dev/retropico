@@ -10,7 +10,7 @@
 namespace mb {
     class InfoNES : public Core {
     public:
-        explicit InfoNES(Platform *platform, Ui *ui);
+        explicit InfoNES(Platform *platform);
 
         ~InfoNES() override;
 

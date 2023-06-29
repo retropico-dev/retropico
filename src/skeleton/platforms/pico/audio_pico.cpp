@@ -8,10 +8,9 @@
 using namespace mb;
 
 void PicoAudio::setup(uint16_t rate, uint16_t samples, uint8_t channels) {
-    printf("PicoAudio: rate: %i, samples: %i, channels: %i\r\n",
-           m_rate, m_samples, m_channels);
-
     Audio::setup(rate, samples, channels);
+    printf("PicoAudio::setup: rate: %i, samples: %i, channels: %i\r\n",
+           m_rate, m_samples, m_channels);
 
     m_i2s_config = {
             .data_pin = AUDIO_PIN_DATA,

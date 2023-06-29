@@ -199,8 +199,10 @@ int startMainApplication() {
         // vector table and jump to the start of its code
 
         // First make sure we don't get retriggered
-        if ((watchdog_hw->scratch[0] == FLASH_MAGIC1) ||
-            (watchdog_hw->scratch[0] == ~FLASH_MAGIC1)) {
+        if (watchdog_hw->scratch[0] == FLASH_MAGIC1 || watchdog_hw->scratch[0] == ~FLASH_MAGIC1
+            || watchdog_hw->scratch[0] == FLASH_MAGIC_UI || watchdog_hw->scratch[0] == ~FLASH_MAGIC_UI
+            || watchdog_hw->scratch[0] == FLASH_MAGIC_NES || watchdog_hw->scratch[0] == ~FLASH_MAGIC_NES
+            || watchdog_hw->scratch[0] == FLASH_MAGIC_GB || watchdog_hw->scratch[0] == ~FLASH_MAGIC_GB) {
             watchdog_hw->scratch[0] = 0;
         }
 
@@ -371,8 +373,12 @@ int main(void) {
     // Take DMA block out of reset so we can use it to calculate CRCs
     unreset_block_wait(RESETS_RESET_DMA_BITS);
 
-    //sAppStartOffset = isRomInFlash() ? XIP_BASE + (uint32_t) &__NES_START : XIP_BASE + (uint32_t) &__UI_START;
-    sAppStartOffset = XIP_BASE + (uint32_t) &__NES_START;
+    // first check for UI magic
+    if (scratch == FLASH_MAGIC_UI) {
+        sAppStartOffset = XIP_BASE + (uint32_t) &__UI_START;
+    } else {
+        sAppStartOffset = isRomInFlash() ? XIP_BASE + (uint32_t) &__NES_START : XIP_BASE + (uint32_t) &__UI_START;
+    }
 
     if ((scratch == FLASH_MAGIC1) && ((image & 0xfff) == 0) && (image > sAppStartOffset)) {
         // Invert the magic number (so we know we've been here) and

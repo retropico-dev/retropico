@@ -5,7 +5,9 @@
 #include <pico/time.h>
 #include <pico/stdlib.h>
 #include <hardware/vreg.h>
+#include <hardware/watchdog.h>
 #include "platform.h"
+#include "platform_pico.h"
 
 using namespace mb;
 
@@ -41,7 +43,29 @@ PicoPlatform::PicoPlatform() : Platform() {
     p_io = new PicoIo();
 }
 
+void PicoPlatform::reboot(const Platform::RebootTarget &target) {
+    // set up watchdog scratch registers so that the bootloader
+    // knows what to do after the reset
+    switch (target) {
+        case RebootTarget::Ui:
+            watchdog_hw->scratch[0] = FLASH_MAGIC_UI;
+            break;
+        case RebootTarget::Gb:
+            watchdog_hw->scratch[0] = FLASH_MAGIC_GB;
+            break;
+        case RebootTarget::Nes:
+            watchdog_hw->scratch[0] = FLASH_MAGIC_NES;
+            break;
+        default:
+            break;
+    }
+
+    watchdog_reboot(0x00000000, 0x00000000, 50);
+
+    // wait for the reset
+    while (true) tight_loop_contents();
+}
+
 PicoPlatform::~PicoPlatform() {
     printf("~PicoPlatform()\n");
-    reset_usb_boot(0, 0);
 }

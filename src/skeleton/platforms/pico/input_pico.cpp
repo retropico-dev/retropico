@@ -69,6 +69,9 @@ uint16_t PicoInput::getButtons() {
         case 68: // ARROW LEFT
             m_buttons |= LEFT;
             break;
+        case 'q':
+            m_buttons |= QUIT;
+            break;
         default:
             break;
     }

@@ -50,8 +50,6 @@ namespace mb {
 
         virtual void createDir(const std::string &path) {};
 
-        virtual bool isRomInFlash() { return false; }
-
         static std::string getRomPath() {
 #if MB_GB
             return "/roms/gameboy";

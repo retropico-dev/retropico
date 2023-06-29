@@ -54,7 +54,7 @@ union core_cmd {
     uint32_t full;
 };
 
-InfoNES::InfoNES(Platform *p, Ui *ui) : Core(p, ui) {
+InfoNES::InfoNES(Platform *p) : Core(p) {
     // crappy
     platform = p;
     core = this;
@@ -149,7 +149,10 @@ bool in_ram(InfoNES::loop)() {
         }
 
         MapperHSync();
-        if (InfoNES_HSync() == -1) return false;
+        if (InfoNES_HSync() == -1) {
+            printf("InfoNES::loop: InfoNES_HSync failed\r\n");
+            return false;
+        }
     }
 
     frameLoaded = false;
@@ -263,7 +266,6 @@ void in_ram(InfoNES_PadState)(DWORD *pdwPad1, DWORD *pdwPad2, DWORD *pdwSystem) 
         || buttons & mb::Input::Button::QUIT) {
         InfoNES_SaveSRAM(core->getSramPath());
         InfoNES_Fin();
-        core->getUi()->flip();
         return;
     }
 
@@ -308,7 +310,7 @@ void in_ram(InfoNES_SoundOutput)(int samples, BYTE *w1, BYTE *w2, BYTE *w3, BYTE
     int32_t sample;
 
     for (uint_fast32_t i = 0; i < samples; i++) {
-        byte = (w1[i] + w2[i] + w3[i]  + w4[i] + w5[i]) / 5;
+        byte = (w1[i] + w2[i] + w3[i] + w4[i] + w5[i]) / 5;
         sample = (byte - 128) * 256;
         if (sample > 32767) sample = 32767;
         else if (sample < -32768) sample = -32768;

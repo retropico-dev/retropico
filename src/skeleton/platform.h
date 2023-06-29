@@ -16,6 +16,13 @@
 namespace mb {
     class Platform {
     public:
+        enum RebootTarget {
+            Auto,
+            Ui,
+            Nes,
+            Gb
+        };
+
         Platform() = default;
 
         virtual ~Platform() {
@@ -33,6 +40,8 @@ namespace mb {
         Input *getInput() { return p_input; };
 
         Io *getIo() { return p_io; };
+
+        virtual void reboot(const Platform::RebootTarget &target) {};
 
     protected:
         Display *p_display = nullptr;

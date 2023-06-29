@@ -244,20 +244,6 @@ void PicoIo::createDir(const std::string &path) {
     unmount();
 }
 
-bool PicoIo::isRomInFlash() {
-#if MB_NES
-    auto data = (uint8_t *) (XIP_BASE + FLASH_TARGET_OFFSET_ROM_DATA);
-    if (memcmp(data, "NES\x1a", 4) != 0) {
-        return false;
-    }
-#else
-#warning TODO: isRomInFlash
-    return false;
-#endif
-
-    return true;
-}
-
 bool PicoIo::mount() {
     FRESULT fr = f_mount(&p_sd->fatfs, p_sd->pcName, 1);
     if (FR_OK != fr) {

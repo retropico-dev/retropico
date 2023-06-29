@@ -20,6 +20,9 @@ Ui::Ui(Platform *platform) {
         m_line_height = (int16_t) (display_height / m_max_lines);
     }
 
+    // set repeat delay for ui
+    p_platform->getInput()->setRepeatDelay(INPUT_DELAY_UI);
+
     flip();
 }
 
@@ -42,9 +45,6 @@ void Ui::setSelection(int index) {
 }
 
 bool Ui::loop() {
-    // set repeat delay for ui
-    p_platform->getInput()->setRepeatDelay(INPUT_DELAY_UI);
-
     // handle inputs
     uint16_t buttons = p_platform->getInput()->getButtons();
 
@@ -94,12 +94,13 @@ bool Ui::loop() {
         }
     } else if (buttons & Input::Button::B1) {
         m_rom = Io::getRomPath() + "/" + m_files.get(m_file_index + m_highlight_index);
-        p_platform->getInput()->setRepeatDelay(0);
-        return false;
+        auto file = p_platform->getIo()->read(m_rom, Io::Target::FlashRomData);
+        if (!file.data) {
+            printf("InfoNES::loadRom: failed to load rom (%s)\r\n", m_rom.c_str());
+        } else {
+            return false;
+        }
     }
-
-    // restore repeat delay for game
-    p_platform->getInput()->setRepeatDelay(0);
 
     return true;
 }

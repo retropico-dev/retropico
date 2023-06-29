@@ -27,6 +27,8 @@ namespace mb {
         PicoPlatform();
 
         ~PicoPlatform() override;
+
+        void reboot(const Platform::RebootTarget &target) override;
     };
 }
 

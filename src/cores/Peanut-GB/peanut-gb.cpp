@@ -206,7 +206,7 @@ void in_ram(lcd_draw_line)(struct gb_s *gb, const uint8_t pixels[LCD_WIDTH], con
     }
 }
 
-PeanutGB::PeanutGB(Platform *p, Ui *ui) : Core(p, ui) {
+PeanutGB::PeanutGB(Platform *p) : Core(p) {
     // create some render surfaces (double buffering)
     if (m_scaling) {
         p_surface[0] = new Surface({LCD_WIDTH, LCD_HEIGHT});

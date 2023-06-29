@@ -13,6 +13,8 @@
 static const uint32_t FLASH_MAGIC1 = 0x8ecd5efb; // Randomly picked numbers
 static const uint32_t FLASH_MAGIC2 = 0xc5ae52a0;
 static const uint32_t FLASH_MAGIC_UI = 0xc5ae52a1;
+static const uint32_t FLASH_MAGIC_NES = 0xc5ae52a2;
+static const uint32_t FLASH_MAGIC_GB = 0xc5ae52a3;
 
 static const uint32_t FLASH_APP_UPDATED = 0xe3fa4ef2; // App has been updated
 
@@ -21,7 +23,9 @@ extern void *__NES_START;
 extern void *__GB_START;
 extern void *__FLASHLOADER_END;
 
-#define FLASH_TARGET_OFFSET_ROM_HEADER ((uint32_t) &__FLASHLOADER_END)
+// 2MB available for rom (1MB) and misc data (1MB)
+#define FLASH_TARGET_OFFSET_ROM_HEADER ((1024 * 1024) * 6)
+//#define FLASH_TARGET_OFFSET_ROM_HEADER ((uint32_t) &__FLASHLOADER_END)
 #define FLASH_TARGET_OFFSET_ROM_DATA (FLASH_TARGET_OFFSET_ROM_HEADER + FLASH_SECTOR_SIZE)
 #define FLASH_TARGET_OFFSET_MISC (FLASH_TARGET_OFFSET_ROM_DATA + FLASH_BLOCK_SIZE + (1024 * 1024)) // 1MB max rom size
 
