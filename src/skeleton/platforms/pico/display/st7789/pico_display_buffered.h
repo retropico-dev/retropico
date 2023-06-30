@@ -2,13 +2,13 @@
 // Created by cpasjuste on 30/05/23.
 //
 
-#ifndef MICROBOY_PICO_DISPLAY_H
-#define MICROBOY_PICO_DISPLAY_H
+#ifndef MICROBOY_PICO_DISPLAY_BUFFERED_H
+#define MICROBOY_PICO_DISPLAY_BUFFERED_H
 
 namespace mb {
-    class PicoDisplay : public Display {
+    class PicoDisplayBuffered : public Display {
     public:
-        PicoDisplay(bool doubleBuffer);
+        PicoDisplayBuffered();
 
         void setCursor(uint16_t x, uint16_t y) override;
 
@@ -23,11 +23,10 @@ namespace mb {
         }
 
     private:
-        bool m_doubleBuffer = false;
-        uint8_t *p_pixelBuffer[2];
-        uint8_t m_bufferIndex = 0;
         Utility::Vec2i m_cursor;
+        uint8_t *p_pixelBuffer[2]{};
+        uint8_t m_bufferIndex = 0;
     };
 }
 
-#endif //MICROBOY_PICO_DISPLAY_H
+#endif //MICROBOY_PICO_DISPLAY_BUFFERED_H

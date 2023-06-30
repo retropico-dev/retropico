@@ -4,6 +4,10 @@ cmake_minimum_required(VERSION 3.13)
 project(microboy-skeleton)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
+# TODO: why ?
+set(CMAKE_FLAGS_RELEASE_FIX "-fno-move-loop-invariants -fno-devirtualize -fno-devirtualize-speculatively")
+set(CMAKE_C_FLAGS_RELEASE "-DNDEBUG -O3 ${CMAKE_FLAGS_RELEASE_FIX}" CACHE STRING "" FORCE)
+set(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -O3 ${CMAKE_FLAGS_RELEASE_FIX}" CACHE STRING "" FORCE)
 
 # set source files
 file(GLOB PLATFORM_SOURCES
@@ -20,7 +24,7 @@ set(PLATFORM_INCLUDES
         ${CMAKE_SOURCE_DIR}/external/misc/Adafruit-GFX-Library
         )
 
-set(PLATFORM_FLAGS -DARDUINO=123)
+set(PLATFORM_FLAGS "-DARDUINO=123 -ffast-math")
 
 if (PLATFORM_LINUX)
     file(GLOB_RECURSE TEMP ${CMAKE_CURRENT_SOURCE_DIR}/platforms/linux/*.c*)
@@ -66,10 +70,11 @@ else ()
     # display driver
     if (PICO_DISPLAY_ST7789_PIO)
         list(APPEND PLATFORM_SOURCES
-                ${CMAKE_CURRENT_SOURCE_DIR}/platforms/pico/display/st7789_pio/pico_display.cpp
-                ${CMAKE_CURRENT_SOURCE_DIR}/platforms/pico/display/st7789_pio/st7789.cpp
+                ${CMAKE_CURRENT_SOURCE_DIR}/platforms/pico/display/st7789/st7789.cpp
+                ${CMAKE_CURRENT_SOURCE_DIR}/platforms/pico/display/st7789/pico_display.cpp
+                ${CMAKE_CURRENT_SOURCE_DIR}/platforms/pico/display/st7789/pico_display_buffered.cpp
                 )
-        list(APPEND PLATFORM_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/platforms/pico/display/st7789_pio)
+        list(APPEND PLATFORM_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/platforms/pico/display/st7789)
         list(APPEND PLATFORM_LIBS hardware_dma)
     endif ()
 endif ()
@@ -84,7 +89,7 @@ target_link_libraries(microboy-skeleton ${PLATFORM_LIBS})
 if (NOT PLATFORM_LINUX)
     if (PICO_DISPLAY_ST7789_PIO)
         pico_generate_pio_header(microboy-skeleton
-                ${CMAKE_CURRENT_SOURCE_DIR}/platforms/pico/display/st7789_pio/st7789_lcd.pio)
+                ${CMAKE_CURRENT_SOURCE_DIR}/platforms/pico/display/st7789/st7789_lcd.pio)
     endif ()
     # debug output
     if (PICO_STDIO_UART)

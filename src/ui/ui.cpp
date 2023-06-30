@@ -46,7 +46,8 @@ void Ui::setSelection(int index) {
         m_highlight_index = m_max_lines / 2;
         m_file_index = index - m_highlight_index;
     }
-    //flip();
+
+    flip();
 }
 
 bool Ui::loop() {
@@ -71,7 +72,7 @@ bool Ui::loop() {
             m_highlight_index = m_files.count < m_max_lines - 1 ? m_files.count - 1 : m_max_lines - 1;
             m_file_index = m_files.count - 1 - m_highlight_index;
         }
-        //flip();
+        flip();
     } else if (buttons & Input::Button::DOWN) {
         int index = m_file_index + m_highlight_index;
         int middle = m_max_lines / 2;
@@ -84,7 +85,7 @@ bool Ui::loop() {
             m_file_index = 0;
             m_highlight_index = 0;
         }
-        //flip();
+        flip();
     } else if (buttons & Input::Button::LEFT) {
         if (m_file_index > 0) {
             int index = m_file_index - m_max_lines;
@@ -106,8 +107,6 @@ bool Ui::loop() {
             return false;
         }
     }
-
-    flip();
 
     return true;
 }

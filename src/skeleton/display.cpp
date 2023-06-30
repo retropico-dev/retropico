@@ -53,11 +53,13 @@ void in_ram(Display::drawPixelLine)(const uint16_t *pixels, uint16_t width, cons
             setPixel(pixels[i]);
         }
     } else {
+        uint_fast16_t p;
+        uint_fast8_t red, green, blue;
         for (uint_fast16_t i = 0; i < width; i++) {
-            uint_fast16_t p = pixels[i];
-            uint_fast8_t red = (p >> 8) & 0xF;
-            uint_fast8_t green = (p >> 4) & 0xF;
-            uint_fast8_t blue = p & 0xF;
+            p = pixels[i];
+            red = (p >> 8) & 0xF;
+            green = (p >> 4) & 0xF;
+            blue = p & 0xF;
             red = (red << 1) | (red >> 3);
             green = (green << 2) | (green >> 2);
             blue = (blue << 1) | (blue >> 3);

@@ -15,6 +15,7 @@
 #include <hardware/sync.h>
 
 #include "pico_display.h"
+#include "pico_display_buffered.h"
 #include "input_pico.h"
 #include "audio_pico.h"
 #include "io_pico.h"
@@ -24,7 +25,7 @@
 namespace mb {
     class PicoPlatform : public Platform {
     public:
-        explicit PicoPlatform(bool doubleBuffer);
+        explicit PicoPlatform(bool useDoubleBufferDisplay = false);
 
         ~PicoPlatform() override;
 

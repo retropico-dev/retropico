@@ -26,7 +26,7 @@ int main() {
     Clock clock;
     int frames = 0;
 
-    auto platform = new MBPlatform(false);
+    auto platform = new MBPlatform();
     auto core = new InfoNES(platform);
 
 #ifndef LINUX
@@ -56,6 +56,7 @@ int main() {
     }
 
     // reboot to ui
+    platform->getDisplay()->clear();
     platform->reboot(Platform::RebootTarget::Ui);
 
     // unreachable
