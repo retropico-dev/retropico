@@ -27,8 +27,13 @@
 // BUTTONS PINS
 #define BTN_PIN_B1      (25)    //                  25
 #define BTN_PIN_B2      (24)    //                  24
+#ifndef NDEBUG
+#define BTN_PIN_START   (-1)     //                  RX
+#define BTN_PIN_SELECT  (-1)     //                  TX
+#else
 #define BTN_PIN_START   (1)     //                  RX
 #define BTN_PIN_SELECT  (0)     //                  TX
+#endif
 #define BTN_PIN_LEFT    (3)     //                  SCL
 #define BTN_PIN_RIGHT   (29)    //                  A3
 #define BTN_PIN_UP      (7)     //                  5
