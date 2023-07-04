@@ -28,6 +28,8 @@ namespace mb {
         bool mount();
 
         bool unmount();
+
+        static void writeSector(uint32_t flash_offs, const uint8_t *data);
     };
 }
 
