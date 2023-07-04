@@ -22,6 +22,12 @@ namespace mb {
 
         Widget() = default;
 
+        Widget(const Utility::Vec2i &pos, const Utility::Vec2i &size) {
+            m_position = pos;
+            m_size = size;
+            m_color = Display::Color::Black;
+        }
+
         ~Widget();
 
         virtual void add(Widget *widget);
@@ -46,15 +52,15 @@ namespace mb {
 
         virtual Origin getOrigin() { return m_origin; };
 
-        virtual void setColor(const Display::Color &color) { m_color = color; };
+        virtual void setColor(uint16_t color) { m_color = color; };
 
-        virtual Display::Color getColor() { return m_color; };
+        virtual uint16_t getColor() { return m_color; };
 
         virtual bool isVisible() { return m_visibility == Visibility::Visible; };
 
         virtual void setVisibility(Visibility visibility) { m_visibility = visibility; };
 
-        virtual void loop(const Utility::Vec2i &pos);
+        virtual void loop(const Utility::Vec2i &pos, const uint16_t &buttons);
 
     protected:
         Widget *p_parent = nullptr;
@@ -63,7 +69,7 @@ namespace mb {
         Utility::Vec2i m_position{};
         Utility::Vec2i m_size{};
         Origin m_origin = Origin::TopLeft;
-        Display::Color m_color = Display::Color::White;
+        uint16_t m_color = Display::Color::White;
     };
 }
 

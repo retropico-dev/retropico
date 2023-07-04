@@ -49,7 +49,7 @@ Utility::Vec4i Widget::getBounds() {
     return {m_position.x, m_position.y, m_size.x, m_size.y};
 }
 
-void Widget::loop(const Utility::Vec2i &pos) {
+void Widget::loop(const Utility::Vec2i &pos, const uint16_t &buttons) {
     if (!isVisible()) return;
 
     for (auto &widget: p_child_list) {
@@ -90,7 +90,7 @@ void Widget::loop(const Utility::Vec2i &pos) {
                     break;
             }
 
-            widget->loop(v);
+            widget->loop(v, buttons);
         }
     }
 }

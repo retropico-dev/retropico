@@ -9,7 +9,7 @@
 using namespace mb;
 
 Rectangle::Rectangle(int16_t x, int16_t y, int16_t w, int16_t h,
-                     bool fill, int16_t radius, const Display::Color &color) : Widget() {
+                     bool fill, int16_t radius, uint16_t color) : Widget() {
     Widget::setPosition(x, y);
     Widget::setSize(w, h);
     m_color = color;
@@ -18,7 +18,7 @@ Rectangle::Rectangle(int16_t x, int16_t y, int16_t w, int16_t h,
 }
 
 Rectangle::Rectangle(const Utility::Vec2i &pos, const Utility::Vec2i &size,
-                     bool fill, int16_t radius, const Display::Color &color) : Widget() {
+                     bool fill, int16_t radius, uint16_t color) : Widget() {
     Widget::setPosition(pos);
     Widget::setSize(size);
     m_color = color;
@@ -26,7 +26,9 @@ Rectangle::Rectangle(const Utility::Vec2i &pos, const Utility::Vec2i &size,
     m_radius = radius;
 }
 
-void Rectangle::loop(const Utility::Vec2i &pos) {
+void Rectangle::loop(const Utility::Vec2i &pos, const uint16_t &buttons) {
+    if (!isVisible()) return;
+
     if (m_fill) {
         if (m_radius > 0) {
             Ui::getDisplay()->fillRoundRect(pos.x, pos.y, m_size.x, m_size.y, m_radius, m_color);
@@ -41,5 +43,5 @@ void Rectangle::loop(const Utility::Vec2i &pos) {
         }
     }
 
-    Widget::loop(pos);
+    Widget::loop(pos, buttons);
 }

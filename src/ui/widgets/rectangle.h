@@ -11,14 +11,12 @@ namespace mb {
     class Rectangle : public Widget {
     public:
         Rectangle(int16_t x, int16_t y, int16_t w, int16_t h,
-                  bool fill = false, int16_t radius = 0,
-                  const Display::Color &color = Display::Color::White);
+                  bool fill = false, int16_t radius = 0, uint16_t color = Display::Color::White);
 
         Rectangle(const Utility::Vec2i &pos, const Utility::Vec2i &size,
-                  bool fill = false, int16_t radius = 0,
-                  const Display::Color &color = Display::Color::White);
+                  bool fill = false, int16_t radius = 0, uint16_t color = Display::Color::White);
 
-        void loop(const Utility::Vec2i &pos) override;
+        void loop(const Utility::Vec2i &pos, const uint16_t &buttons) override;
 
     private:
         int16_t m_radius = 0;

@@ -40,6 +40,9 @@ if (NOT PLATFORM_LINUX)
         pico_add_link_depend(${TARGET} ${CMAKE_SOURCE_DIR}/src/bootloader/memmap_defines.ld)
         pico_add_link_depend(${TARGET} ${CMAKE_SOURCE_DIR}/src/bootloader/memmap_default.ld)
     endfunction()
+else ()
+    # i want all executable located at root of build directory
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} CACHE STRING "" FORCE)
 endif ()
 
 # microboy-skeleton (cross-platform library)

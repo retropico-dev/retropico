@@ -18,7 +18,7 @@ Display::Display(const Utility::Vec2i &size) : Adafruit_GFX(size.x, size.y) {
 
 // very slow, obviously...
 void in_ram(Display::drawPixel)(int16_t x, int16_t y, uint16_t color) {
-    if ((x < 0) || (y < 0) || x > m_size.x || y > m_size.y) return;
+    if ((x < 0) || (y < 0) || x >= m_size.x || y >= m_size.y) return;
 
     if (rotation) {
         int16_t t;
