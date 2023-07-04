@@ -26,7 +26,7 @@ namespace mb {
             Cyan = 0x07FF,
             Magenta = 0xF81F,
             Yellow = 0xFFE0,
-            White = 0xFFFF,
+            White = 0xFFFF
         };
 
         // init a display (hardware dependant, to be implemented)

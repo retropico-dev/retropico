@@ -56,6 +56,14 @@ namespace mb {
 
         virtual uint16_t getColor() { return m_color; };
 
+        virtual void setOutlineColor(uint16_t color) { m_outline_color = color; };
+
+        virtual uint16_t getOutlineColor() { return m_outline_color; };
+
+        virtual void setOutlineThickness(uint16_t size) { m_outline_thickness = size; };
+
+        virtual uint16_t getOutlineThickness() { return m_outline_thickness; };
+
         virtual bool isVisible() { return m_visibility == Visibility::Visible; };
 
         virtual void setVisibility(Visibility visibility) { m_visibility = visibility; };
@@ -70,6 +78,8 @@ namespace mb {
         Utility::Vec2i m_size{};
         Origin m_origin = Origin::TopLeft;
         uint16_t m_color = Display::Color::White;
+        uint16_t m_outline_color = Display::Color::Red;
+        uint16_t m_outline_thickness = 0;
     };
 }
 

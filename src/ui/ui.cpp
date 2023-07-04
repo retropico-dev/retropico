@@ -10,18 +10,27 @@ using namespace mb;
 //...
 mb::Platform *s_platform;
 
-Ui::Ui(Platform *platform) : Rectangle({0, 0}, platform->getDisplay()->getSize()) {
+Ui::Ui(Platform *platform)
+        : Rectangle({2, 2}, {(int16_t) (platform->getDisplay()->getSize().x - 4),
+                             (int16_t) (platform->getDisplay()->getSize().y - 4)},
+                    Color::Transparent, 8) {
     p_platform = s_platform = platform;
 
     // set repeat delay for ui
     p_platform->getInput()->setRepeatDelay(INPUT_DELAY_UI);
 
-    // set outline color
-    Ui::setColor(Ui::Color::Red);
+    // set colors
+    Ui::setOutlineThickness(2);
+    Ui::setOutlineColor(Ui::Color::Red);
 
     // add filer
     p_filer = new Filer({1, 1}, {(int16_t) (Ui::getSize().x - 2), (int16_t) (Ui::getSize().y - 2)});
     Ui::add(p_filer);
+
+    // add menu
+    p_menu = new Menu({0, (int16_t) (Ui::getSize().y / 2)}, {150, 200});
+    p_menu->setOrigin(Origin::Left);
+    //Ui::add(p_menu);
 
     // first flip
     p_platform->getDisplay()->clear();

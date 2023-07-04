@@ -21,8 +21,10 @@ Filer::Filer(const Utility::Vec2i &pos, const Utility::Vec2i &size) : Widget(pos
     }
 
     // add highlight
-    p_highlight = new Rectangle({0, 0}, {Filer::getSize().x, (int16_t) (m_line_height + 4)}, true);
+    p_highlight = new Rectangle({0, 0}, {Filer::getSize().x, (int16_t) (m_line_height + 4)}, true, 8);
     p_highlight->setColor(Ui::Color::Red);
+    p_highlight->setOutlineColor(Ui::Color::Yellow);
+    p_highlight->setOutlineThickness(1);
     Filer::add(p_highlight);
 
     // add lines

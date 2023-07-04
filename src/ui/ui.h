@@ -8,6 +8,7 @@
 #include <vector>
 #include "rectangle.h"
 #include "filer.h"
+#include "menu.h"
 
 #define UI_FONT_HEIGHT 16
 
@@ -18,12 +19,14 @@ namespace mb {
     public:
         enum Color {
             Black = 0x0000,
+            White = 0xFFFF,
             Red = 0xC083,
             Yellow = 0xF5C1,
             Green = 0x0388,
             Blue = 0x01CF,
             Gray = 0x52CB,
-            GrayDark = 0x2986
+            GrayDark = 0x2986,
+            Transparent = 0xABCD // fake
         };
 
         explicit Ui(Platform *platform);
@@ -37,6 +40,7 @@ namespace mb {
     private:
         Platform *p_platform;
         Filer *p_filer;
+        Menu *p_menu;
     };
 }
 
