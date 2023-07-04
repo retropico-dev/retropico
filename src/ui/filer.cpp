@@ -15,19 +15,19 @@ Filer::Filer(const Utility::Vec2i &pos, const Utility::Vec2i &size) : Widget(pos
     m_files = p_platform->getIo()->getDir(Io::getRomPath());
 
     m_line_height = UI_FONT_HEIGHT + 6; // font height + margin
-    m_max_lines = (int16_t)(Filer::getSize().y / m_line_height);
+    m_max_lines = (int16_t) (Filer::getSize().y / m_line_height);
     if (m_max_lines * m_line_height < Filer::getSize().y) {
-        m_line_height = (int16_t)(Filer::getSize().y / m_max_lines);
+        m_line_height = (int16_t) (Filer::getSize().y / m_max_lines);
     }
 
     // add highlight
-    p_highlight = new Rectangle({0, 0}, {Filer::getSize().x, (int16_t)(m_line_height + 4)}, true);
+    p_highlight = new Rectangle({0, 0}, {Filer::getSize().x, (int16_t) (m_line_height + 4)}, true);
     p_highlight->setColor(Ui::Color::Red);
     Filer::add(p_highlight);
 
     // add lines
     for (int i = 0; i < m_max_lines; i++) {
-        auto line = new Text({4, (int16_t)(m_line_height * i + 6)}, "");
+        auto line = new Text({4, (int16_t) (m_line_height * i + 6)}, "");
         line->setColor(Ui::Color::Yellow);
         p_lines.push_back(line);
         Filer::add(line);
@@ -75,7 +75,9 @@ void Filer::loop(const Utility::Vec2i &pos, const uint16_t &buttons) {
     } else if (buttons & Input::Button::B1) {
         m_rom = Io::getRomPath() + "/" + m_files.get(m_file_index + m_highlight_index);
         auto file = p_platform->getIo()->read(m_rom, Io::Target::FlashRomData);
-        if (!file.data) {
+        if (file.data) {
+            m_done = true;
+        } else {
             printf("Filer: failed to load rom (%s)\r\n", m_rom.c_str());
         }
     }
@@ -88,7 +90,7 @@ void Filer::loop(const Utility::Vec2i &pos, const uint16_t &buttons) {
             p_lines[i]->setVisibility(Visibility::Visible);
             p_lines[i]->setString(m_files.get(i + m_file_index));
             if (i == m_highlight_index) {
-                p_highlight->setPosition(p_highlight->getPosition().x, (int16_t)(p_lines[i]->getPosition().y - 6));
+                p_highlight->setPosition(p_highlight->getPosition().x, (int16_t) (p_lines[i]->getPosition().y - 6));
             }
         }
     }

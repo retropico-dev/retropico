@@ -14,6 +14,8 @@ namespace mb {
     public:
         explicit Filer(const Utility::Vec2i &pos, const Utility::Vec2i &size);
 
+        [[nodiscard]] bool isDone() const { return m_done; }
+
     private:
         Platform *p_platform;
         std::string m_rom;
@@ -24,6 +26,7 @@ namespace mb {
         int m_highlight_index = 0;
         Rectangle *p_highlight;
         std::vector<Text *> p_lines;
+        bool m_done = false;
 
         void loop(const Utility::Vec2i &pos, const uint16_t &buttons) override;
 

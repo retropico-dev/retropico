@@ -31,7 +31,7 @@ Ui::Ui(Platform *platform) : Rectangle({0, 0}, platform->getDisplay()->getSize()
 
 bool Ui::loop() {
     uint16_t buttons = p_platform->getInput()->getButtons();
-    if (buttons & Input::Button::QUIT) return false;
+    if (buttons & Input::Button::QUIT || p_filer->isDone()) return false;
 
     // only refresh screen on button inputs
     if (buttons && buttons != Input::Button::DELAY) {
