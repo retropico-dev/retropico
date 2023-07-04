@@ -69,13 +69,7 @@ Io::FileBuffer PicoIo::read(const std::string &path, const Target &target) {
             break;
         }
 
-        // disable interrupts...
-        uint32_t ints = save_and_disable_interrupts();
-        // flash
-        flash_range_erase(offset + i, FLASH_SECTOR_SIZE);
-        flash_range_program(offset + i, buffer, FLASH_SECTOR_SIZE);
-        // restore interrupts...
-        restore_interrupts(ints);
+        writeSector(offset + i, buffer);
     }
 
     // sync
@@ -143,8 +137,6 @@ bool PicoIo::write(const std::string &path, const Io::FileBuffer &fileBuffer) {
 // static getDir filename allocation
 static char m_files_buffer[FLASH_SECTOR_SIZE / IO_MAX_PATH][IO_MAX_PATH];
 
-#warning TODO: handle < FLASH_SECTOR_SIZE buffer
-
 // load array of filenames to flash for memory reduction
 Io::FileListBuffer PicoIo::getDir(const std::string &path) {
     Io::FileListBuffer fileListBuffer;
@@ -178,18 +170,17 @@ Io::FileListBuffer PicoIo::getDir(const std::string &path) {
                 fileCountTotal++;
                 fileCountCurrent++;
                 if (fileCountCurrent == maxFiles) { // FLASH_SECTOR_SIZE
-                    // disable interrupts...
-                    uint32_t ints = save_and_disable_interrupts();
-                    // flash
-                    flash_range_erase(m_flash_offset_misc, FLASH_SECTOR_SIZE);
-                    flash_range_program(m_flash_offset_misc, (uint8_t *) m_files_buffer, FLASH_SECTOR_SIZE);
-                    // restore interrupts...
-                    restore_interrupts(ints);
+                    writeSector(m_flash_offset_misc, (uint8_t *) m_files_buffer);
                     m_flash_offset_misc += FLASH_SECTOR_SIZE;
                     fileCountCurrent = 0;
                     memset(m_files_buffer, 0, sizeof(m_files_buffer));
                 }
             }
+        }
+
+        if (fileCountCurrent > 0) {
+            writeSector(m_flash_offset_misc, (uint8_t *) m_files_buffer);
+            m_flash_offset_misc += FLASH_SECTOR_SIZE;
         }
 
         f_closedir(&dir);
@@ -262,4 +253,14 @@ bool PicoIo::unmount() {
     }
 
     return true;
+}
+
+void PicoIo::writeSector(uint32_t flash_offs, const uint8_t *data) {
+    // disable interrupts...
+    uint32_t ints = save_and_disable_interrupts();
+    // flash
+    flash_range_erase(flash_offs, FLASH_SECTOR_SIZE);
+    flash_range_program(flash_offs, data, FLASH_SECTOR_SIZE);
+    // restore interrupts...
+    restore_interrupts(ints);
 }
