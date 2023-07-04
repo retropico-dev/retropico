@@ -11,13 +11,13 @@
 namespace mb {
     class Text : public Widget {
     public:
-        Text(int16_t x, int16_t y, const std::string &text,
-             uint16_t color = Display::Color::White);
+        Text(int16_t x, int16_t y, int16_t w, int16_t h,
+             const std::string &text, uint16_t color = Display::Color::White);
 
-        Text(const Utility::Vec2i &pos, const std::string &text,
-             uint16_t color = Display::Color::White);
+        Text(const Utility::Vec2i &pos, const Utility::Vec2i &size,
+             const std::string &text, uint16_t color = Display::Color::White);
 
-        std::string getString();
+        [[nodiscard]] std::string getString() const;
 
         void setString(const std::string &str);
 
@@ -25,7 +25,7 @@ namespace mb {
 
     private:
         std::string m_text;
-        Utility::Vec4i m_bounds;
+        Utility::Vec4i m_bounds{};
     };
 }
 

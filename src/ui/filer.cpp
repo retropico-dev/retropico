@@ -29,7 +29,8 @@ Filer::Filer(const Utility::Vec2i &pos, const Utility::Vec2i &size) : Widget(pos
 
     // add lines
     for (int i = 0; i < m_max_lines; i++) {
-        auto line = new Text({4, (int16_t) (m_line_height * i + 6)}, "");
+        auto line = new Text(4, (int16_t) (m_line_height * i + 6),
+                             (int16_t) (Filer::getSize().x - 8), (int16_t) m_line_height, "");
         line->setColor(Ui::Color::Yellow);
         p_lines.push_back(line);
         Filer::add(line);
