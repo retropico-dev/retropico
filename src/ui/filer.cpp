@@ -23,15 +23,15 @@ Filer::Filer(const Utility::Vec2i &pos, const Utility::Vec2i &size) : Widget(pos
     // add highlight
     p_highlight = new Rectangle({0, 0}, {Filer::getSize().x, (int16_t) (m_line_height + 4)}, true, 8);
     p_highlight->setColor(Ui::Color::Red);
-    p_highlight->setOutlineColor(Ui::Color::Yellow);
+    p_highlight->setOutlineColor(Ui::Color::YellowLight);
     p_highlight->setOutlineThickness(1);
     Filer::add(p_highlight);
 
     // add lines
     for (int i = 0; i < m_max_lines; i++) {
-        auto line = new Text(4, (int16_t) (m_line_height * i + 6),
-                             (int16_t) (Filer::getSize().x - 8), (int16_t) m_line_height, "");
-        line->setColor(Ui::Color::Yellow);
+        auto line = new Text(3, (int16_t) (m_line_height * i + 6),
+                             (int16_t) (Filer::getSize().x - 13), (int16_t) m_line_height, "");
+        line->setColor(Ui::Color::YellowLight);
         p_lines.push_back(line);
         Filer::add(line);
     }
@@ -93,7 +93,10 @@ void Filer::loop(const Utility::Vec2i &pos, const uint16_t &buttons) {
             p_lines[i]->setVisibility(Visibility::Visible);
             p_lines[i]->setString(m_files.get(i + m_file_index));
             if (i == m_highlight_index) {
+                p_lines[i]->setColor(Ui::Color::Yellow);
                 p_highlight->setPosition(p_highlight->getPosition().x, (int16_t) (p_lines[i]->getPosition().y - 6));
+            } else {
+                p_lines[i]->setColor(Ui::Color::YellowLight);
             }
         }
     }

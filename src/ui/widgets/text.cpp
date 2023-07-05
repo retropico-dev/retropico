@@ -6,9 +6,7 @@
 #include "text.h"
 #include "ui.h"
 
-//#include "fonts/future6pt7b.h"
 #include "fonts/future7pt7b.h"
-//#include "fonts/future8pt7b.h"
 
 using namespace mb;
 
@@ -42,19 +40,9 @@ std::string Text::getString() const {
 
 void Text::setString(const std::string &str) {
     m_text = str;
-
-    //
     Ui::getDisplay()->getTextBounds(m_text.c_str(), 0, 0,
                                     &m_bounds.x, &m_bounds.y,
                                     (uint16_t *) &m_bounds.w, (uint16_t *) &m_bounds.h);
-    // TODO: handle recursive loop
-    while (m_bounds.w > getSize().x) {
-        m_text.erase(m_text.size() - 1, 1);
-        Ui::getDisplay()->getTextBounds(m_text.c_str(), 0, 0,
-                                        &m_bounds.x, &m_bounds.y,
-                                        (uint16_t *) &m_bounds.w, (uint16_t *) &m_bounds.h);
-
-    }
 }
 
 void Text::loop(const Utility::Vec2i &pos, const uint16_t &buttons) {
@@ -62,7 +50,9 @@ void Text::loop(const Utility::Vec2i &pos, const uint16_t &buttons) {
 
     // now draw the text
     Ui::getDisplay()->setTextColor(m_color);
+    Ui::getDisplay()->setClipArea({pos.x, pos.y, (int16_t) (pos.x + m_size.x), (int16_t) (pos.y + m_size.y)});
     Ui::getDisplay()->drawText((int16_t) (pos.x - m_bounds.x), (int16_t) (pos.y - m_bounds.y), m_text);
+    Ui::getDisplay()->setClipArea({0, 0, Ui::getDisplay()->getSize().x, Ui::getDisplay()->getSize().y});
 
     // draw child's
     Widget::loop(pos, buttons);

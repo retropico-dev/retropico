@@ -83,12 +83,21 @@ namespace mb {
             drawText(pos.x, pos.y, text);
         }
 
+        void setClipArea(const Utility::Vec4i &clipArea) {
+            m_clip = clipArea;
+        }
+
+        [[nodiscard]] Utility::Vec4i getClipArea() const {
+            return m_clip;
+        }
+
         // get display size
         Utility::Vec2i getSize() { return m_size; };
 
     protected:
         uint16_t *m_line_buffer;
         Utility::Vec2i m_size{};
+        Utility::Vec4i m_clip{};
         int m_pitch = 0;
         int m_bpp = 2;
     };
