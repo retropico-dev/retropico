@@ -52,7 +52,7 @@ void Filer::loop(const Utility::Vec2i &pos, const uint16_t &buttons) {
             m_highlight_index--;
         }
         if (m_highlight_index < 0) {
-            m_highlight_index = m_files.count < m_max_lines - 1 ? m_files.count - 1 : m_max_lines - 1;
+            m_highlight_index = m_files.count < m_max_lines ? m_files.count - 1 : m_max_lines - 1;
             m_file_index = m_files.count - 1 - m_highlight_index;
         }
     } else if (buttons & Input::Button::DOWN) {
