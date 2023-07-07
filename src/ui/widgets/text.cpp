@@ -13,8 +13,8 @@ using namespace mb;
 Text::Text(int16_t x, int16_t y, int16_t w, int16_t h,
            const std::string &str, uint16_t color) : Widget() {
     // default stuff
-    Ui::getPlatform()->getDisplay()->setFont(&future7pt7b);
-    Ui::getPlatform()->getDisplay()->setTextWrap(false);
+    Ui::getDisplay()->setFont(&future7pt7b);
+    Ui::getDisplay()->setTextWrap(false);
 
     Widget::setPosition(x, y);
     Widget::setSize(w, h);
@@ -25,8 +25,8 @@ Text::Text(int16_t x, int16_t y, int16_t w, int16_t h,
 Text::Text(const Utility::Vec2i &pos, const Utility::Vec2i &size,
            const std::string &str, uint16_t color) : Widget() {
     // default stuff
-    Ui::getPlatform()->getDisplay()->setFont(&future7pt7b);
-    Ui::getPlatform()->getDisplay()->setTextWrap(false);
+    Ui::getDisplay()->setFont(&future7pt7b);
+    Ui::getDisplay()->setTextWrap(false);
 
     Widget::setPosition(pos);
     Widget::setSize(size);

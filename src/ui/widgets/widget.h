@@ -28,6 +28,12 @@ namespace mb {
             m_color = Display::Color::Black;
         }
 
+        explicit Widget(const Utility::Vec4i &bounds) {
+            m_position = {bounds.x, bounds.y};
+            m_size = {bounds.w, bounds.h};
+            m_color = Display::Color::Black;
+        }
+
         ~Widget();
 
         virtual void add(Widget *widget);

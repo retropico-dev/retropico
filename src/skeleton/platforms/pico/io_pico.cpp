@@ -186,6 +186,8 @@ Io::FileListBuffer PicoIo::getDir(const std::string &path) {
         f_closedir(&dir);
     }
 
+    //4printf("PicoIo::getDir: m_flash_offset_misc: %i\r\n", m_flash_offset_misc);
+
     // unmount sdcard
     unmount();
 

@@ -8,18 +8,20 @@
 using namespace mb;
 
 //...
-mb::Platform *s_platform;
+static Ui *s_ui = nullptr;
 
 Ui::Ui(Platform *platform)
         : Rectangle({2, 2}, {(int16_t) (platform->getDisplay()->getSize().x - 4),
                              (int16_t) (platform->getDisplay()->getSize().y - 4)},
                     Color::Transparent, 8) {
-    p_platform = s_platform = platform;
+    s_ui = this;
+    p_platform = platform;
 
     // set repeat delay for ui
     p_platform->getInput()->setRepeatDelay(INPUT_DELAY_UI);
 
     // set colors
+    Ui::setColor(Color::Black);
     Ui::setOutlineThickness(2);
     Ui::setOutlineColor(Ui::Color::Red);
 
@@ -28,9 +30,10 @@ Ui::Ui(Platform *platform)
     Ui::add(p_filer);
 
     // add menu
-    p_menu = new Menu({0, (int16_t) (Ui::getSize().y / 2)}, {150, 200});
+    p_menu = new Menu({-8, (int16_t) (Ui::getSize().y / 2)}, {150, 144});
     p_menu->setOrigin(Origin::Left);
-    //Ui::add(p_menu);
+    p_menu->setVisibility(Visibility::Hidden);
+    Ui::add(p_menu);
 
     // first flip
     p_platform->getDisplay()->clear();
@@ -38,12 +41,16 @@ Ui::Ui(Platform *platform)
     p_platform->getDisplay()->flip();
 }
 
-bool Ui::loop() {
+bool Ui::loop(bool force) {
     uint16_t buttons = p_platform->getInput()->getButtons();
     if (buttons & Input::Button::QUIT || p_filer->isDone()) return false;
 
     // only refresh screen on button inputs
-    if (buttons && buttons != Input::Button::DELAY) {
+    if (force || buttons && buttons != Input::Button::DELAY) {
+        if (buttons & Input::Button::SELECT) {
+            p_menu->setVisibility(p_menu->isVisible() ? Visibility::Hidden : Visibility::Visible);
+        }
+
         // clear screen
         p_platform->getDisplay()->clear();
 
@@ -57,10 +64,14 @@ bool Ui::loop() {
     return true;
 }
 
+Ui *Ui::getInstance() {
+    return s_ui;
+}
+
 Platform *Ui::getPlatform() {
-    return s_platform;
+    return s_ui->p_platform;
 }
 
 Display *Ui::getDisplay() {
-    return s_platform->getDisplay();
+    return s_ui->p_platform->getDisplay();
 }

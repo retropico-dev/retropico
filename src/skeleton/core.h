@@ -11,6 +11,11 @@
 namespace mb {
     class Core {
     public:
+        enum Type {
+            Nes = 0,
+            Gb = 1
+        };
+
         explicit Core(Platform *platform) {
             p_platform = platform;
         }

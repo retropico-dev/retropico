@@ -112,14 +112,25 @@ void __assert_func(const char *filename,
 
 #endif
 
-bool isRomInFlash() {
-    // TODO: handle gb roms
+int isRomInFlash() {
+    // check for a valid nes rom
     uint8_t *data = (uint8_t *) (XIP_BASE + FLASH_TARGET_OFFSET_ROM_DATA);
-    if (memcmp(data, "NES\x1a", 4) != 0) {
-        return false;
+    if (memcmp(data, "NES\x1a", 4) == 0) {
+        return 1;
     }
 
-    return true;
+    // check for a valid gb rom (checksum)
+    uint8_t x = 0;
+    uint16_t i;
+    for (i = 0x0134; i <= 0x014C; i++) {
+        x = x - data[i] - 1;
+    }
+    if (x == data[0x014D]) {
+        return 2;
+    }
+
+    // load ui
+    return 0;
 }
 
 //****************************************************************************
@@ -377,7 +388,14 @@ int main(void) {
     if (scratch == FLASH_MAGIC_UI) {
         sAppStartOffset = XIP_BASE + (uint32_t) &__UI_START;
     } else {
-        sAppStartOffset = isRomInFlash() ? XIP_BASE + (uint32_t) &__NES_START : XIP_BASE + (uint32_t) &__UI_START;
+        int magic = isRomInFlash();
+        if (magic == 1) {
+            sAppStartOffset = XIP_BASE + (uint32_t) &__NES_START;
+        } else if (magic == 2) {
+            sAppStartOffset = XIP_BASE + (uint32_t) &__GB_START;
+        } else {
+            sAppStartOffset = XIP_BASE + (uint32_t) &__UI_START;
+        }
     }
 
     if ((scratch == FLASH_MAGIC1) && ((image & 0xfff) == 0) && (image > sAppStartOffset)) {

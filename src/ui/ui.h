@@ -12,8 +12,6 @@
 
 #define UI_FONT_HEIGHT 16
 
-extern mb::Platform *s_platform;
-
 namespace mb {
     class Ui : public Rectangle {
     public:
@@ -33,7 +31,13 @@ namespace mb {
 
         explicit Ui(Platform *platform);
 
-        bool loop();
+        bool loop(bool force = false);
+
+        Filer *getFiler() { return p_filer; }
+
+        Menu *getMenu() { return p_menu; }
+
+        static Ui *getInstance();
 
         static Platform *getPlatform();
 

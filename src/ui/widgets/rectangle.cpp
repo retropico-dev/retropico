@@ -24,6 +24,13 @@ Rectangle::Rectangle(const Utility::Vec2i &pos, const Utility::Vec2i &size,
     m_radius = radius;
 }
 
+Rectangle::Rectangle(const Utility::Vec4i &bounds, uint16_t color, int16_t radius) {
+    Widget::setPosition({bounds.x, bounds.y});
+    Widget::setSize({bounds.w, bounds.h});
+    m_color = color;
+    m_radius = radius;
+}
+
 void Rectangle::loop(const Utility::Vec2i &pos, const uint16_t &buttons) {
     if (!isVisible()) return;
 

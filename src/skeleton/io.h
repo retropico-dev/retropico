@@ -28,11 +28,19 @@ namespace mb {
         };
 
         struct FileListBuffer {
+#ifdef LINUX
+            std::vector<std::string> data;
+#else
             uint8_t *data = nullptr;
+#endif
             int count = 0;
 
             [[nodiscard]] char *get(int idx) const {
+#ifdef LINUX
+                return const_cast<char *>(data.at(idx).c_str());
+#else
                 return (char *) &data[idx * IO_MAX_PATH];
+#endif
             }
         };
 
@@ -50,20 +58,20 @@ namespace mb {
 
         virtual void createDir(const std::string &path) {};
 
-        static std::string getRomPath() {
-#if MB_GB
-            return "/roms/gameboy";
-#else
-            return "/roms/nes";
-#endif
+        static std::string getRomPath(int core) {
+            if (core == 0) {
+                return "/roms/nes";
+            } else {
+                return "/roms/gameboy";
+            }
         }
 
-        static std::string getSavePath() {
-#if MB_GB
-            return "/saves/gameboy";
-#else
-            return "/saves/nes";
-#endif
+        static std::string getSavePath(int core) {
+            if (core == 0) {
+                return "/saves/nes";
+            } else {
+                return "/saves/gameboy";
+            }
         }
     };
 }

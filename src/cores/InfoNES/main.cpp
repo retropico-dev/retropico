@@ -34,9 +34,12 @@ int main() {
             .data = (uint8_t *) (XIP_BASE + FLASH_TARGET_OFFSET_ROM_DATA),
             .size = 1024 * 1024
     };
+
     if (!core->loadRom(buffer)) {
-        stdio_flush();
-        while (true) { __wfi(); }
+        // reboot to ui
+        platform->getDisplay()->clear();
+        platform->getDisplay()->clear();
+        platform->reboot(Platform::RebootTarget::Ui);
     }
 #endif
 
@@ -56,6 +59,7 @@ int main() {
     }
 
     // reboot to ui
+    platform->getDisplay()->clear();
     platform->getDisplay()->clear();
     platform->reboot(Platform::RebootTarget::Ui);
 

@@ -16,6 +16,9 @@ namespace mb {
         Rectangle(const Utility::Vec2i &pos, const Utility::Vec2i &size,
                   uint16_t color = Display::Color::White, int16_t radius = 0);
 
+        explicit Rectangle(const Utility::Vec4i &bounds,
+                           uint16_t color = Display::Color::White, int16_t radius = 0);
+
         void loop(const Utility::Vec2i &pos, const uint16_t &buttons) override;
 
     private:

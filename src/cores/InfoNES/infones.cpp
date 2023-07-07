@@ -60,7 +60,7 @@ InfoNES::InfoNES(Platform *p) : Core(p) {
     core = this;
 
     // create saves directory
-    p_platform->getIo()->createDir(Io::getSavePath());
+    p_platform->getIo()->createDir(Io::getSavePath(Core::Type::Nes));
 
     // setup audio
     p_platform->getAudio()->setup(44100, 735, 1);
@@ -77,7 +77,7 @@ bool InfoNES::loadRom(const std::string &path) {
     }
 
     m_romPath = path;
-    m_sramPath = Io::getSavePath() + "/"
+    m_sramPath = Io::getSavePath(Core::Type::Nes) + "/"
                  + Utility::removeExt(Utility::baseName(m_romPath)) + ".srm";
 
     return loadRom(file);
