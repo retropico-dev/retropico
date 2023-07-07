@@ -23,7 +23,7 @@ namespace mb {
             Gb
         };
 
-        explicit Platform(bool useDoubleBufferDisplay = false) {}
+        explicit Platform(bool useDoubleBufferDisplay = false, bool maxOc = false) {}
 
         virtual ~Platform() {
             printf("~Platform()\n");

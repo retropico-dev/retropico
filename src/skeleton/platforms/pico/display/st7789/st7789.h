@@ -8,7 +8,7 @@
 #define DISPLAY_WIDTH 240
 #define DISPLAY_HEIGHT 240
 
-#define SERIAL_CLK_DIV 2.f
+#define SERIAL_CLK_DIV 1.5f
 
 #define ST7789_MADCTL_MY 0x80
 #define ST7789_MADCTL_MX 0x40

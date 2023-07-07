@@ -109,24 +109,28 @@ void in_ram(Display::drawSurface)(Surface *surface, const Utility::Vec2i &pos, c
             }
         }
 #else
-        // bilinear interpolation
-        int x_ratio = (srcWidth << 16) / dstWidth + 1;
-        int y_ratio = (srcHeight << 16) / dstHeight + 1;
+        // bi-linear interpolation
+        auto pixels = (uint16_t *) surface->getPixels();
+        auto srcSize = surface->getSize();
+        int x_ratio = (srcSize.x << 16) / size.x + 1;
+        int y_ratio = (srcSize.y << 16) / size.y + 1;
         int x, y, x_diff, y_diff;
         uint16_t a, b, c, d;
 
-        for (int i = 0; i < dstHeight; i++) {
+        setCursor(pos.x, pos.y);
+
+        for (int i = 0; i < size.y; i++) {
             y = (i * y_ratio) >> 16;
             y_diff = ((i * y_ratio) >> 8) & 0xFF;
 
-            for (int j = 0; j < dstWidth; j++) {
+            for (int j = 0; j < size.x; j++) {
                 x = (j * x_ratio) >> 16;
                 x_diff = ((j * x_ratio) >> 8) & 0xFF;
 
-                a = srcBuffer[(y * srcWidth) + x];
-                b = srcBuffer[(y * srcWidth) + x + 1];
-                c = srcBuffer[((y + 1) * srcWidth) + x];
-                d = srcBuffer[((y + 1) * srcWidth) + x + 1];
+                a = pixels[(y * srcSize.x) + x];
+                b = pixels[(y * srcSize.x) + x + 1];
+                c = pixels[((y + 1) * srcSize.x) + x];
+                d = pixels[((y + 1) * srcSize.x) + x + 1];
 
                 uint16_t red = (((a & 0xF800) >> 11) * (256 - x_diff) * (256 - y_diff) +
                                 ((b & 0xF800) >> 11) * x_diff * (256 - y_diff) +

@@ -11,21 +11,21 @@
 
 using namespace mb;
 
-PicoPlatform::PicoPlatform(bool useDoubleBufferDisplay) : Platform() {
-    // overclock - the value for VCO set here is meant for least power consumption
-#if MB_GB
-    vreg_set_voltage(VREG_VOLTAGE_1_15);
-    sleep_ms(2);
-    set_sys_clock_khz(300000, true);
-    sleep_ms(2);
-#else
-    const unsigned vco = 1596 * 1000 * 1000; // 266MHz
-    const unsigned div1 = 6, div2 = 1;
-    vreg_set_voltage(VREG_VOLTAGE_DEFAULT);
-    sleep_ms(2);
-    set_sys_clock_pll(vco, div1, div2);
-    sleep_ms(2);
-#endif
+PicoPlatform::PicoPlatform(bool useDoubleBufferDisplay, bool maxOc) : Platform() {
+    // overclock
+    if (maxOc) {
+        vreg_set_voltage(VREG_VOLTAGE_1_15);
+        sleep_ms(2);
+        set_sys_clock_khz(300000, true);
+        sleep_ms(2);
+    } else {
+        const unsigned vco = 1596 * 1000 * 1000; // 266MHz
+        const unsigned div1 = 6, div2 = 1;
+        vreg_set_voltage(VREG_VOLTAGE_DEFAULT);
+        sleep_ms(2);
+        set_sys_clock_pll(vco, div1, div2);
+        sleep_ms(2);
+    }
 
     // initialise USB serial connection for debugging
     stdio_init_all();

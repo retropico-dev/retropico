@@ -25,7 +25,7 @@
 namespace mb {
     class PicoPlatform : public Platform {
     public:
-        explicit PicoPlatform(bool useDoubleBufferDisplay = false);
+        explicit PicoPlatform(bool useDoubleBufferDisplay = false, bool maxOc = false);
 
         ~PicoPlatform() override;
 
