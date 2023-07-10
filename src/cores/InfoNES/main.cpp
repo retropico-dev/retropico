@@ -37,8 +37,6 @@ int main() {
 
     if (!core->loadRom(buffer)) {
         // reboot to ui
-        platform->getDisplay()->clear();
-        platform->getDisplay()->clear();
         platform->reboot(Platform::RebootTarget::Ui);
     }
 #endif
@@ -59,8 +57,6 @@ int main() {
     }
 
     // reboot to ui
-    platform->getDisplay()->clear();
-    platform->getDisplay()->clear();
     platform->reboot(Platform::RebootTarget::Ui);
 
     // unreachable

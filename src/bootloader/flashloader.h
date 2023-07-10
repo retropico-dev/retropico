@@ -23,8 +23,8 @@ extern void *__NES_START;
 extern void *__GB_START;
 extern void *__FLASHLOADER_END;
 
-// 3MB available of 8MB (Feather rp2040) (1MB for rom data, 1MB for misc data)
-#define FLASH_TARGET_OFFSET_ROM_HEADER ((1024 * 1024) * 5)
+// 5MB available of 8MB (Feather rp2040) (1MB for rom data, 1MB for misc data)
+#define FLASH_TARGET_OFFSET_ROM_HEADER ((1024 * 1024) * 3)  // unused for now
 //#define FLASH_TARGET_OFFSET_ROM_HEADER ((uint32_t) &__FLASHLOADER_END)
 #define FLASH_TARGET_OFFSET_ROM_DATA (FLASH_TARGET_OFFSET_ROM_HEADER + FLASH_SECTOR_SIZE)
 #define FLASH_TARGET_OFFSET_MISC (FLASH_TARGET_OFFSET_ROM_DATA + FLASH_BLOCK_SIZE + (1024 * 1024)) // 1MB max rom size

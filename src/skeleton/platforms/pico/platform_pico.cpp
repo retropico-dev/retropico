@@ -60,6 +60,10 @@ void PicoPlatform::reboot(const Platform::RebootTarget &target) {
             break;
     }
 
+    // clean screen
+    p_display->flip();
+    p_display->flip();
+
     watchdog_reboot(0x00000000, 0x00000000, 50);
 
     // wait for the reset
