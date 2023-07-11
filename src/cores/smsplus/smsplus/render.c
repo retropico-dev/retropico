@@ -67,7 +67,7 @@ void vramMarkTileDirty(int index) {
     }
 }
 
-uint8 *getCache(int tile, int attr) {
+uint8 *in_ram(getCache)(int tile, int attr) {
     int n, i, x, y, c;
     int b0, b1, b2, b3;
     int i0, i1, i2, i3;
@@ -127,7 +127,7 @@ uint8 *getCache(int tile, int attr) {
 
 #ifdef ALIGN_DWORD
 
-static __inline__ uint32 read_dword(void *address) {
+static __inline__ uint32 in_ram(read_dword)(void *address) {
     if ((uint32) address & 3) {
 #ifdef LSB_FIRST  /* little endian version */
         return (*((uint8 *) address) +
@@ -145,7 +145,7 @@ static __inline__ uint32 read_dword(void *address) {
 }
 
 
-static __inline__ void write_dword(void *address, uint32 data) {
+static __inline__ void in_ram(write_dword)(void *address, uint32 data) {
     if ((uint32) address & 3) {
 #ifdef LSB_FIRST
         *((uint8 *) address) = data;
@@ -220,11 +220,12 @@ void render_init(void) {
 
 
 /* Reset the rendering data */
-void render_reset(void) {
+void in_ram(render_reset)(void) {
     int i;
 
     /* Clear display bitmap */
-    memset(bitmap.data, 0, bitmap.pitch * bitmap.height);
+    //memset(bitmap.data, 0, bitmap.pitch * bitmap.height);
+    memset(bitmap.data, 0, bitmap.pitch);
 
     /* Clear palette */
     for (i = 0; i < PALETTE_SIZE; i += 1) {
@@ -255,7 +256,7 @@ void render_reset(void) {
 extern void sms_render_line(int line, const uint8_t *buffer);
 
 /* Draw a line of the display */
-void render_line(int line) {
+void in_ram(render_line)(int line) {
     /* Ensure we're within the viewport range */
     if ((line < vp_vstart) || (line >= vp_vend)) return;
 
@@ -284,7 +285,7 @@ void render_line(int line) {
 
 
 /* Draw the Master System background */
-void render_bg_sms(int line) {
+void in_ram(render_bg_sms)(int line) {
     int locked = 0;
     int v_line = (line + vdp.reg[9]) % 224;
     int v_row = (v_line & 7) << 3;
@@ -409,7 +410,7 @@ void render_bg_gg(int line) {
 
 
 /* Draw sprites */
-void render_obj(int line) {
+void in_ram(render_obj)(int line) {
     int i;
     uint8_t *ctp;
 

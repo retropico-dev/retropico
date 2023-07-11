@@ -4690,7 +4690,7 @@ OP(op, fe) {CP(ARG()); } /* CP   n 		  */
 OP(op, ff) {RST(0x38); } /* RST  7 		  */
 
 
-static void take_interrupt(void) {
+static void in_ram(take_interrupt)(void) {
     if (_IFF1) {
         int irq_vector;
 
@@ -4752,7 +4752,7 @@ static void take_interrupt(void) {
 /****************************************************************************
  * Reset registers to their initial values
  ****************************************************************************/
-void z80_reset(void *param) {
+void in_ram(z80_reset)(void *param) {
     Z80_DaisyChain *daisy_chain = (Z80_DaisyChain *) param;
     int i, p;
 #if BIG_FLAGS_ARRAY
@@ -4882,7 +4882,7 @@ void z80_exit(void) {
 /****************************************************************************
  * Execute 'cycles' T-states. Return number of T-states really executed
  ****************************************************************************/
-int z80_execute(int cycles) {
+int in_ram(z80_execute)(int cycles) {
     z80_ICount = cycles - Z80.extra_cycles;
     Z80.extra_cycles = 0;
 
@@ -4901,7 +4901,7 @@ int z80_execute(int cycles) {
 /****************************************************************************
  * Burn 'cycles' T-states. Adjust R register for the lost time
  ****************************************************************************/
-void z80_burn(int cycles) {
+void in_ram(z80_burn)(int cycles) {
     if (cycles > 0) {
         /* NOP takes 4 cycles per instruction */
         int n = (cycles + 3) / 4;
@@ -4913,7 +4913,7 @@ void z80_burn(int cycles) {
 /****************************************************************************
  * Get all registers in given buffer
  ****************************************************************************/
-unsigned z80_get_context(void *dst) {
+unsigned in_ram(z80_get_context)(void *dst) {
     if (dst)
         *(Z80_Regs *) dst = Z80;
     return sizeof(Z80_Regs);
@@ -4922,7 +4922,7 @@ unsigned z80_get_context(void *dst) {
 /****************************************************************************
  * Set all registers to given values
  ****************************************************************************/
-void z80_set_context(void *src) {
+void in_ram(z80_set_context)(void *src) {
     if (src)
         Z80 = *(Z80_Regs *) src;
 }
@@ -4937,28 +4937,28 @@ unsigned z80_get_pc(void) {
 /****************************************************************************
  * Set program counter
  ****************************************************************************/
-void z80_set_pc(unsigned val) {
+void in_ram(z80_set_pc)(unsigned val) {
     _PC = val;
 }
 
 /****************************************************************************
  * Return stack pointer
  ****************************************************************************/
-unsigned z80_get_sp(void) {
+unsigned in_ram(z80_get_sp)(void) {
     return _SPD;
 }
 
 /****************************************************************************
  * Set stack pointer
  ****************************************************************************/
-void z80_set_sp(unsigned val) {
+void in_ram(z80_set_sp)(unsigned val) {
     _SP = val;
 }
 
 /****************************************************************************
  * Return a specific register
  ****************************************************************************/
-unsigned z80_get_reg(int regnum) {
+unsigned in_ram(z80_get_reg)(int regnum) {
     switch (regnum) {
         case Z80_PC:
             return Z80.PC.w.l;
@@ -5023,7 +5023,7 @@ unsigned z80_get_reg(int regnum) {
 /****************************************************************************
  * Set a specific register
  ****************************************************************************/
-void z80_set_reg(int regnum, unsigned val) {
+void in_ram(z80_set_reg)(int regnum, unsigned val) {
     switch (regnum) {
         case Z80_PC:
             Z80.PC.w.l = val;
@@ -5112,7 +5112,7 @@ void z80_set_reg(int regnum, unsigned val) {
 /****************************************************************************
  * Set NMI line state
  ****************************************************************************/
-void z80_set_nmi_line(int state) {
+void in_ram(z80_set_nmi_line)(int state) {
     if (Z80.nmi_state == state) return;
 
     Z80.nmi_state = state;
@@ -5130,7 +5130,7 @@ void z80_set_nmi_line(int state) {
 /****************************************************************************
  * Set IRQ line state
  ****************************************************************************/
-void z80_set_irq_line(int irqline, int state) {
+void in_ram(z80_set_irq_line)(int irqline, int state) {
     Z80.irq_state = state;
     if (state == CLEAR_LINE) return;
 
@@ -5168,6 +5168,6 @@ void z80_set_irq_line(int irqline, int state) {
 /****************************************************************************
  * Set IRQ vector callback
  ****************************************************************************/
-void z80_set_irq_callback(int (*callback)(int)) {
+void in_ram(z80_set_irq_callback)(int (*callback)(int)) {
     Z80.irq_callback = callback;
 }

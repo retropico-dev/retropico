@@ -199,7 +199,7 @@ int vdp_data_r(void) {
 
 
 /* Process frame events */
-void vdp_run(void) {
+void in_ram(vdp_run)(void) {
     if (vdp.line <= 0xC0) {
         if (vdp.line == 0xC0) {
             vdp.status |= 0x80;

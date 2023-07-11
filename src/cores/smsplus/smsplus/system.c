@@ -247,6 +247,3 @@ void ym2413_write(int chip, int offset, int data) {
 
 
 
-
-
-

@@ -24,6 +24,13 @@ extern "C" {
 #endif
 #endif
 
+#ifdef PICO_BOARD
+#include <pico/platform.h>
+#define in_ram __not_in_flash_func
+#else
+#define in_ram
+#endif
+
 #include "types.h"
 #include "z80.h"
 #include "sms.h"

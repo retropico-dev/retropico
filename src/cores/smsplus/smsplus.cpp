@@ -16,15 +16,19 @@ static Core *core;
 
 #define SMS_WIDTH 256
 #define SMS_HEIGHT 192
-#define SND_RATE 22050
+#define SMS_AUD_RATE 22050
+#define SMS_FPS 60
 
-#define LINE_BUFFER_COUNT 16
+// rendering
+#define LINE_BUFFER_COUNT 32
 static uint16_t in_ram(lineBuffer)[LINE_BUFFER_COUNT][240];
 static uint8_t lineBufferIndex = 0;
-
 static int palette565[32];
 static uint8_t framebufferLine[256];
 static uint8_t sram[0x8000];
+
+// audio
+static int aud_buffer[SMS_AUD_RATE / SMS_FPS];
 
 _Noreturn void in_ram(core1_main)();
 
@@ -51,7 +55,8 @@ SMSPlus::SMSPlus(Platform *p) : Core(p) {
     p_platform->getIo()->createDir(Io::getSavePath(Core::Type::Sms));
 
     // setup audio
-    p_platform->getAudio()->setup(22050, 735, 2);
+    int samples = (int) ((float) SMS_AUD_RATE / SMS_FPS);
+    p_platform->getAudio()->setup(SMS_AUD_RATE, samples, 2);
 
     // start Core1, which processes requests to the LCD
     multicore_launch_core1(core1_main);
@@ -91,7 +96,7 @@ bool SMSPlus::loadRom(Io::FileBuffer file) {
     cart.rom = data;
     cart.type = TYPE_SMS;
 
-    system_init(SND_RATE);
+    system_init(SMS_AUD_RATE);
 
     p_platform->getDisplay()->clear();
 
@@ -120,16 +125,22 @@ bool in_ram(SMSPlus::loop)() {
     // process frame
     sms_frame(0);
 
+    // process audio
+    for (int x = 0; x < snd.bufsize; x++) {
+        aud_buffer[x] = (snd.buffer[0][x] << 16) + snd.buffer[1][x];
+    }
+    platform->getAudio()->play((void *) &aud_buffer, snd.bufsize);
+
     return true;
 }
 
-extern "C" void sms_palette_sync(int index) {
+extern "C" void in_ram(sms_palette_sync)(int index) {
     palette565[index] = ((bitmap.pal.color[index][0] >> 3) << 11)
                         | ((bitmap.pal.color[index][1] >> 2) << 5)
                         | (bitmap.pal.color[index][2] >> 3);
 }
 
-extern "C" void sms_render_line(int line, const uint8_t *buffer) {
+extern "C" void in_ram(sms_render_line)(int line, const uint8_t *buffer) {
     union core_cmd cmd{};
     cmd.cmd = CORE_CMD_LCD_LINE;
     cmd.line = line;

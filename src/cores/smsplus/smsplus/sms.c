@@ -4,8 +4,10 @@
 /* SMS context */
 t_sms sms;
 
+extern void ym2413_write(int chip, int offset, int data);
+
 /* Run the virtual console emulation for one frame */
-void sms_frame(int skip_render) {
+void in_ram(sms_frame)(int skip_render) {
     /* Take care of hard resets */
     if (input.system & INPUT_HARD_RESET) {
         system_reset();
