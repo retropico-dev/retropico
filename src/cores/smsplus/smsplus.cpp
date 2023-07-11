@@ -12,6 +12,7 @@ extern "C" {
 using namespace mb;
 
 static Platform *platform;
+static Display *display;
 static Core *core;
 
 #define SMS_WIDTH 256
@@ -20,15 +21,19 @@ static Core *core;
 #define SMS_FPS 60
 
 // rendering
-#define LINE_BUFFER_COUNT 32
+#define LINE_BUFFER_COUNT 64
 static uint16_t in_ram(lineBuffer)[LINE_BUFFER_COUNT][240];
 static uint8_t lineBufferIndex = 0;
+static uint8_t framebufferLine[SMS_WIDTH];
 static int palette565[32];
-static uint8_t framebufferLine[256];
 static uint8_t sram[0x8000];
 
 // audio
 static int aud_buffer[SMS_AUD_RATE / SMS_FPS];
+
+// input
+static uint16_t picoButtons = 0;
+static uint16_t smsButtons = 0, smsSystem = 0;
 
 _Noreturn void in_ram(core1_main)();
 
@@ -49,6 +54,7 @@ union core_cmd {
 SMSPlus::SMSPlus(Platform *p) : Core(p) {
     // crappy
     platform = p;
+    display = p->getDisplay();
     core = this;
 
     // create saves directory
@@ -79,7 +85,7 @@ bool SMSPlus::loadRom(const std::string &path) {
 bool SMSPlus::loadRom(Io::FileBuffer file) {
     uint8_t *data = file.data;
 
-    memset(framebufferLine, 0x00, 256);
+    memset(framebufferLine, 0x00, SMS_WIDTH);
     memset(sram, 0x00, 0x8000);
 
     sms.use_fm = 0;
@@ -105,20 +111,19 @@ bool SMSPlus::loadRom(Io::FileBuffer file) {
 
 bool in_ram(SMSPlus::loop)() {
     //printf("SMSPlus::loop\r\n");
-    uint16_t smsButtons = 0, smsSystem = 0;
 
     // process inputs
-    uint16_t buttons = platform->getInput()->getButtons();
-    if (buttons & Input::QUIT) return false;
+    picoButtons = platform->getInput()->getButtons();
+    if (picoButtons & Input::QUIT) return false;
 
-    if (buttons & Input::Button::UP) smsButtons |= INPUT_UP;
-    if (buttons & Input::Button::DOWN) smsButtons |= INPUT_DOWN;
-    if (buttons & Input::Button::LEFT) smsButtons |= INPUT_LEFT;
-    if (buttons & Input::Button::RIGHT) smsButtons |= INPUT_RIGHT;
-    if (buttons & Input::Button::B1) smsButtons |= INPUT_BUTTON1;
-    if (buttons & Input::Button::B2) smsButtons |= INPUT_BUTTON2;
-    if (buttons & Input::Button::START) smsSystem |= INPUT_START;
-    if (buttons & Input::Button::SELECT) smsSystem |= INPUT_PAUSE;
+    if (picoButtons & Input::Button::UP) smsButtons |= INPUT_UP;
+    if (picoButtons & Input::Button::DOWN) smsButtons |= INPUT_DOWN;
+    if (picoButtons & Input::Button::LEFT) smsButtons |= INPUT_LEFT;
+    if (picoButtons & Input::Button::RIGHT) smsButtons |= INPUT_RIGHT;
+    if (picoButtons & Input::Button::B1) smsButtons |= INPUT_BUTTON1;
+    if (picoButtons & Input::Button::B2) smsButtons |= INPUT_BUTTON2;
+    if (picoButtons & Input::Button::START) smsSystem |= INPUT_START;
+    if (picoButtons & Input::Button::SELECT) smsSystem |= INPUT_PAUSE;
     input.pad[0] = smsButtons;
     input.system = smsSystem;
 
@@ -166,8 +171,6 @@ extern "C" void in_ram(sms_render_line)(int line, const uint8_t *buffer) {
 
 void in_ram(core1_lcd_draw_line)(const uint_fast8_t line, const uint_fast8_t index) {
     //printf("core1_lcd_draw_line(%i, %i)\r\n", line, index);
-    auto display = platform->getDisplay();
-
     if (line == 0) {
         display->setCursor(0, 24);
     }

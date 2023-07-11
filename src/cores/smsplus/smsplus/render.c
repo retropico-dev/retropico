@@ -54,7 +54,7 @@ void render_reset(void);
 
 void render_init(void);
 
-void vramMarkTileDirty(int index) {
+void in_ram(vramMarkTileDirty)(int index) {
     int i = index;
     while (i < 0x800) {
         if (cachePtr[i] != -1) {
@@ -543,7 +543,7 @@ void in_ram(render_obj)(int line) {
 extern void sms_palette_sync(int index);
 
 /* Update a palette entry */
-void palette_sync(int index) {
+void in_ram(palette_sync)(int index) {
     int r, g, b;
 
     if (IS_GG) {
