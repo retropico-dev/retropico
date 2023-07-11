@@ -48,7 +48,7 @@ if (NOT PLATFORM_LINUX)
 
     find_package(Python3 REQUIRED COMPONENTS Interpreter)
     add_custom_command(OUTPUT ${COMPLETE_UF2}
-            DEPENDS ${CMAKE_PROJECT_NAME}-bootloader ${CMAKE_PROJECT_NAME}-ui ${CMAKE_PROJECT_NAME}-nes ${CMAKE_PROJECT_NAME}-gb
+            DEPENDS ${CMAKE_PROJECT_NAME}-bootloader ${CMAKE_PROJECT_NAME}-ui ${CMAKE_PROJECT_NAME}-nes ${CMAKE_PROJECT_NAME}-gb ${CMAKE_PROJECT_NAME}-sms
             COMMENT "Building full UF2 image"
             COMMAND ${Python3_EXECUTABLE}
             ${CMAKE_CURRENT_SOURCE_DIR}/uf2tool.py
@@ -57,6 +57,7 @@ if (NOT PLATFORM_LINUX)
             ${CMAKE_BINARY_DIR}/src/ui/${CMAKE_PROJECT_NAME}-ui.uf2
             ${CMAKE_BINARY_DIR}/src/cores/InfoNES/${CMAKE_PROJECT_NAME}-nes.uf2
             ${CMAKE_BINARY_DIR}/src/cores/Peanut-GB/${CMAKE_PROJECT_NAME}-gb.uf2
+            ${CMAKE_BINARY_DIR}/src/cores/smsplus/${CMAKE_PROJECT_NAME}-sms.uf2
             )
     add_custom_target(microboy ALL DEPENDS ${COMPLETE_UF2})
 endif ()

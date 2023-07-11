@@ -69,6 +69,7 @@ SMSPlus::SMSPlus(Platform *p) : Core(p) {
 }
 
 bool SMSPlus::loadRom(const std::string &path) {
+    printf("SMSPlus::loadRom(%s)\r\n", path.c_str());
     auto file = p_platform->getIo()->read(path, Io::Target::FlashRomData);
     if (!file.data) {
         printf("SMSPlus::loadRom: failed to load rom (%s)\r\n", path.c_str());
@@ -83,6 +84,7 @@ bool SMSPlus::loadRom(const std::string &path) {
 }
 
 bool SMSPlus::loadRom(Io::FileBuffer file) {
+    printf("SMSPlus::loadRom()\r\n");
     uint8_t *data = file.data;
 
     memset(framebufferLine, 0x00, SMS_WIDTH);
@@ -98,9 +100,16 @@ bool SMSPlus::loadRom(Io::FileBuffer file) {
     bitmap.pitch = 256;
     bitmap.depth = 8;
 
-    cart.pages = (file.size / 0x4000);
-    cart.rom = data;
     cart.type = TYPE_SMS;
+    // take care of image header, if present
+    if ((file.size / 512) & 1) {
+        printf("SMSPlus::loadRom: removing rom header...\r\n");
+        cart.rom = data + 512;
+        cart.pages = ((file.size - 512) / 0x4000);
+    } else {
+        cart.rom = data;
+        cart.pages = (file.size / 0x4000);
+    }
 
     system_init(SMS_AUD_RATE);
 

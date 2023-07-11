@@ -112,9 +112,6 @@ void __assert_func(const char *filename,
 #endif
 
 int isRomInFlash() {
-    // TODO
-    return 3;
-
     // check for a valid nes rom
     uint8_t *data = (uint8_t *) (XIP_BASE + FLASH_TARGET_OFFSET_ROM_DATA);
     if (memcmp(data, "NES\x1a", 4) == 0) {
@@ -132,9 +129,14 @@ int isRomInFlash() {
     }
 
     // check for a valid sms rom
-    // TODO
+    // https://www.smspower.org/Development/ROMHeader
+    if (memcmp(data + 0x7FF0, "TMR SEGA", 8) == 0
+        || memcmp(data + 0x3FF0, "TMR SEGA", 8) == 0
+        || memcmp(data + 0x1FF0, "TMR SEGA", 8) == 0) {
+        return 3;
+    }
 
-    // load ui
+    // no valid rom found, load ui
     return 0;
 }
 
