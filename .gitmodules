@@ -16,3 +16,6 @@
 [submodule "external/misc/no-OS-FatFS-SD-SPI-RPi-Pico"]
 	path = external/misc/no-OS-FatFS-SD-SPI-RPi-Pico
 	url = https://github.com/Cpasjuste/no-OS-FatFS-SD-SPI-RPi-Pico.git
+[submodule "external/cores/smsplus"]
+	path = external/cores/smsplus
+	url = https://github.com/0ldsk00l/smsplus.git

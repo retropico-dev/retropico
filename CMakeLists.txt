@@ -57,6 +57,9 @@ add_subdirectory(src/cores/InfoNES)
 # microboy-gb (Peanut-GB core)
 add_subdirectory(src/cores/Peanut-GB)
 
+# microboy-sms (smsplus core)
+add_subdirectory(src/cores/smsplus)
+
 # microboy-bootloader
 if (PICO_USE_BOOTLOADER)
     add_subdirectory(src/bootloader)

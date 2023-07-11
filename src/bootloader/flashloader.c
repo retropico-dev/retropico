@@ -69,7 +69,6 @@ static const uint8_t sDMAChannel = 0;
 // Must be aligned to a 256 byte boundary to allow use as a DMA ring buffer
 static uint8_t sPageBuffer[256] __attribute__ ((aligned(256)));
 
-
 #ifndef USE_PICO_STDLIB
 
 //****************************************************************************
@@ -113,6 +112,9 @@ void __assert_func(const char *filename,
 #endif
 
 int isRomInFlash() {
+    // TODO
+    return 3;
+
     // check for a valid nes rom
     uint8_t *data = (uint8_t *) (XIP_BASE + FLASH_TARGET_OFFSET_ROM_DATA);
     if (memcmp(data, "NES\x1a", 4) == 0) {
@@ -128,6 +130,9 @@ int isRomInFlash() {
     if (x == data[0x014D]) {
         return 2;
     }
+
+    // check for a valid sms rom
+    // TODO
 
     // load ui
     return 0;
@@ -213,7 +218,8 @@ int startMainApplication() {
         if (watchdog_hw->scratch[0] == FLASH_MAGIC1 || watchdog_hw->scratch[0] == ~FLASH_MAGIC1
             || watchdog_hw->scratch[0] == FLASH_MAGIC_UI || watchdog_hw->scratch[0] == ~FLASH_MAGIC_UI
             || watchdog_hw->scratch[0] == FLASH_MAGIC_NES || watchdog_hw->scratch[0] == ~FLASH_MAGIC_NES
-            || watchdog_hw->scratch[0] == FLASH_MAGIC_GB || watchdog_hw->scratch[0] == ~FLASH_MAGIC_GB) {
+            || watchdog_hw->scratch[0] == FLASH_MAGIC_GB || watchdog_hw->scratch[0] == ~FLASH_MAGIC_GB
+            || watchdog_hw->scratch[0] == FLASH_MAGIC_SMS || watchdog_hw->scratch[0] == ~FLASH_MAGIC_SMS) {
             watchdog_hw->scratch[0] = 0;
         }
 
@@ -393,6 +399,8 @@ int main(void) {
             sAppStartOffset = XIP_BASE + (uint32_t) &__NES_START;
         } else if (magic == 2) {
             sAppStartOffset = XIP_BASE + (uint32_t) &__GB_START;
+        } else if (magic == 3) {
+            sAppStartOffset = XIP_BASE + (uint32_t) &__SMS_START;
         } else {
             sAppStartOffset = XIP_BASE + (uint32_t) &__UI_START;
         }

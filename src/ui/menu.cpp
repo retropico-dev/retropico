@@ -46,7 +46,11 @@ Menu::Menu(const Utility::Vec2i &pos, const Utility::Vec2i &size)
     add(line);
     m_lines.emplace_back(line);
 
-    line = new MenuLine({0, (int16_t) (h * 2), getSize().x, h}, &settings_img, "SETTINGS");
+    line = new MenuLine({0, (int16_t) (h * 2), getSize().x, h}, &settings_img, "SMS");
+    add(line);
+    m_lines.emplace_back(line);
+
+    line = new MenuLine({0, (int16_t) (h * 3), getSize().x, h}, &settings_img, "SETTINGS");
     add(line);
     m_lines.emplace_back(line);
 }
@@ -78,6 +82,8 @@ void Menu::refresh() {
         Ui::getInstance()->getFiler()->setCore(Core::Nes);
     } else if (m_line_index == 1) {
         Ui::getInstance()->getFiler()->setCore(Core::Gb);
+    } else if (m_line_index == 2) {
+        Ui::getInstance()->getFiler()->setCore(Core::Sms);
     } else {
         // TODO: settings
     }

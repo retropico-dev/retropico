@@ -14,6 +14,7 @@ Filer::Filer(const Utility::Vec2i &pos, const Utility::Vec2i &size) : Widget(pos
     // get file list
     m_files[Core::Type::Nes] = p_platform->getIo()->getDir(Io::getRomPath(Core::Type::Nes));
     m_files[Core::Type::Gb] = p_platform->getIo()->getDir(Io::getRomPath(Core::Type::Gb));
+    m_files[Core::Type::Sms] = p_platform->getIo()->getDir(Io::getRomPath(Core::Type::Sms));
 
     m_line_height = UI_FONT_HEIGHT + 6; // font height + margin
     m_max_lines = (int16_t) (Filer::getSize().y / m_line_height);

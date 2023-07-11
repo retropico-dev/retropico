@@ -13,7 +13,8 @@ namespace mb {
     public:
         enum Type {
             Nes = 0,
-            Gb = 1
+            Gb = 1,
+            Sms = 2
         };
 
         explicit Core(Platform *platform) {

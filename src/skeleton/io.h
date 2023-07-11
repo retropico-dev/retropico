@@ -61,16 +61,20 @@ namespace mb {
         static std::string getRomPath(int core) {
             if (core == 0) {
                 return "/roms/nes";
-            } else {
+            } else if (core == 1) {
                 return "/roms/gameboy";
+            } else {
+                return "/roms/sms";
             }
         }
 
         static std::string getSavePath(int core) {
             if (core == 0) {
                 return "/saves/nes";
-            } else {
+            } else if (core == 1) {
                 return "/saves/gameboy";
+            } else {
+                return "/saves/sms";
             }
         }
     };
