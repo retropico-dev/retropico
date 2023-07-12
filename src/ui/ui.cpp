@@ -29,8 +29,13 @@ Ui::Ui(Platform *platform)
     p_filer = new Filer({1, 1}, {(int16_t) (Ui::getSize().x - 2), (int16_t) (Ui::getSize().y - 2)});
     Ui::add(p_filer);
 
+    // add settings
+    p_settings = new Settings(p_filer->getPosition(), p_filer->getSize());
+    p_settings->setVisibility(Visibility::Hidden);
+    Ui::add(p_settings);
+
     // add menu
-    p_menu = new Menu({-8, (int16_t) (Ui::getSize().y / 2)}, {150, 144});
+    p_menu = new Menu({-8, (int16_t) (Ui::getSize().y / 2)}, {150, 192});
     p_menu->setOrigin(Origin::Left);
     p_menu->setVisibility(Visibility::Hidden);
     Ui::add(p_menu);

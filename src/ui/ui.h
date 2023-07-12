@@ -9,6 +9,7 @@
 #include "rectangle.h"
 #include "filer.h"
 #include "menu.h"
+#include "settings.h"
 
 #define UI_FONT_HEIGHT 16
 
@@ -37,6 +38,8 @@ namespace mb {
 
         Menu *getMenu() { return p_menu; }
 
+        Settings *getSettings() { return p_settings; };
+
         static Ui *getInstance();
 
         static Platform *getPlatform();
@@ -47,6 +50,7 @@ namespace mb {
         Platform *p_platform;
         Filer *p_filer;
         Menu *p_menu;
+        Settings *p_settings;
     };
 }
 

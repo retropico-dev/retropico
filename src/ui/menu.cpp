@@ -9,6 +9,7 @@
 
 #include "bitmaps/nes.h"
 #include "bitmaps/gameboy.h"
+#include "bitmaps/sms.h"
 #include "bitmaps/settings.h"
 
 using namespace mb;
@@ -35,7 +36,7 @@ Menu::Menu(const Utility::Vec2i &pos, const Utility::Vec2i &size)
     Menu::setOutlineColor(Ui::Color::Red);
     Menu::setOutlineThickness(2);
 
-    int16_t h = (int16_t) (getSize().y / 3);
+    int16_t h = (int16_t) (getSize().y / 4);
     auto line = new MenuLine({0, 0, getSize().x, h}, &nes_img, "NES");
     line->setOutlineColor(Ui::Color::Red);
     line->p_text->setColor(Ui::Color::Yellow);
@@ -46,7 +47,7 @@ Menu::Menu(const Utility::Vec2i &pos, const Utility::Vec2i &size)
     add(line);
     m_lines.emplace_back(line);
 
-    line = new MenuLine({0, (int16_t) (h * 2), getSize().x, h}, &settings_img, "SMS");
+    line = new MenuLine({0, (int16_t) (h * 2), getSize().x, h}, &sms_img, "SMS");
     add(line);
     m_lines.emplace_back(line);
 
@@ -79,13 +80,21 @@ void Menu::loop(const Utility::Vec2i &pos, const uint16_t &buttons) {
 
 void Menu::refresh() {
     if (m_line_index == 0) {
+        Ui::getInstance()->getFiler()->setVisibility(Visibility::Visible);
+        Ui::getInstance()->getSettings()->setVisibility(Visibility::Hidden);
         Ui::getInstance()->getFiler()->setCore(Core::Nes);
     } else if (m_line_index == 1) {
+        Ui::getInstance()->getFiler()->setVisibility(Visibility::Visible);
+        Ui::getInstance()->getSettings()->setVisibility(Visibility::Hidden);
         Ui::getInstance()->getFiler()->setCore(Core::Gb);
     } else if (m_line_index == 2) {
+        Ui::getInstance()->getFiler()->setVisibility(Visibility::Visible);
+        Ui::getInstance()->getSettings()->setVisibility(Visibility::Hidden);
         Ui::getInstance()->getFiler()->setCore(Core::Sms);
     } else {
-        // TODO: settings
+        Ui::getInstance()->getFiler()->setVisibility(Visibility::Hidden);
+        Ui::getInstance()->getSettings()->setVisibility(Visibility::Visible);
+        Ui::getInstance()->loop(true);
     }
 
     for (int i = 0; i < m_lines.size(); i++) {
