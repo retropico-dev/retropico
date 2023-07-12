@@ -208,12 +208,10 @@ void in_ram(lcd_draw_line)(struct gb_s *gb, const uint8_t pixels[LCD_WIDTH], con
 
 PeanutGB::PeanutGB(Platform *p) : Core(p) {
     // create some render surfaces (double buffering)
-    if (m_scaling) {
-        p_surface[0] = new Surface({LCD_WIDTH, LCD_HEIGHT});
+    p_surface[0] = new Surface({LCD_WIDTH, LCD_HEIGHT});
 #if MB_DOUBLE_BUFFER
-        p_surface[1] = new Surface({LCD_WIDTH, LCD_HEIGHT});
+    p_surface[1] = new Surface({LCD_WIDTH, LCD_HEIGHT});
 #endif
-    }
 
     // cache drawing position
     drawingPos = {
@@ -322,6 +320,10 @@ bool in_ram(PeanutGB::loop)() {
                     manual_palette_selected++;
                     manual_assign_palette(palette, manual_palette_selected);
                 }
+            } else if (buttons & mb::Input::Button::UP) {
+                setScalingEnabled(true);
+            } else if (buttons & mb::Input::Button::DOWN) {
+                setScalingEnabled(false);
             }
         } else {
             p_platform->getInput()->setRepeatDelay(0);
@@ -332,10 +334,8 @@ bool in_ram(PeanutGB::loop)() {
 }
 
 PeanutGB::~PeanutGB() {
-    if (m_scaling) {
-        delete (p_surface[0]);
+    delete (p_surface[0]);
 #if MB_DOUBLE_BUFFER
-        delete (p_surface[1]);
+    delete (p_surface[1]);
 #endif
-    }
 }

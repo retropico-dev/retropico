@@ -52,6 +52,10 @@ namespace mb {
         }
 
         void setScalingEnabled(bool enable) {
+            if (enable == m_scaling) return;
+            if (!enable) {
+                p_platform->getDisplay()->clear();
+            }
             m_scaling = enable;
         }
 
