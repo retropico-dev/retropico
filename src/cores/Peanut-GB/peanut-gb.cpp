@@ -17,7 +17,7 @@ using namespace mb;
 
 //#define ENABLE_RAM_BANK
 #ifdef ENABLE_RAM_BANK
-static unsigned char rom_bank0[65536];
+static uint8_t rom_bank0[65536];
 #endif
 static const uint8_t *gb_rom = nullptr;
 static uint8_t gb_ram[32768];
@@ -247,7 +247,7 @@ bool PeanutGB::loadRom(Io::FileBuffer file) {
 
     gb_rom = file.data;
 #ifdef ENABLE_RAM_BANK
-    memcpy(rom_bank0, buffer, sizeof(rom_bank0));
+    memcpy(rom_bank0, file.data, sizeof(rom_bank0));
 #endif
 
     // start Core1, which processes requests to the LCD
