@@ -25,11 +25,7 @@ namespace mb {
 
         virtual bool loop() { return false; }
 
-        virtual bool loadRom(const std::string &path) { return false; }
-
         virtual bool loadRom(Io::FileBuffer file) { return false; }
-
-        virtual std::string getRomPath() { return m_romPath; };
 
         virtual std::string getSramPath() { return m_sramPath; };
 
@@ -37,7 +33,7 @@ namespace mb {
 
     protected:
         Platform *p_platform;
-        std::string m_romPath;
+        std::string m_romName;
         std::string m_sramPath;
     };
 }

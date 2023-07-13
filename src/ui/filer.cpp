@@ -79,12 +79,13 @@ void Filer::loop(const Utility::Vec2i &pos, const uint16_t &buttons) {
             if (index > m_files[m_core].count - 1) index = m_files[m_core].count - 1;
             setSelection(index);
         } else if (buttons & Input::Button::B1) {
-            m_rom = Io::getRomPath(m_core) + "/" + m_files[m_core].get(m_file_index + m_highlight_index);
-            auto file = p_platform->getIo()->read(m_rom, Io::Target::FlashRomData);
-            if (file.data) {
+            std::string name = m_files[m_core].get(m_file_index + m_highlight_index);
+            std::string path = Io::getRomPath(m_core) + "/" + name;
+            auto success = p_platform->getIo()->writeRomToFlash(path, name);
+            if (success) {
                 m_done = true;
             } else {
-                printf("Filer: failed to load rom (%s)\r\n", m_rom.c_str());
+                printf("Filer: failed to load rom (%s)\r\n", path.c_str());
             }
         }
     }

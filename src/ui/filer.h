@@ -23,7 +23,6 @@ namespace mb {
 
     private:
         Platform *p_platform;
-        std::string m_rom;
         Io::FileListBuffer m_files[3];
         Core::Type m_core = Core::Type::Nes;
         int m_max_lines = 0;

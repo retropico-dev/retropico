@@ -16,13 +16,12 @@ namespace mb {
     class Io {
     public:
         enum Target {
-            FlashRomHeader,
-            FlashRomData,
-            FlashMisc,
+            Flash,
             Ram
         };
 
         struct FileBuffer {
+            char name[IO_MAX_PATH]{};
             uint8_t *data = nullptr;
             size_t size = 0;
         };
@@ -50,9 +49,13 @@ namespace mb {
             printf("~Io()\n");
         }
 
-        virtual FileBuffer read(const std::string &path, const Target &target = FlashMisc) { return {}; }
+        virtual FileBuffer read(const std::string &path, const Target &target = Flash) { return {}; }
+
+        virtual FileBuffer readRomFromFlash() { return {}; }
 
         virtual bool write(const std::string &path, const FileBuffer &fileBuffer) { return false; }
+
+        virtual bool writeRomToFlash(const std::string &path, const std::string &name) { return false; }
 
         virtual FileListBuffer getDir(const std::string &path) { return {}; }
 

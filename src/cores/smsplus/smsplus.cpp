@@ -68,23 +68,11 @@ SMSPlus::SMSPlus(Platform *p) : Core(p) {
     multicore_launch_core1(core1_main);
 }
 
-bool SMSPlus::loadRom(const std::string &path) {
-    printf("SMSPlus::loadRom(%s)\r\n", path.c_str());
-    auto file = p_platform->getIo()->read(path, Io::Target::FlashRomData);
-    if (!file.data) {
-        printf("SMSPlus::loadRom: failed to load rom (%s)\r\n", path.c_str());
-        return false;
-    }
-
-    m_romPath = path;
-    m_sramPath = Io::getSavePath(Core::Type::Sms) + "/"
-                 + Utility::removeExt(Utility::baseName(m_romPath)) + ".srm";
-
-    return loadRom(file);
-}
-
 bool SMSPlus::loadRom(Io::FileBuffer file) {
-    printf("SMSPlus::loadRom()\r\n");
+    printf("SMSPlus::loadRom: %s\r\n", file.name);
+    m_romName = file.name;
+    m_sramPath = Io::getSavePath(Core::Type::Sms) + "/"
+                 + Utility::removeExt(Utility::baseName(m_romName)) + ".srm";
     uint8_t *data = file.data;
 
     memset(framebufferLine, 0x00, SMS_WIDTH);

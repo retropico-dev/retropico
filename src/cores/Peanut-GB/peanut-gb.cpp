@@ -229,21 +229,13 @@ PeanutGB::PeanutGB(Platform *p) : Core(p) {
     gb_priv.gb = this;
 }
 
-bool PeanutGB::loadRom(const std::string &path) {
-    Io::FileBuffer fileBuffer = p_platform->getIo()->read(path, Io::Target::FlashRomData);
-    if (!fileBuffer.data) {
-        printf("PeanutGB::loadRom: failed to load rom (%s)\r\n", path.c_str());
-        return false;
-    }
-
-    printf("PeanutGB::loadRom: data: %p, size: %zu\r\n",
-           fileBuffer.data, fileBuffer.size);
-
-    return loadRom(fileBuffer);
-}
-
 bool PeanutGB::loadRom(Io::FileBuffer file) {
     enum gb_init_error_e ret;
+
+    printf("PeanutGB::loadRom: %s\r\n", file.name);
+    m_romName = file.name;
+    m_sramPath = Io::getSavePath(Core::Type::Sms) + "/"
+                 + Utility::removeExt(Utility::baseName(m_romName)) + ".srm";
 
     gb_rom = file.data;
 #ifdef ENABLE_RAM_BANK

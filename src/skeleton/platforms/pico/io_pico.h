@@ -13,9 +13,13 @@ namespace mb {
     public:
         PicoIo();
 
-        FileBuffer read(const std::string &path, const Target &target = FlashMisc) override;
+        FileBuffer read(const std::string &path, const Target &target = Flash) override;
+
+        FileBuffer readRomFromFlash() override;
 
         bool write(const std::string &path, const FileBuffer &fileBuffer) override;
+
+        bool writeRomToFlash(const std::string &path, const std::string &name) override;
 
         FileListBuffer getDir(const std::string &path) override;
 

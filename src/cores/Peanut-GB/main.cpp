@@ -30,12 +30,8 @@ int main() {
     auto core = new PeanutGB(platform);
 
 #ifndef LINUX
-    Io::FileBuffer buffer{
-            .data = (uint8_t *) (XIP_BASE + FLASH_TARGET_OFFSET_ROM_DATA),
-            .size = 1024 * 1024
-    };
-
-    if (!core->loadRom(buffer)) {
+    Io::FileBuffer fb = platform->getIo()->readRomFromFlash();
+    if (!core->loadRom(fb)) {
         // reboot to ui
         platform->reboot(Platform::RebootTarget::Ui);
     }

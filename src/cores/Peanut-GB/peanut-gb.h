@@ -21,8 +21,6 @@ namespace mb {
 
         ~PeanutGB() override;
 
-        bool loadRom(const std::string &path) override;
-
         bool loadRom(Io::FileBuffer file) override;
 
         bool loop() override;

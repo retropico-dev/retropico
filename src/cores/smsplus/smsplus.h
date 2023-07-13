@@ -12,8 +12,6 @@ namespace mb {
     public:
         explicit SMSPlus(Platform *platform);
 
-        bool loadRom(const std::string &path) override;
-
         bool loadRom(Io::FileBuffer file) override;
 
         bool loop() override;
