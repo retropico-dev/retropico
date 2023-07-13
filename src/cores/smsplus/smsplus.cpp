@@ -29,7 +29,7 @@ static int palette565[32];
 static uint8_t sram[0x8000];
 
 // audio
-static int aud_buffer[SMS_AUD_RATE / SMS_FPS];
+static int audio_buffer[SMS_AUD_RATE / SMS_FPS];
 
 // input
 static uint16_t picoButtons = 0;
@@ -99,6 +99,7 @@ bool SMSPlus::loadRom(Io::FileBuffer file) {
         cart.pages = (file.size / 0x4000);
     }
 
+    memset(audio_buffer, 0x00, (SMS_AUD_RATE / SMS_FPS));
     system_init(SMS_AUD_RATE);
 
     p_platform->getDisplay()->clear();
@@ -129,9 +130,10 @@ bool in_ram(SMSPlus::loop)() {
 
     // process audio
     for (int x = 0; x < snd.bufsize; x++) {
-        aud_buffer[x] = (snd.buffer[0][x] << 16) + snd.buffer[1][x];
+        audio_buffer[x] = (snd.buffer[0][x] << 16) + snd.buffer[1][x];
+        //audio_buffer[x] = ((snd.buffer[0][x] + snd.buffer[1][x]) / 512) + 128;
     }
-    platform->getAudio()->play((void *) &aud_buffer, snd.bufsize);
+    platform->getAudio()->play((void *) &audio_buffer, snd.bufsize);
 
     return true;
 }

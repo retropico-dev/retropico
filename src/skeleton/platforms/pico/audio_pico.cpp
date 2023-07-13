@@ -49,12 +49,13 @@ void PicoAudio::setup(uint16_t rate, uint16_t samples, uint8_t channels) {
 void in_ram(PicoAudio::play)(const void *data, int samples) {
     auto buffer = take_audio_buffer(p_producer_pool, true);
     auto sampleBuffer = (int16_t *) buffer->buffer->bytes;
-    if (m_volume == 0) {
+    if (m_volume == 100) {
         memcpy(sampleBuffer, data, samples * sizeof(int16_t) * m_channels);
     } else {
         auto dataBuffer = (int16_t *) data;
         for (uint_fast16_t i = 0; i < (uint_fast16_t) samples * m_channels; i++) {
-            sampleBuffer[i] = (int16_t) (dataBuffer[i] >> m_volume);
+            //sampleBuffer[i] = (int16_t) (dataBuffer[i] >> m_volume);
+            sampleBuffer[i] = (int16_t) ((dataBuffer[i] * m_volume) / 100);
         }
     }
 

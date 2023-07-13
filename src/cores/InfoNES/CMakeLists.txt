@@ -15,7 +15,7 @@ set(NES_INCLUDES
         ${CMAKE_SOURCE_DIR}/external/cores/InfoNES/infones
         ${CMAKE_SOURCE_DIR}/external/cores/InfoNES/pico_lib
         )
-set(NES_FLAGS -DMB_NES -DPICO_AUDIO_I2S_MONO_INPUT)
+set(NES_FLAGS -DMB_NES -DPICO_AUDIO_I2S_MONO_INPUT -DPICO_AUDIO_I2S_MONO_OUTPUT)
 
 ####################
 # InfoNES binary
