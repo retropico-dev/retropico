@@ -29,7 +29,7 @@ if (NOT PLATFORM_LINUX)
         set_linker_script(microboy-gb memmap_gb.ld)
         target_compile_definitions(microboy-gb PUBLIC ${GB_FLAGS} PICO_USE_BOOTLOADER)
     endif ()
-    pico_set_binary_type(microboy-gb copy_to_ram)
+    #pico_set_binary_type(microboy-gb copy_to_ram)
     pico_add_uf2_output(microboy-gb)
     # debug output
     if (PICO_STDIO_UART)

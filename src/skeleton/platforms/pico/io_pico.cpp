@@ -2,6 +2,7 @@
 // Created by cpasjuste on 01/06/23.
 //
 
+#include <cstring>
 #include "platform.h"
 #include "io_pico.h"
 #include "f_util.h"
@@ -17,7 +18,7 @@ PicoIo::PicoIo() : Io() {
 Io::FileBuffer PicoIo::read(const std::string &path, const Target &target) {
     uint8_t buffer[FLASH_SECTOR_SIZE];
     Io::FileBuffer fileBuffer;
-    uint32_t offset;
+    uint32_t offset = 0;
     FSIZE_t size;
     FRESULT fr;
     UINT br;

@@ -24,7 +24,7 @@ set(PLATFORM_INCLUDES
         ${CMAKE_SOURCE_DIR}/external/misc/Adafruit-GFX-Library
         )
 
-set(PLATFORM_FLAGS "-DARDUINO=123 -ffast-math")
+set(PLATFORM_FLAGS "-DNO_PICO_LED -DARDUINO=123 -ffast-math")
 
 if (PLATFORM_LINUX)
     file(GLOB_RECURSE TEMP ${CMAKE_CURRENT_SOURCE_DIR}/platforms/linux/*.c*)
