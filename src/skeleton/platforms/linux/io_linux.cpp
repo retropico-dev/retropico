@@ -125,3 +125,29 @@ void LinuxIo::createDir(const std::string &path) {
 
     free(temp);
 }
+
+bool LinuxIo::writeRomToFlash(const std::string &path, const std::string &name) {
+    FILE *fp = fopen("/tmp/microboy.flash", "w");
+    if (!fp) return false;
+    fwrite(path.c_str(), path.length(), 1, fp);
+    fclose(fp);
+    return true;
+}
+
+Io::FileBuffer LinuxIo::readRomFromFlash() {
+    FileBuffer fb;
+    FILE *fp = fopen("/tmp/microboy.flash", "r");
+    if (fp) {
+        std::string str(256, '\0');
+        size_t len = fread(&str[0], sizeof(char), (size_t) 256, fp);
+        str.resize(len + 1);
+        str[len + 1] = '\0';
+        // remove "/"
+        if (str[0] == '/') str.erase(0, 1);
+        // open rom file
+        fb = read(str);
+        strncpy(fb.name, Utility::baseName(str).c_str(), 128);
+    }
+
+    return fb;
+}

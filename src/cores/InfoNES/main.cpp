@@ -29,13 +29,11 @@ int main() {
     auto platform = new MBPlatform();
     auto core = new InfoNES(platform);
 
-#ifndef LINUX
     Io::FileBuffer fb = platform->getIo()->readRomFromFlash();
     if (!core->loadRom(fb)) {
         // reboot to ui
         platform->reboot(Platform::RebootTarget::Ui);
     }
-#endif
 
     // emulation loop
     while (core->loop()) {
