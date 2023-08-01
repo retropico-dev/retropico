@@ -50,7 +50,7 @@ namespace mb {
         Clock m_repeatClock{};
         uint16_t m_buttons{0};
         uint16_t m_buttons_prev{0};
-        uint16_t m_repeatDelayMs = INPUT_DELAY_UI;
+        uint16_t m_repeatDelayMs = 0;
         Mapping m_mapping[MAX_BUTTONS];
     };
 }

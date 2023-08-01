@@ -84,6 +84,7 @@ void Filer::loop(const Utility::Vec2i &pos, const uint16_t &buttons) {
             auto success = p_platform->getIo()->writeRomToFlash(path, name);
             if (success) {
                 m_done = true;
+                return;
             } else {
                 printf("Filer: failed to load rom (%s)\r\n", path.c_str());
             }

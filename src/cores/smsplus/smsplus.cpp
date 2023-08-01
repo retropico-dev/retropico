@@ -112,8 +112,14 @@ bool in_ram(SMSPlus::loop)() {
 
     // process inputs
     picoButtons = platform->getInput()->getButtons();
-    if (picoButtons & Input::QUIT) return false;
 
+    // exit requested
+    if (picoButtons & Input::Button::START && picoButtons & Input::Button::SELECT
+        || picoButtons & mb::Input::Button::QUIT) {
+        return false;
+    }
+
+    smsButtons = 0;
     if (picoButtons & Input::Button::UP) smsButtons |= INPUT_UP;
     if (picoButtons & Input::Button::DOWN) smsButtons |= INPUT_DOWN;
     if (picoButtons & Input::Button::LEFT) smsButtons |= INPUT_LEFT;

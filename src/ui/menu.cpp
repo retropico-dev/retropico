@@ -71,7 +71,7 @@ void Menu::loop(const Utility::Vec2i &pos, const uint16_t &buttons) {
             m_line_index = 0;
         }
         refresh();
-    } else if (buttons & Input::Button::B2) {
+    } else if (buttons & Input::Button::B1 || buttons & Input::Button::B2) {
         setVisibility(Visibility::Hidden);
     }
 

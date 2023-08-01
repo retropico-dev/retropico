@@ -9,8 +9,8 @@ using namespace mb;
 
 PicoInput::PicoInput() : Input() {
     // setup buttons pins
-    m_mapping[0] = {Input::Button::B1, BTN_PIN_B1, "B1"};
-    m_mapping[1] = {Input::Button::B2, BTN_PIN_B2, "B2"};
+    m_mapping[0] = {Input::Button::B1, BTN_PIN_A, "B1"};
+    m_mapping[1] = {Input::Button::B2, BTN_PIN_B, "B2"};
     m_mapping[2] = {Input::Button::START, BTN_PIN_START, "START"};
     m_mapping[3] = {Input::Button::SELECT, BTN_PIN_SELECT, "SELECT"};
     m_mapping[4] = {Input::Button::LEFT, BTN_PIN_LEFT, "LEFT"};

@@ -25,8 +25,8 @@
 #define AUDIO_PIN_LRC   28  // LRC (CLOCK + 1)      A2
 
 // BUTTONS PINS
-#define BTN_PIN_B1      (25)    //                  25
-#define BTN_PIN_B2      (24)    //                  24
+#define BTN_PIN_A       (25)    //                  25
+#define BTN_PIN_B       (24)    //                  24
 #define BTN_PIN_START   (1)     //                  RX
 #define BTN_PIN_SELECT  (0)     //                  TX
 #define BTN_PIN_LEFT    (3)     //                  SCL

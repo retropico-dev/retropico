@@ -20,7 +20,8 @@ namespace mb {
             Auto,
             Ui,
             Nes,
-            Gb
+            Gb,
+            Sms
         };
 
         explicit Platform(bool useDoubleBufferDisplay = false, bool maxOc = false) {}

@@ -44,6 +44,8 @@ PicoPlatform::PicoPlatform(bool useDoubleBufferDisplay, bool maxOc) : Platform()
 }
 
 void PicoPlatform::reboot(const Platform::RebootTarget &target) {
+    printf("PicoPlatform::reboot: %i\r\n", target);
+
     // set up watchdog scratch registers so that the bootloader
     // knows what to do after the reset
     switch (target) {
@@ -56,15 +58,19 @@ void PicoPlatform::reboot(const Platform::RebootTarget &target) {
         case RebootTarget::Nes:
             watchdog_hw->scratch[0] = FLASH_MAGIC_NES;
             break;
+        case RebootTarget::Sms:
+            watchdog_hw->scratch[0] = FLASH_MAGIC_SMS;
+            break;
         default:
+            watchdog_hw->scratch[0] = 0;
             break;
     }
 
     // clean screen
-    p_display->flip();
+    p_display->clear();
     p_display->flip();
 
-    watchdog_reboot(0x00000000, 0x00000000, 50);
+    watchdog_reboot(0, 0, 50);
 
     // wait for the reset
     while (true) tight_loop_contents();

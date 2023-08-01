@@ -285,8 +285,11 @@ bool in_ram(PeanutGB::loop)() {
     // handle input
     uint16_t buttons = p_platform->getInput()->getButtons();
     if (buttons > 0 && !(buttons & mb::Input::Button::DELAY)) {
-        // exit requested (linux)
-        if (buttons & mb::Input::Button::QUIT) return false;
+        // exit requested
+        if (buttons & Input::Button::START && buttons & Input::Button::SELECT
+            || buttons & mb::Input::Button::QUIT) {
+            return false;
+        }
 
         // emulation inputs
         gameboy.direct.joypad_bits.a = !(buttons & mb::Input::Button::B1);

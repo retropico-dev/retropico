@@ -22,6 +22,7 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <hardware/gpio.h>
 #include "hardware/regs/addressmap.h"
 #include "hardware/regs/m0plus.h"
 #include "hardware/structs/watchdog.h"
@@ -35,6 +36,8 @@
 #include "pico/bootrom.h"
 #include "pico/binary_info.h"
 #include "flashloader.h"
+
+#include "../skeleton/platforms/pico/pinout.h"
 
 bi_decl(bi_program_version_string("1.10"));
 
@@ -378,6 +381,42 @@ void initClock() {
                 CLOCKS_CLK_SYS_CTRL_AUXSRC_VALUE_CLKSRC_PLL_SYS);
 }
 
+// check for combo keys
+// up + right + down + left: reboot to bootloader
+// A + B: boot ui (filer)
+bool check_bootloader_combo() {
+    gpio_set_function(BTN_PIN_UP, GPIO_FUNC_SIO);
+    gpio_set_dir(BTN_PIN_UP, false);
+    gpio_pull_up(BTN_PIN_UP);
+    gpio_set_function(BTN_PIN_RIGHT, GPIO_FUNC_SIO);
+    gpio_set_dir(BTN_PIN_RIGHT, false);
+    gpio_pull_up(BTN_PIN_RIGHT);
+    gpio_set_function(BTN_PIN_DOWN, GPIO_FUNC_SIO);
+    gpio_set_dir(BTN_PIN_DOWN, false);
+    gpio_pull_up(BTN_PIN_DOWN);
+    gpio_set_function(BTN_PIN_LEFT, GPIO_FUNC_SIO);
+    gpio_set_dir(BTN_PIN_LEFT, false);
+    gpio_pull_up(BTN_PIN_LEFT);
+    gpio_set_function(BTN_PIN_A, GPIO_FUNC_SIO);
+    gpio_set_dir(BTN_PIN_A, false);
+    gpio_pull_up(BTN_PIN_A);
+    gpio_set_function(BTN_PIN_B, GPIO_FUNC_SIO);
+    gpio_set_dir(BTN_PIN_B, false);
+    gpio_pull_up(BTN_PIN_B);
+
+    if (!gpio_get(BTN_PIN_UP) && !gpio_get(BTN_PIN_RIGHT)
+        && !gpio_get(BTN_PIN_DOWN) && !gpio_get(BTN_PIN_LEFT)) {
+        reset_usb_boot(0, 0);
+        while (true) tight_loop_contents();
+    }
+
+    if (!gpio_get(BTN_PIN_A) && !gpio_get(BTN_PIN_B)) {
+        return true;
+    }
+
+    return false;
+}
+
 //****************************************************************************
 int main(void) {
     const tFlashHeader *header;
@@ -391,6 +430,9 @@ int main(void) {
 
     // Take DMA block out of reset so we can use it to calculate CRCs
     unreset_block_wait(RESETS_RESET_DMA_BITS);
+
+    // check for combos keys
+    if (check_bootloader_combo()) scratch = FLASH_MAGIC_UI;
 
     // first check for UI magic
     if (scratch == FLASH_MAGIC_UI) {

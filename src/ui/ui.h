@@ -51,6 +51,9 @@ namespace mb {
         Filer *p_filer;
         Menu *p_menu;
         Settings *p_settings;
+        // auto-repeat
+        uint16_t m_buttons_old = 0;
+        Clock m_repeat_clock{};
     };
 }
 

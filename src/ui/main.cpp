@@ -45,7 +45,6 @@ int main() {
 
     // reboot to bootloader for launching either nes or gb core
     // based on rom header
-    platform->getDisplay()->clear();
     platform->reboot(Platform::RebootTarget::Auto);
 
     delete (ui);
