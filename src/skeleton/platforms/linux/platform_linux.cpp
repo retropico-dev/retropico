@@ -6,7 +6,7 @@
 
 using namespace mb;
 
-LinuxPlatform::LinuxPlatform(bool useDoubleBufferDisplay) : Platform() {
+LinuxPlatform::LinuxPlatform(bool useDoubleBufferDisplay, bool maxOc) : Platform() {
     p_display = new LinuxDisplay();
     p_audio = new LinuxAudio();
     p_input = new LinuxInput();

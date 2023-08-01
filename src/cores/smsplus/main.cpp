@@ -29,18 +29,11 @@ int main() {
     auto platform = new MBPlatform();
     auto core = new SMSPlus(platform);
 
-#ifndef LINUX
     Io::FileBuffer fb = platform->getIo()->readRomFromFlash();
     if (!core->loadRom(fb)) {
         // reboot to ui
         platform->reboot(Platform::RebootTarget::Ui);
     }
-#else
-    if (!core->loadRom("roms/sms/Alex Kidd in Miracle World (USA, Europe, Brazil) (Rev 1).sms")) {
-        // reboot to ui
-        platform->reboot(Platform::RebootTarget::Ui);
-    }
-#endif
 
     // emulation loop
     while (core->loop()) {
