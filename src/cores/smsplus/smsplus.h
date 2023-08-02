@@ -14,7 +14,7 @@ namespace mb {
 
         bool loadRom(Io::FileBuffer file) override;
 
-        bool loop() override;
+        bool loop(uint16_t buttons) override;
     };
 }
 

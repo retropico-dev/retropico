@@ -22,6 +22,20 @@ namespace mb {
 
         virtual void play(const void *data, int samples) {};
 
+        virtual void volumeUp() {
+            if (m_volume <= 95) {
+                m_volume += 5;
+            }
+        }
+
+        virtual void volumeDown() {
+            if (m_volume >= 5) {
+                m_volume -= 5;
+            }
+        }
+
+        virtual uint8_t getVolume() { return m_volume; }
+
     protected:
         uint16_t m_rate = 44100;
         uint16_t m_samples = 735;

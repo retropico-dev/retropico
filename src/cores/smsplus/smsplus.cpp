@@ -32,7 +32,7 @@ static uint8_t sram[0x8000];
 static int audio_buffer[SMS_AUD_RATE / SMS_FPS];
 
 // input
-static uint16_t picoButtons = 0;
+//static uint16_t picoButtons = 0;
 static uint16_t smsButtons = 0, smsSystem = 0;
 
 _Noreturn void in_ram(core1_main)();
@@ -107,27 +107,19 @@ bool SMSPlus::loadRom(Io::FileBuffer file) {
     return true;
 }
 
-bool in_ram(SMSPlus::loop)() {
+bool in_ram(SMSPlus::loop)(uint16_t buttons) {
     //printf("SMSPlus::loop\r\n");
-
-    // process inputs
-    picoButtons = platform->getInput()->getButtons();
-
-    // exit requested
-    if (picoButtons & Input::Button::START && picoButtons & Input::Button::SELECT
-        || picoButtons & mb::Input::Button::QUIT) {
-        return false;
-    }
+    if (!Core::loop(buttons)) return false;
 
     smsButtons = 0;
-    if (picoButtons & Input::Button::UP) smsButtons |= INPUT_UP;
-    if (picoButtons & Input::Button::DOWN) smsButtons |= INPUT_DOWN;
-    if (picoButtons & Input::Button::LEFT) smsButtons |= INPUT_LEFT;
-    if (picoButtons & Input::Button::RIGHT) smsButtons |= INPUT_RIGHT;
-    if (picoButtons & Input::Button::B1) smsButtons |= INPUT_BUTTON1;
-    if (picoButtons & Input::Button::B2) smsButtons |= INPUT_BUTTON2;
-    if (picoButtons & Input::Button::START) smsSystem |= INPUT_START;
-    if (picoButtons & Input::Button::SELECT) smsSystem |= INPUT_PAUSE;
+    if (buttons & Input::Button::UP) smsButtons |= INPUT_UP;
+    if (buttons & Input::Button::DOWN) smsButtons |= INPUT_DOWN;
+    if (buttons & Input::Button::LEFT) smsButtons |= INPUT_LEFT;
+    if (buttons & Input::Button::RIGHT) smsButtons |= INPUT_RIGHT;
+    if (buttons & Input::Button::B1) smsButtons |= INPUT_BUTTON1;
+    if (buttons & Input::Button::B2) smsButtons |= INPUT_BUTTON2;
+    if (buttons & Input::Button::START) smsSystem |= INPUT_START;
+    if (buttons & Input::Button::SELECT) smsSystem |= INPUT_PAUSE;
     input.pad[0] = smsButtons;
     input.system = smsSystem;
 

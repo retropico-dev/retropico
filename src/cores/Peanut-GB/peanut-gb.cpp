@@ -265,9 +265,10 @@ bool PeanutGB::loadRom(Io::FileBuffer file) {
     return true;
 }
 
-bool in_ram(PeanutGB::loop)() {
-    gameboy.gb_frame = 0;
+bool in_ram(PeanutGB::loop)(uint16_t buttons) {
+    if (!Core::loop(buttons)) return false;
 
+    gameboy.gb_frame = 0;
     do {
         __gb_step_cpu(&gameboy);
         tight_loop_contents();
@@ -283,47 +284,40 @@ bool in_ram(PeanutGB::loop)() {
     gameboy.direct.joypad = 0xFF;
 
     // handle input
-    uint16_t buttons = p_platform->getInput()->getButtons();
-    if (buttons > 0 && !(buttons & mb::Input::Button::DELAY)) {
-        // exit requested
-        if (buttons & Input::Button::START && buttons & Input::Button::SELECT
-            || buttons & mb::Input::Button::QUIT) {
-            return false;
-        }
+    // emulation inputs
+    gameboy.direct.joypad_bits.a = !(buttons & mb::Input::Button::B1);
+    gameboy.direct.joypad_bits.b = !(buttons & mb::Input::Button::B2);
+    gameboy.direct.joypad_bits.select = !(buttons & mb::Input::Button::SELECT);
+    gameboy.direct.joypad_bits.start = !(buttons & mb::Input::Button::START);
+    gameboy.direct.joypad_bits.up = !(buttons & mb::Input::Button::UP);
+    gameboy.direct.joypad_bits.right = !(buttons & mb::Input::Button::RIGHT);
+    gameboy.direct.joypad_bits.down = !(buttons & mb::Input::Button::DOWN);
+    gameboy.direct.joypad_bits.left = !(buttons & mb::Input::Button::LEFT);
 
-        // emulation inputs
-        gameboy.direct.joypad_bits.a = !(buttons & mb::Input::Button::B1);
-        gameboy.direct.joypad_bits.b = !(buttons & mb::Input::Button::B2);
-        gameboy.direct.joypad_bits.select = !(buttons & mb::Input::Button::SELECT);
-        gameboy.direct.joypad_bits.start = !(buttons & mb::Input::Button::START);
-        gameboy.direct.joypad_bits.up = !(buttons & mb::Input::Button::UP);
-        gameboy.direct.joypad_bits.right = !(buttons & mb::Input::Button::RIGHT);
-        gameboy.direct.joypad_bits.down = !(buttons & mb::Input::Button::DOWN);
-        gameboy.direct.joypad_bits.left = !(buttons & mb::Input::Button::LEFT);
-
-        // hotkey / combos
-        if (buttons & mb::Input::Button::SELECT) {
-            p_platform->getInput()->setRepeatDelay(INPUT_DELAY_UI);
-            // palette selection
-            if (buttons & mb::Input::Button::LEFT) {
-                if (manual_palette_selected > 0) {
-                    manual_palette_selected--;
-                    manual_assign_palette(palette, manual_palette_selected);
-                }
-            } else if (buttons & mb::Input::Button::RIGHT) {
-                if (manual_palette_selected < NUMBER_OF_MANUAL_PALETTES) {
-                    manual_palette_selected++;
-                    manual_assign_palette(palette, manual_palette_selected);
-                }
-            } else if (buttons & mb::Input::Button::UP) {
-                setScalingEnabled(true);
-            } else if (buttons & mb::Input::Button::DOWN) {
-                setScalingEnabled(false);
+    /*
+    // hotkey / combos
+    if (buttons & mb::Input::Button::SELECT) {
+        p_platform->getInput()->setRepeatDelay(INPUT_DELAY_UI);
+        // palette selection
+        if (buttons & mb::Input::Button::LEFT) {
+            if (manual_palette_selected > 0) {
+                manual_palette_selected--;
+                manual_assign_palette(palette, manual_palette_selected);
             }
-        } else {
-            p_platform->getInput()->setRepeatDelay(0);
+        } else if (buttons & mb::Input::Button::RIGHT) {
+            if (manual_palette_selected < NUMBER_OF_MANUAL_PALETTES) {
+                manual_palette_selected++;
+                manual_assign_palette(palette, manual_palette_selected);
+            }
+        } else if (buttons & mb::Input::Button::UP) {
+            setScalingEnabled(true);
+        } else if (buttons & mb::Input::Button::DOWN) {
+            setScalingEnabled(false);
         }
+    } else {
+        p_platform->getInput()->setRepeatDelay(0);
     }
+    */
 
     return true;
 }

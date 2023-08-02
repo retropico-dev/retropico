@@ -18,16 +18,17 @@
  */
 
 #include "platform.h"
-#include "smsplus.h"
+#include "main.h"
 
 using namespace mb;
 
 int main() {
     Clock clock;
     int frames = 0;
+    bool running = true;
 
     auto platform = new MBPlatform();
-    auto core = new SMSPlus(platform);
+    auto core = new MBCore(platform);
 
     Io::FileBuffer fb = platform->getIo()->readRomFromFlash();
     if (!core->loadRom(fb)) {
@@ -36,7 +37,10 @@ int main() {
     }
 
     // emulation loop
-    while (core->loop()) {
+    while (running) {
+        // emulation loop
+        running = core->loop(platform->getInput()->getButtons());
+
         // fps
         if (clock.getElapsedTime().asSeconds() >= 1) {
             auto percent = (uint16_t) (((float) Utility::getUsedHeap() / (float) Utility::getTotalHeap()) * 100);
@@ -45,16 +49,17 @@ int main() {
                    Utility::getUsedHeap(), Utility::getTotalHeap(), percent);
             frames = 0;
         }
-
         // increment frames for fps counter
         frames++;
     }
+
+    // cleanly close core (handle saves and such)
+    delete (core);
 
     // reboot to ui
     platform->reboot(Platform::RebootTarget::Ui);
 
     // unreachable
-    delete (core);
     delete (platform);
 
     return 0;

@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 # set source files
 file(GLOB GB_SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/../main.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/*.c*
         ${CMAKE_SOURCE_DIR}/external/cores/Peanut-GB/examples/sdl2/minigb_apu/*.c*
         )

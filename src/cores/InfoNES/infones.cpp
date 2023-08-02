@@ -35,6 +35,8 @@ static int lcd_line_busy = 0;
 // audio
 static int16_t in_ram(audio_buffer)[1024];
 static int audio_buffer_index = 0;
+// buttons
+static uint16_t s_buttons = 0;
 
 int InfoNES_LoadSRAM(const std::string &path);
 
@@ -115,8 +117,12 @@ bool InfoNES::loadRom(Io::FileBuffer file) {
     return true;
 }
 
-bool in_ram(InfoNES::loop)() {
+bool in_ram(InfoNES::loop)(uint16_t buttons) {
+    if (!Core::loop(buttons)) return false;
     if (InfoNES_Menu() == -1) return false;
+
+    // static buttons
+    s_buttons = buttons;
 
     while (!frameLoaded && !stopped) {
         if (SpriteJustHit == PPU_Scanline && PPU_ScanTable[PPU_Scanline] == SCAN_ON_SCREEN) {
@@ -150,7 +156,11 @@ bool in_ram(InfoNES::loop)() {
     return true;
 }
 
-InfoNES::~InfoNES() = default;
+InfoNES::~InfoNES() {
+    printf("~InfoNES()\n");
+    InfoNES_SaveSRAM(getSramPath());
+    InfoNES_Fin();
+}
 
 void in_ram(core1_lcd_draw_line)(const uint_fast8_t line, const uint_fast8_t index) {
     if (line == 4) {
@@ -249,27 +259,16 @@ void in_ram(InfoNES_PadState)(DWORD *pdwPad1, DWORD *pdwPad2, DWORD *pdwSystem) 
     (void) pdwPad1;
     (void) pdwSystem;
 
-    uint16_t buttons = platform->getInput()->getButtons();
-
-    // exit requested
-    if (buttons & Input::Button::START && buttons & Input::Button::SELECT
-        || buttons & mb::Input::Button::QUIT) {
-        InfoNES_SaveSRAM(core->getSramPath());
-        InfoNES_Fin();
-        return;
-    }
-
     // emulation inputs
     auto &pad = *pdwPad1;
-    pad = (buttons & mb::Input::Button::LEFT ? LEFT : 0) |
-          (buttons & mb::Input::Button::RIGHT ? RIGHT : 0) |
-          (buttons & mb::Input::Button::UP ? UP : 0) |
-          (buttons & mb::Input::Button::DOWN ? DOWN : 0) |
-          (buttons & mb::Input::Button::B1 ? A : 0) |
-          (buttons & mb::Input::Button::B2 ? B : 0) |
-          (buttons & mb::Input::Button::SELECT ? SELECT : 0) |
-          (buttons & mb::Input::Button::START ? START : 0) |
-          0;
+    pad = (s_buttons & Input::Button::LEFT ? LEFT : 0) |
+          (s_buttons & Input::Button::RIGHT ? RIGHT : 0) |
+          (s_buttons & Input::Button::UP ? UP : 0) |
+          (s_buttons & Input::Button::DOWN ? DOWN : 0) |
+          (s_buttons & Input::Button::B1 ? A : 0) |
+          (s_buttons & Input::Button::B2 ? B : 0) |
+          (s_buttons & Input::Button::SELECT ? SELECT : 0) |
+          (s_buttons & Input::Button::START ? START : 0) | 0;
 }
 
 int InfoNES_Menu() {

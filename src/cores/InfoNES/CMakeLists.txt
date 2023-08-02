@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 # set source files
 file(GLOB NES_SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/../main.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/*.c*
         ${CMAKE_SOURCE_DIR}/external/cores/InfoNES/infones/*.cpp
         )

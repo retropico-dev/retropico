@@ -23,7 +23,7 @@ namespace mb {
 
         virtual ~Core() = default;
 
-        virtual bool loop() { return false; }
+        virtual bool loop(uint16_t buttons);
 
         virtual bool loadRom(Io::FileBuffer file) { return false; }
 
