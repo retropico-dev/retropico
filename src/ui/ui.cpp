@@ -40,6 +40,13 @@ Ui::Ui(Platform *platform)
     p_menu->setVisibility(Visibility::Hidden);
     Ui::add(p_menu);
 
+    // add info box
+    p_infoBox = new InfoBox({(int16_t) (Ui::getSize().x / 2), (int16_t) (Ui::getSize().y / 2)},
+                            {(int16_t) (Ui::getSize().x - 32), 64});
+    p_infoBox->setOrigin(Origin::Center);
+    p_infoBox->setVisibility(Visibility::Hidden);
+    Ui::add(p_infoBox);
+
     // first flip
     p_platform->getDisplay()->clear();
     Rectangle::loop(m_position, 0);

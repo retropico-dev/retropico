@@ -10,6 +10,7 @@
 #include "filer.h"
 #include "menu.h"
 #include "settings.h"
+#include "infobox.h"
 
 #define UI_FONT_HEIGHT 16
 
@@ -38,7 +39,9 @@ namespace mb {
 
         Menu *getMenu() { return p_menu; }
 
-        Settings *getSettings() { return p_settings; };
+        Settings *getSettings() { return p_settings; }
+
+        InfoBox *getInfoBox() { return p_infoBox; }
 
         static Ui *getInstance();
 
@@ -51,6 +54,7 @@ namespace mb {
         Filer *p_filer;
         Menu *p_menu;
         Settings *p_settings;
+        InfoBox *p_infoBox;
         // auto-repeat
         uint16_t m_buttons_old = 0;
         Clock m_repeat_clock{};

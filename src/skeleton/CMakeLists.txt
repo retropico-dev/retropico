@@ -15,16 +15,19 @@ file(GLOB PLATFORM_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/utility/*.c*
         ${CMAKE_CURRENT_SOURCE_DIR}/compat/*.c*
         ${CMAKE_SOURCE_DIR}/external/misc/Adafruit-GFX-Library/Adafruit_GFX.cpp
-        )
+)
 set(PLATFORM_INCLUDES
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/utility
         ${CMAKE_CURRENT_SOURCE_DIR}/compat
         ${CMAKE_SOURCE_DIR}/src # for bootloader header
         ${CMAKE_SOURCE_DIR}/external/misc/Adafruit-GFX-Library
-        )
+)
 
 set(PLATFORM_FLAGS "-DNO_PICO_LED -DARDUINO=123 -ffast-math")
+if (PICO_STDIO_UART)
+    list(APPEND PLATFORM_FLAGS -DPICO_STDIO_UART)
+endif ()
 
 if (PLATFORM_LINUX)
     file(GLOB_RECURSE TEMP ${CMAKE_CURRENT_SOURCE_DIR}/platforms/linux/*.c*)
@@ -53,7 +56,7 @@ else ()
             PICO_AUDIO_I2S_DMA_IRQ=1
             #PICO_DEFAULT_UART_TX_PIN=12
             #PICO_DEFAULT_UART_RX_PIN=13
-            )
+    )
     list(APPEND PLATFORM_LIBS
             -Wl,--print-memory-usage
             pico_stdlib
@@ -63,7 +66,7 @@ else ()
             hardware_pio
             hardware_dma
             hardware_flash
-            )
+    )
     # spi sdcard driver
     add_subdirectory(${CMAKE_SOURCE_DIR}/external/misc/no-OS-FatFS-SD-SPI-RPi-Pico/FatFs_SPI build)
     list(APPEND PLATFORM_LIBS FatFs_SPI)
@@ -73,7 +76,7 @@ else ()
                 ${CMAKE_CURRENT_SOURCE_DIR}/platforms/pico/display/st7789/st7789.cpp
                 ${CMAKE_CURRENT_SOURCE_DIR}/platforms/pico/display/st7789/pico_display.cpp
                 ${CMAKE_CURRENT_SOURCE_DIR}/platforms/pico/display/st7789/pico_display_buffered.cpp
-                )
+        )
         list(APPEND PLATFORM_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/platforms/pico/display/st7789)
         list(APPEND PLATFORM_LIBS hardware_dma)
     endif ()

@@ -81,12 +81,14 @@ void Filer::loop(const Utility::Vec2i &pos, const uint16_t &buttons) {
         } else if (buttons & Input::Button::B1) {
             std::string name = m_files[m_core].get(m_file_index + m_highlight_index);
             std::string path = Io::getRomPath(m_core) + "/" + name;
+            Ui::getInstance()->getInfoBox()->show("Please Wait... Loading...");
             auto success = p_platform->getIo()->writeRomToFlash(path, name);
             if (success) {
                 m_done = true;
                 return;
             } else {
                 printf("Filer: failed to load rom (%s)\r\n", path.c_str());
+                Ui::getInstance()->getInfoBox()->hide();
             }
         }
     }
