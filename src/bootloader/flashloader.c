@@ -382,36 +382,30 @@ void initClock() {
 }
 
 // check for combo keys
-// up + right + down + left: reboot to bootloader
+// SELECT: reboot to bootloader
 // A + B: boot ui (filer)
 bool check_bootloader_combo() {
-    gpio_set_function(BTN_PIN_UP, GPIO_FUNC_SIO);
-    gpio_set_dir(BTN_PIN_UP, false);
-    gpio_pull_up(BTN_PIN_UP);
-    gpio_set_function(BTN_PIN_RIGHT, GPIO_FUNC_SIO);
-    gpio_set_dir(BTN_PIN_RIGHT, false);
-    gpio_pull_up(BTN_PIN_RIGHT);
-    gpio_set_function(BTN_PIN_DOWN, GPIO_FUNC_SIO);
-    gpio_set_dir(BTN_PIN_DOWN, false);
-    gpio_pull_up(BTN_PIN_DOWN);
-    gpio_set_function(BTN_PIN_LEFT, GPIO_FUNC_SIO);
-    gpio_set_dir(BTN_PIN_LEFT, false);
-    gpio_pull_up(BTN_PIN_LEFT);
-    gpio_set_function(BTN_PIN_A, GPIO_FUNC_SIO);
-    gpio_set_dir(BTN_PIN_A, false);
-    gpio_pull_up(BTN_PIN_A);
-    gpio_set_function(BTN_PIN_B, GPIO_FUNC_SIO);
-    gpio_set_dir(BTN_PIN_B, false);
-    gpio_pull_up(BTN_PIN_B);
-
-    if (!gpio_get(BTN_PIN_UP) && !gpio_get(BTN_PIN_RIGHT)
-        && !gpio_get(BTN_PIN_DOWN) && !gpio_get(BTN_PIN_LEFT)) {
-        reset_usb_boot(0, 0);
-        while (true) tight_loop_contents();
+    if (BTN_PIN_SELECT > -1) {
+        gpio_set_function(BTN_PIN_UP, GPIO_FUNC_SIO);
+        gpio_set_dir(BTN_PIN_UP, false);
+        gpio_pull_up(BTN_PIN_UP);
+        if (!gpio_get(BTN_PIN_SELECT)) {
+            reset_usb_boot(0, 0);
+            while (true) tight_loop_contents();
+        }
     }
 
-    if (!gpio_get(BTN_PIN_A) && !gpio_get(BTN_PIN_B)) {
-        return true;
+    if (BTN_PIN_A > -1 && BTN_PIN_B > -1) {
+        gpio_set_function(BTN_PIN_A, GPIO_FUNC_SIO);
+        gpio_set_dir(BTN_PIN_A, false);
+        gpio_pull_up(BTN_PIN_A);
+        gpio_set_function(BTN_PIN_B, GPIO_FUNC_SIO);
+        gpio_set_dir(BTN_PIN_B, false);
+        gpio_pull_up(BTN_PIN_B);
+
+        if (!gpio_get(BTN_PIN_A) && !gpio_get(BTN_PIN_B)) {
+            return true;
+        }
     }
 
     return false;

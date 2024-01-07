@@ -4,9 +4,10 @@ cmake_minimum_required(VERSION 3.13)
 # linux platform
 option(PLATFORM_LINUX "Linux target platform" OFF)
 
-# microboy default board is adafruit feather rp2040
+# microboy default board
 if (NOT PLATFORM_LINUX AND NOT PICO_BOARD)
-    set(PICO_BOARD "adafruit_feather_rp2040")
+    #set(PICO_BOARD "adafruit_feather_rp2040") # v1.0 rev board
+    set(PICO_BOARD "pico") # v1.1 rev board
 endif ()
 
 # pico options

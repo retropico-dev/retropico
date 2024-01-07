@@ -80,6 +80,12 @@ else ()
         list(APPEND PLATFORM_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/platforms/pico/display/st7789)
         list(APPEND PLATFORM_LIBS hardware_dma)
     endif ()
+    # microboy board revision define
+    if (PICO_BOARD STREQUAL "adafruit_feather_rp2040")
+        list(APPEND PLATFORM_FLAGS -DMICROBOY_10)
+    else ()
+        list(APPEND PLATFORM_FLAGS -DMICROBOY_11 "-DPICO_FLASH_SIZE_BYTES=(16 * 1024 * 1024)")
+    endif ()
 endif ()
 
 ####################

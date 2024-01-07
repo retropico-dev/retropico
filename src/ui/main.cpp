@@ -26,7 +26,7 @@ int main() {
     Clock clock;
     int frames = 0;
 
-    auto platform = new MBPlatform(true);
+    auto platform = new MBPlatform(false);
     auto ui = new Ui(platform);
 
     while (ui->loop()) {

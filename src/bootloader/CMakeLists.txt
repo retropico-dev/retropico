@@ -21,8 +21,15 @@ set(BOOTLOADER_LIBS
         pico_platform
         pico_standard_link
         pico_divider
-        )
+)
 set(BOOTLOADER_FLAGS -Wall -Wextra -Wno-ignored-qualifiers -Os)
+
+# microboy board revision define
+if (PICO_BOARD STREQUAL "adafruit_feather_rp2040")
+    list(APPEND BOOTLOADER_FLAGS -DMICROBOY_10)
+else ()
+    list(APPEND BOOTLOADER_FLAGS -DMICROBOY_11 "-DPICO_FLASH_SIZE_BYTES=(16 * 1024 * 1024)")
+endif ()
 
 ######################
 # bootloader binary
@@ -58,6 +65,6 @@ if (NOT PLATFORM_LINUX)
             ${CMAKE_BINARY_DIR}/src/cores/InfoNES/${CMAKE_PROJECT_NAME}-nes.uf2
             ${CMAKE_BINARY_DIR}/src/cores/Peanut-GB/${CMAKE_PROJECT_NAME}-gb.uf2
             ${CMAKE_BINARY_DIR}/src/cores/smsplus/${CMAKE_PROJECT_NAME}-sms.uf2
-            )
+    )
     add_custom_target(microboy ALL DEPENDS ${COMPLETE_UF2})
 endif ()

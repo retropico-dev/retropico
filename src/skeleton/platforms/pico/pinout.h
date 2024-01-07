@@ -5,6 +5,7 @@
 #ifndef MICROBOY_PINOUT_H
 #define MICROBOY_PINOUT_H
 
+#if defined(MICROBOY_10)
 // SPI LCD PINS         GPIO                        FEATHER RP2040
 #define LCD_PIN_DC      8   // SPI1 RX              6
 #define LCD_PIN_CS      9   // SPI1 CSn             9
@@ -43,6 +44,38 @@
 #define BTN_PIN_RIGHT   (29)    //                  A3
 #define BTN_PIN_UP      (7)     //                  5
 #define BTN_PIN_DOWN    (2)     //                  SDA
+#endif
+#elif defined(MICROBOY_11)
+// SPI LCD PINS         GPIO
+#define LCD_PIN_DC      8
+#define LCD_PIN_CS      5
+#define LCD_PIN_CLK     6
+#define LCD_PIN_DIN     7
+#define LCD_PIN_BL      9
+#define LCD_PIN_RESET   4
+
+// SPI SDCARD PINS
+#define SD_PIN_CS       2
+#define SD_PIN_CLK      18
+#define SD_PIN_MOSI     19
+#define SD_PIN_MISO     20
+
+// AUDIO PINS (I2S, DIGITAL)
+#define AUDIO_PIN_DATA  10  // DIN
+#define AUDIO_PIN_CLOCK 11  // BCLK
+#define AUDIO_PIN_LRC   12  // LRC (CLOCK + 1)
+
+#define BTN_PIN_START   (24)
+#define BTN_PIN_SELECT  (-1)
+#define BTN_PIN_A       (24)
+#define BTN_PIN_B       (-1)
+#define BTN_PIN_DOWN    (-1)
+#define BTN_PIN_RIGHT   (-1)
+#define BTN_PIN_LEFT    (-1)
+#define BTN_PIN_UP      (-1)
+
+#else
+#error "microboy device version not defined"
 #endif
 
 #endif //MICROBOY_PINOUT_H
