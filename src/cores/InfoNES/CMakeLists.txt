@@ -16,7 +16,10 @@ set(NES_INCLUDES
         ${CMAKE_SOURCE_DIR}/external/cores/InfoNES/infones
         ${CMAKE_SOURCE_DIR}/external/cores/InfoNES/pico_lib
         )
-set(NES_FLAGS -DMB_NES -DPICO_AUDIO_I2S_MONO_INPUT -DPICO_AUDIO_I2S_MONO_OUTPUT)
+set(NES_FLAGS -DMB_NES
+        -DPICO_AUDIO_I2S_MONO_INPUT
+        -DPICO_AUDIO_I2S_MONO_OUTPUT
+        -DPICO_AUDIO_I2S_BUFFER_SAMPLE_LENGTH=735)
 
 ####################
 # InfoNES binary

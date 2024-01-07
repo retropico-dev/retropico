@@ -3,6 +3,7 @@
 //
 
 #include <cstdarg>
+#include <cstring>
 #include "platform.h"
 #include "infones.h"
 #include "InfoNES.h"

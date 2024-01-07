@@ -385,11 +385,11 @@ void initClock() {
 // SELECT: reboot to bootloader
 // A + B: boot ui (filer)
 bool check_bootloader_combo() {
-    if (BTN_PIN_SELECT > -1) {
+    if (BTN_PIN_UP > -1) {
         gpio_set_function(BTN_PIN_UP, GPIO_FUNC_SIO);
         gpio_set_dir(BTN_PIN_UP, false);
         gpio_pull_up(BTN_PIN_UP);
-        if (!gpio_get(BTN_PIN_SELECT)) {
+        if (!gpio_get(BTN_PIN_UP)) {
             reset_usb_boot(0, 0);
             while (true) tight_loop_contents();
         }
