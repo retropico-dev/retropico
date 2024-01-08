@@ -10,12 +10,12 @@ file(GLOB NES_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/../main.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/*.c*
         ${CMAKE_SOURCE_DIR}/external/cores/InfoNES/infones/*.cpp
-        )
+)
 set(NES_INCLUDES
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_SOURCE_DIR}/external/cores/InfoNES/infones
         ${CMAKE_SOURCE_DIR}/external/cores/InfoNES/pico_lib
-        )
+)
 set(NES_FLAGS -DMB_NES
         -DPICO_AUDIO_I2S_MONO_INPUT
         -DPICO_AUDIO_I2S_MONO_OUTPUT

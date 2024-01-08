@@ -33,6 +33,7 @@ static WORD in_ram(lineBufferRGB444)[LINE_BUFFER_COUNT][NES_DISP_WIDTH];
 static uint8_t lineBufferIndex = 0;
 extern int SpriteJustHit;
 static int lcd_line_busy = 0;
+#define AUDIO_SAMPLE_RATE 735
 // audio
 static int16_t in_ram(audio_buffer)[1024];
 static int audio_buffer_index = 0;
@@ -62,11 +63,11 @@ InfoNES::InfoNES(Platform *p) : Core(p) {
     platform = p;
     core = this;
 
-    // create saves directory
-    p_platform->getIo()->createDir(Io::getSavePath(Core::Type::Nes));
+    // create saves directory (edit: try to not use sdcard if not needed)
+    //p_platform->getIo()->createDir(Io::getSavePath(Core::Type::Nes));
 
     // setup audio
-    p_platform->getAudio()->setup(44100, 735, 1);
+    p_platform->getAudio()->setup(44100, AUDIO_SAMPLE_RATE, 1);
 
     // start Core1, which processes requests to the LCD
     multicore_launch_core1(core1_main);
@@ -291,7 +292,7 @@ void InfoNES_SoundClose() {
 
 int in_ram(InfoNES_GetSoundBufferSize)() {
     //printf("InfoNES_GetSoundBufferSize\r\n");
-    return 735 * sizeof(uint8_t);
+    return AUDIO_SAMPLE_RATE * sizeof(uint8_t);
 }
 
 void in_ram(InfoNES_SoundOutput)(int samples, BYTE *w1, BYTE *w2, BYTE *w3, BYTE *w4, BYTE *w5) {
@@ -306,7 +307,7 @@ void in_ram(InfoNES_SoundOutput)(int samples, BYTE *w1, BYTE *w2, BYTE *w3, BYTE
         else if (sample < -32768) sample = -32768;
         audio_buffer[audio_buffer_index] = (int16_t) sample;
         audio_buffer_index++;
-        if (audio_buffer_index >= 735) {
+        if (audio_buffer_index >= AUDIO_SAMPLE_RATE) {
             platform->getAudio()->play(audio_buffer, audio_buffer_index);
             audio_buffer_index = 0;
         }

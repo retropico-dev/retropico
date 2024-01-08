@@ -11,7 +11,8 @@
 using namespace mb;
 
 PicoIo::PicoIo() : Io() {
-    p_sd = sd_get_by_num(0);
+    printf("PicoIo::PicoIo()\r\n");
+    //p_sd = sd_get_by_num(0);
 }
 
 // TODO: target == Ram
@@ -312,6 +313,7 @@ void PicoIo::createDir(const std::string &path) {
 }
 
 bool PicoIo::mount() {
+    p_sd = sd_get_by_num(0);
     FRESULT fr = f_mount(&p_sd->fatfs, p_sd->pcName, 1);
     if (FR_OK != fr) {
         printf("PicoIo::mount: mount error: %s (%d)\r\n", FRESULT_str(fr), fr);
@@ -322,6 +324,7 @@ bool PicoIo::mount() {
 }
 
 bool PicoIo::unmount() {
+    p_sd = sd_get_by_num(0);
     FRESULT fr = f_unmount(p_sd->pcName);
     if (FR_OK != fr) {
         printf("PicoIo::unmount: unmount error: %s (%d)\r\n", FRESULT_str(fr), fr);
