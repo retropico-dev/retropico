@@ -40,7 +40,9 @@ int main() {
     }
 
     // emulation loop
-    while (core->loop(platform->getInput()->getButtons())) {
+    while (true) {
+        if (!core->loop(platform->getInput()->getButtons())) break;
+
         // fps
         if (clock.getElapsedTime().asSeconds() >= 1) {
             auto percent = (uint16_t) (((float) Utility::getUsedHeap() / (float) Utility::getTotalHeap()) * 100);

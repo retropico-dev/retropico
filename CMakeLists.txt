@@ -30,7 +30,7 @@ endif ()
 #add_subdirectory(src/skeleton)
 
 # microboy-ui (ui binary)
-add_subdirectory(src/ui)
+#add_subdirectory(src/ui)
 
 # microboy-nes (infones core)
 add_subdirectory(src/cores/InfoNES)
