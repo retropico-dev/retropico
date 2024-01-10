@@ -26,20 +26,14 @@ int main() {
     Clock clock;
     int frames = 0;
 
-    auto platform = new P2DPlatform(false);
+    auto platform = new P2DPlatform(true);
     auto display = (Display *) new P2DDisplay({240, 240}, {240, 240});
     platform->setDisplay(display);
     auto core = new MBCore(platform);
 
 #ifndef NDEBUG
     Io::FileBuffer fb;
-#ifdef MB_NES
-    RomFs::Binary binary = RomFs::get("romfs/mario.nes");
-#elif MB_GB
-    RomFs::Binary binary = RomFs::get("romfs/mario.gb");
-#elif MB_SMS
-    RomFs::Binary binary = RomFs::get("romfs/sonic.sms");
-#endif
+    RomFs::Binary binary = RomFs::get(ROMFS_ROM);
     fb.data = (uint8_t *) binary.data;
     fb.size = binary.size;
 #else
