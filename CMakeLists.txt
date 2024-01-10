@@ -11,6 +11,13 @@ option(PICO_USE_BOOTLOADER "Build bootloader compatible binaries" OFF)
 
 project(microboy)
 
+# TODO: why ?
+#[[
+set(CMAKE_FLAGS_RELEASE_FIX "-fno-move-loop-invariants -fno-devirtualize -fno-devirtualize-speculatively")
+set(CMAKE_C_FLAGS_RELEASE "-DNDEBUG -O3 ${CMAKE_FLAGS_RELEASE_FIX}" CACHE STRING "" FORCE)
+set(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -O3 ${CMAKE_FLAGS_RELEASE_FIX}" CACHE STRING "" FORCE)
+]]
+
 if (NOT PLATFORM_LINUX)
     function(set_linker_script TARGET script)
         target_link_directories(${TARGET} PRIVATE ${CMAKE_SOURCE_DIR}/src/bootloader)
@@ -26,22 +33,19 @@ else ()
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} CACHE STRING "" FORCE)
 endif ()
 
-# microboy-skeleton (cross-platform library)
-#add_subdirectory(src/skeleton)
-
 # microboy-ui (ui binary)
-#add_subdirectory(src/ui)
+add_subdirectory(src/ui)
 
 # microboy-nes (infones core)
 add_subdirectory(src/cores/InfoNES)
 
 # microboy-gb (Peanut-GB core)
-#add_subdirectory(src/cores/Peanut-GB)
+add_subdirectory(src/cores/Peanut-GB)
 
 # microboy-sms (smsplus core)
-#add_subdirectory(src/cores/smsplus)
+add_subdirectory(src/cores/smsplus)
 
 # microboy-bootloader
-#if (PICO_USE_BOOTLOADER)
-#    add_subdirectory(src/bootloader)
-#endif ()
+if (PICO_USE_BOOTLOADER)
+    add_subdirectory(src/bootloader)
+endif ()

@@ -28,7 +28,7 @@ int main() {
     int frames = 0;
 
     auto platform = new P2DPlatform();
-    platform->addDisplay((Display *) new P2DDisplay({240, 240}, {120, 120}));
+    platform->setDisplay((Display *) new P2DDisplay({240, 240}, {120, 120}));
 
     auto ui = new Ui(platform);
 
@@ -48,8 +48,7 @@ int main() {
 
     // reboot to bootloader for launching either nes or gb core
     // based on rom header
-#warning TODO: reboot
-    //platform->reboot(Platform::RebootTarget::Auto);
+    platform->reboot();
 
     delete (ui);
     delete (platform);

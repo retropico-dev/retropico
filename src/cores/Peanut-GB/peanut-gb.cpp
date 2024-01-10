@@ -14,6 +14,7 @@ extern "C" {
 };
 
 using namespace mb;
+using namespace p2d;
 
 //#define ENABLE_RAM_BANK
 #ifdef ENABLE_RAM_BANK
@@ -234,7 +235,7 @@ bool PeanutGB::loadRom(Io::FileBuffer file) {
 
     printf("PeanutGB::loadRom: %s\r\n", file.name);
     m_romName = file.name;
-    m_sramPath = Io::getSavePath(Core::Type::Sms) + "/"
+    m_sramPath = p2d::Io::getSavePath(Core::Type::Sms) + "/"
                  + Utility::removeExt(Utility::baseName(m_romName)) + ".srm";
 
     gb_rom = file.data;
@@ -243,6 +244,9 @@ bool PeanutGB::loadRom(Io::FileBuffer file) {
 #endif
 
     // start Core1, which processes requests to the LCD
+#if !defined(NDEBUG) && defined(PICO_STDIO_UART)
+    multicore_reset_core1(); // seems to be needed for "picoprobe" debugging
+#endif
     multicore_launch_core1(main_core1);
 
     // initialise GB context
@@ -285,33 +289,33 @@ bool in_ram(PeanutGB::loop)(uint16_t buttons) {
 
     // handle input
     // emulation inputs
-    gameboy.direct.joypad_bits.a = !(buttons & mb::Input::Button::B1);
-    gameboy.direct.joypad_bits.b = !(buttons & mb::Input::Button::B2);
-    gameboy.direct.joypad_bits.select = !(buttons & mb::Input::Button::SELECT);
-    gameboy.direct.joypad_bits.start = !(buttons & mb::Input::Button::START);
-    gameboy.direct.joypad_bits.up = !(buttons & mb::Input::Button::UP);
-    gameboy.direct.joypad_bits.right = !(buttons & mb::Input::Button::RIGHT);
-    gameboy.direct.joypad_bits.down = !(buttons & mb::Input::Button::DOWN);
-    gameboy.direct.joypad_bits.left = !(buttons & mb::Input::Button::LEFT);
+    gameboy.direct.joypad_bits.a = !(buttons & p2d::Input::Button::B1);
+    gameboy.direct.joypad_bits.b = !(buttons & p2d::Input::Button::B2);
+    gameboy.direct.joypad_bits.select = !(buttons & p2d::Input::Button::SELECT);
+    gameboy.direct.joypad_bits.start = !(buttons & p2d::Input::Button::START);
+    gameboy.direct.joypad_bits.up = !(buttons & p2d::Input::Button::UP);
+    gameboy.direct.joypad_bits.right = !(buttons & p2d::Input::Button::RIGHT);
+    gameboy.direct.joypad_bits.down = !(buttons & p2d::Input::Button::DOWN);
+    gameboy.direct.joypad_bits.left = !(buttons & p2d::Input::Button::LEFT);
 
     /*
     // hotkey / combos
-    if (buttons & mb::Input::Button::SELECT) {
+    if (buttons & p2d::Input::Button::SELECT) {
         p_platform->getInput()->setRepeatDelay(INPUT_DELAY_UI);
         // palette selection
-        if (buttons & mb::Input::Button::LEFT) {
+        if (buttons & p2d::Input::Button::LEFT) {
             if (manual_palette_selected > 0) {
                 manual_palette_selected--;
                 manual_assign_palette(palette, manual_palette_selected);
             }
-        } else if (buttons & mb::Input::Button::RIGHT) {
+        } else if (buttons & p2d::Input::Button::RIGHT) {
             if (manual_palette_selected < NUMBER_OF_MANUAL_PALETTES) {
                 manual_palette_selected++;
                 manual_assign_palette(palette, manual_palette_selected);
             }
-        } else if (buttons & mb::Input::Button::UP) {
+        } else if (buttons & p2d::Input::Button::UP) {
             setScalingEnabled(true);
-        } else if (buttons & mb::Input::Button::DOWN) {
+        } else if (buttons & p2d::Input::Button::DOWN) {
             setScalingEnabled(false);
         }
     } else {

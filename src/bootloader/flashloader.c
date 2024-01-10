@@ -37,7 +37,7 @@
 #include "pico/binary_info.h"
 #include "flashloader.h"
 
-#include "../skeleton/platforms/pico/pinout.h"
+#include "../../external/misc/libpico2d/src/platforms/pico/pinout.h"
 
 bi_decl(bi_program_version_string("1.10"));
 

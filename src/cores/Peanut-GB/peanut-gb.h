@@ -17,15 +17,15 @@
 namespace mb {
     class PeanutGB : public Core {
     public:
-        explicit PeanutGB(Platform *platform);
+        explicit PeanutGB(p2d::Platform *platform);
 
         ~PeanutGB() override;
 
-        bool loadRom(Io::FileBuffer file) override;
+        bool loadRom(p2d::Io::FileBuffer file) override;
 
         bool loop(uint16_t buttons) override;
 
-        Surface *getSurface(uint8_t idx) {
+        p2d::Surface *getSurface(uint8_t idx) {
             return p_surface[idx];
         }
 
@@ -66,7 +66,7 @@ namespace mb {
         }
 
     private:
-        Surface *p_surface[2] = {nullptr, nullptr};
+        p2d::Surface *p_surface[2] = {nullptr, nullptr};
         uint8_t m_bufferIndex = 0;
         bool m_scaling = false;
         bool m_frameSkip = false;

@@ -3,11 +3,6 @@ cmake_minimum_required(VERSION 3.13)
 
 project(microboy-nes)
 
-# TODO: why ?
-set(CMAKE_FLAGS_RELEASE_FIX "-fno-move-loop-invariants -fno-devirtualize -fno-devirtualize-speculatively")
-set(CMAKE_C_FLAGS_RELEASE "-DNDEBUG -O3 ${CMAKE_FLAGS_RELEASE_FIX}" CACHE STRING "" FORCE)
-set(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -O3 ${CMAKE_FLAGS_RELEASE_FIX}" CACHE STRING "" FORCE)
-
 # set source files
 file(GLOB NES_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/../*.cpp

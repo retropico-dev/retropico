@@ -10,6 +10,7 @@ extern "C" {
 }
 
 using namespace mb;
+using namespace p2d;
 
 static Platform *platform;
 static Display *display;

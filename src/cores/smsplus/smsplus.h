@@ -10,9 +10,9 @@
 namespace mb {
     class SMSPlus : public Core {
     public:
-        explicit SMSPlus(Platform *platform);
+        explicit SMSPlus(p2d::Platform *platform);
 
-        bool loadRom(Io::FileBuffer file) override;
+        bool loadRom(p2d::Io::FileBuffer file) override;
 
         bool loop(uint16_t buttons) override;
     };
