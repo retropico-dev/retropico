@@ -31,7 +31,20 @@ int main() {
     platform->setDisplay(display);
     auto core = new MBCore(platform);
 
+#ifndef NDEBUG
+    Io::FileBuffer fb;
+#ifdef MB_NES
+    RomFs::Binary binary = RomFs::get("romfs/mario.nes");
+#elif MB_GB
+    RomFs::Binary binary = RomFs::get("romfs/mario.gb");
+#elif MB_SMS
+    RomFs::Binary binary = RomFs::get("romfs/sonic.sms");
+#endif
+    fb.data = (uint8_t *) binary.data;
+    fb.size = binary.size;
+#else
     Io::FileBuffer fb = platform->getIo()->readRomFromFlash();
+#endif
     if (!core->loadRom(fb)) {
         // reboot to ui
         platform->reboot(FLASH_MAGIC_UI);

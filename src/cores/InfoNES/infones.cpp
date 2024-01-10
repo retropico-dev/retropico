@@ -103,6 +103,7 @@ bool InfoNES::loadRom(Io::FileBuffer file) {
     }
 
     if (InfoNES_Reset() < 0) {
+#warning "TODO: add ui error message"
         printf("InfoNES::loadRom: NES reset error\n");
         return false;
     }
@@ -168,7 +169,7 @@ void in_ram(core1_lcd_draw_line)(const uint_fast8_t line, const uint_fast8_t ind
     if(line < 4 || line > 236) {
         return;
     } else if (line == 4) {
-        platform->getDisplay()->setCursorPos(0, 4);
+        platform->getDisplay()->setCursor(0, 4);
     }
 
     // crop line buffer width by 16 pixels (240x240 display)

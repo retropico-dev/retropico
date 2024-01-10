@@ -28,6 +28,13 @@ add_executable(microboy-nes ${NES_SOURCES})
 target_include_directories(microboy-nes PUBLIC ${NES_INCLUDES})
 target_compile_definitions(microboy-nes PUBLIC ${NES_FLAGS})
 target_link_libraries(microboy-nes ${NES_LIBS} pico2d-skeleton)
+
+# test rom
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    file(GLOB ROMFS romfs/*)
+    target_add_resources(microboy-nes ${ROMFS})
+endif ()
+
 if (NOT PLATFORM_LINUX)
     if (PICO_USE_BOOTLOADER)
         set_linker_script(microboy-nes memmap_nes.ld)

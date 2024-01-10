@@ -24,6 +24,13 @@ add_executable(microboy-gb ${GB_SOURCES})
 target_include_directories(microboy-gb PUBLIC ${GB_INCLUDES})
 target_compile_definitions(microboy-gb PUBLIC ${GB_FLAGS})
 target_link_libraries(microboy-gb ${GB_LIBS} pico2d-skeleton)
+
+# test rom
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    file(GLOB ROMFS romfs/*)
+    target_add_resources(microboy-gb ${ROMFS})
+endif ()
+
 if (NOT PLATFORM_LINUX)
     if (PICO_USE_BOOTLOADER)
         set_linker_script(microboy-gb memmap_gb.ld)
