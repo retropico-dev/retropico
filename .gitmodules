@@ -1,9 +1,6 @@
-[submodule "Peanut-GB"]
+[submodule "external/cores/Peanut-GB"]
 	path = external/cores/Peanut-GB
 	url = https://github.com/deltabeard/Peanut-GB.git
-[submodule "external/misc/Adafruit-GFX-Library"]
-	path = external/misc/Adafruit-GFX-Library
-	url = https://github.com/adafruit/Adafruit-GFX-Library.git
 [submodule "external/cores/SameBoy"]
 	path = external/cores/SameBoy
 	url = https://github.com/Cpasjuste/SameBoy.git
@@ -13,9 +10,6 @@
 [submodule "external/cores/InfoNES"]
 	path = external/cores/InfoNES
 	url = https://github.com/Cpasjuste/pico-infones.git
-[submodule "external/misc/no-OS-FatFS-SD-SPI-RPi-Pico"]
-	path = external/misc/no-OS-FatFS-SD-SPI-RPi-Pico
-	url = https://github.com/Cpasjuste/no-OS-FatFS-SD-SPI-RPi-Pico.git
 [submodule "external/misc/libpico2d"]
 	path = external/misc/libpico2d
 	url = git@github.com:Cpasjuste/libpico2d.git

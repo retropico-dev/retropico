@@ -28,12 +28,7 @@ int main() {
     int frames = 0;
 
     auto platform = new P2DPlatform(false);
-    /*
-    auto display = (Display *) new P2DDisplay(
-            {240, 240}, {240, 240}, Display::ScaleMode::Scale2x, Display::Buffering::None);
-    */
-    auto display = (Display *) new PicoDisplay(
-            {240, 240}, {240, 240}, Display::ScaleMode::Scale2x, Display::Buffering::None);
+    auto display = (Display *) new PicoDisplay({240, 240}, {240, 240});
     platform->setDisplay(display);
     auto core = new MBCore(platform);
 
