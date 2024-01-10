@@ -1,6 +1,3 @@
-[submodule "external/cores/Peanut-GB"]
-	path = external/cores/Peanut-GB
-	url = https://github.com/deltabeard/Peanut-GB.git
 [submodule "external/cores/SameBoy"]
 	path = external/cores/SameBoy
 	url = https://github.com/Cpasjuste/SameBoy.git
@@ -13,3 +10,6 @@
 [submodule "external/misc/libpico2d"]
 	path = external/misc/libpico2d
 	url = git@github.com:Cpasjuste/libpico2d.git
+[submodule "external/cores/Peanut-GB"]
+	path = external/cores/Peanut-GB
+	url = https://github.com/deltabeard/Peanut-GB.git
