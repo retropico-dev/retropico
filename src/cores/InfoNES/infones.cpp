@@ -9,7 +9,6 @@
 #include "InfoNES.h"
 #include "InfoNES_System.h"
 #include "K6502.h"
-//#include "cores/Peanut-GB/hedley.h"
 
 using namespace mb;
 using namespace p2d;
@@ -201,8 +200,6 @@ _Noreturn void in_ram(core1_main)() {
                 break;
         }
     }
-
-    //HEDLEY_UNREACHABLE();
 }
 
 void in_ram(InfoNES_PreDrawLine)(int line) {
@@ -301,7 +298,6 @@ int in_ram(InfoNES_GetSoundBufferSize)() {
 }
 
 void in_ram(InfoNES_SoundOutput)(int samples, BYTE *w1, BYTE *w2, BYTE *w3, BYTE *w4, BYTE *w5) {
-    /*
     //printf("InfoNES_SoundOutput: samples = %i\r\n", samples);
     uint8_t byte;
     int32_t sample;
@@ -318,7 +314,6 @@ void in_ram(InfoNES_SoundOutput)(int samples, BYTE *w1, BYTE *w2, BYTE *w3, BYTE
             audio_buffer_index = 0;
         }
     }
-    */
 }
 
 void InfoNES_MessageBox(const char *pszMsg, ...) {
