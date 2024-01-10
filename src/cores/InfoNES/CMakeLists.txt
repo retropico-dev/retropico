@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON")
+#set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON")
 
 project(microboy-nes)
 set(CMAKE_C_STANDARD 11)

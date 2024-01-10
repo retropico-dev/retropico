@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON")
+#set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON")
 
 if (NOT PLATFORM_LINUX)
     include(${CMAKE_SOURCE_DIR}/external/misc/libpico2d/src/platforms/pico/cmake/pico_sdk_import.cmake)
