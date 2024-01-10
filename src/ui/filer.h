@@ -11,9 +11,9 @@
 #include "core.h"
 
 namespace mb {
-    class Filer : public Widget {
+    class Filer : public p2d::Widget {
     public:
-        explicit Filer(const Utility::Vec2i &pos, const Utility::Vec2i &size);
+        explicit Filer(const p2d::Utility::Vec2i &pos, const p2d::Utility::Vec2i &size);
 
         void setCore(const Core::Type &core);
 
@@ -22,18 +22,18 @@ namespace mb {
         [[nodiscard]] bool isDone() const { return m_done; }
 
     private:
-        Platform *p_platform;
-        Io::FileListBuffer m_files[3];
+        p2d::Platform *p_platform;
+        p2d::Io::FileListBuffer m_files[3];
         Core::Type m_core = Core::Type::Nes;
         int m_max_lines = 0;
         int m_line_height = 0;
         int m_file_index = 0;
         int m_highlight_index = 0;
-        Rectangle *p_highlight;
-        std::vector<Text *> p_lines;
+        p2d::Rectangle *p_highlight;
+        std::vector<p2d::Text *> p_lines;
         bool m_done = false;
 
-        void loop(const Utility::Vec2i &pos, const uint16_t &buttons) override;
+        void loop(const p2d::Utility::Vec2i &pos, const uint16_t &buttons) override;
 
         void refresh();
 

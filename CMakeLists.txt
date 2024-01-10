@@ -1,35 +1,15 @@
-cmake_minimum_required(VERSION 3.13)
-#set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON")
+cmake_minimum_required(VERSION 3.5)
+set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON")
 
-# linux platform
-option(PLATFORM_LINUX "Linux target platform" OFF)
-
-# microboy default board
-if (NOT PLATFORM_LINUX AND NOT PICO_BOARD)
-    #set(PICO_BOARD "adafruit_feather_rp2040") # v1.0 rev board
-    set(PICO_BOARD "pico") # v1.1 rev board
+if (NOT PLATFORM_LINUX)
+    include(${CMAKE_SOURCE_DIR}/external/misc/libpico2d/src/platforms/pico/cmake/pico_sdk_import.cmake)
 endif ()
+add_subdirectory(${CMAKE_SOURCE_DIR}/external/misc/libpico2d)
 
 # pico options
-option(PICO_STDIO_UART "Pico UART debug" ON)
-option(PICO_USE_BOOTLOADER "Build bootloader compatible binaries" ON)
-option(PICO_DISPLAY_ST7789_PIO "Pico ST7789 display driver (pio)" ON)
-
-if (NOT PLATFORM_LINUX)
-    # initialize the SDK based on PICO_SDK_PATH
-    # note: this must happen before project()
-    include(${CMAKE_SOURCE_DIR}/src/skeleton/platforms/pico/cmake/pico_sdk_import.cmake)
-
-    # for pico_audio_i2s, hardware_sleep
-    include(${CMAKE_SOURCE_DIR}/src/skeleton/platforms/pico/cmake/pico_extras_import.cmake)
-endif ()
+option(PICO_USE_BOOTLOADER "Build bootloader compatible binaries" OFF)
 
 project(microboy)
-
-if (NOT PLATFORM_LINUX)
-    # initialize the Raspberry Pi Pico SDK
-    pico_sdk_init()
-endif ()
 
 if (NOT PLATFORM_LINUX)
     function(set_linker_script TARGET script)
@@ -47,7 +27,7 @@ else ()
 endif ()
 
 # microboy-skeleton (cross-platform library)
-add_subdirectory(src/skeleton)
+#add_subdirectory(src/skeleton)
 
 # microboy-ui (ui binary)
 add_subdirectory(src/ui)
@@ -56,12 +36,12 @@ add_subdirectory(src/ui)
 add_subdirectory(src/cores/InfoNES)
 
 # microboy-gb (Peanut-GB core)
-add_subdirectory(src/cores/Peanut-GB)
+#add_subdirectory(src/cores/Peanut-GB)
 
 # microboy-sms (smsplus core)
-add_subdirectory(src/cores/smsplus)
+#add_subdirectory(src/cores/smsplus)
 
 # microboy-bootloader
-if (PICO_USE_BOOTLOADER)
-    add_subdirectory(src/bootloader)
-endif ()
+#if (PICO_USE_BOOTLOADER)
+#    add_subdirectory(src/bootloader)
+#endif ()

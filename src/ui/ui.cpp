@@ -5,6 +5,7 @@
 #include "platform.h"
 #include "ui.h"
 
+using namespace p2d;
 using namespace mb;
 
 //...
@@ -13,7 +14,7 @@ static Ui *s_ui = nullptr;
 Ui::Ui(Platform *platform)
         : Rectangle({2, 2}, {(int16_t) (platform->getDisplay()->getSize().x - 4),
                              (int16_t) (platform->getDisplay()->getSize().y - 4)},
-                    Color::Transparent, 8) {
+                    Display::Color::Transparent, 8) {
     s_ui = this;
     p_platform = platform;
 
@@ -21,19 +22,17 @@ Ui::Ui(Platform *platform)
     p_platform->getInput()->setRepeatDelay(INPUT_DELAY_UI);
 
     // set colors
-    Ui::setColor(Color::Black);
-    Ui::setOutlineThickness(2);
+    //Ui::setColor(Color::Black);
+    Ui::setOutlineThickness(1);
     Ui::setOutlineColor(Ui::Color::Red);
 
-    // create roms directories if needed
-    /*
+    // create roms directories
     p_platform->getIo()->createDir(Io::getRomPath(Core::Type::Nes));
     p_platform->getIo()->createDir(Io::getRomPath(Core::Type::Gb));
     p_platform->getIo()->createDir(Io::getRomPath(Core::Type::Sms));
     p_platform->getIo()->createDir(Io::getSavePath(Core::Type::Nes));
     p_platform->getIo()->createDir(Io::getSavePath(Core::Type::Gb));
     p_platform->getIo()->createDir(Io::getSavePath(Core::Type::Sms));
-    */
 
     // add filer
     p_filer = new Filer({1, 1}, {(int16_t) (Ui::getSize().x - 2), (int16_t) (Ui::getSize().y - 2)});

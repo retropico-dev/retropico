@@ -6,6 +6,7 @@
 #include "ui.h"
 #include "infobox.h"
 
+using namespace p2d;
 using namespace mb;
 
 InfoBox::InfoBox(const Utility::Vec2i &pos, const Utility::Vec2i &size)

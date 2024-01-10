@@ -10,12 +10,12 @@
 #include "bitmap.h"
 
 namespace mb {
-    class Settings : public Rectangle {
+    class Settings : public p2d::Rectangle {
     public:
-        Settings(const Utility::Vec2i &pos, const Utility::Vec2i &size);
+        Settings(const p2d::Utility::Vec2i &pos, const p2d::Utility::Vec2i &size);
 
     private:
-        void loop(const Utility::Vec2i &pos, const uint16_t &buttons) override;
+        void loop(const p2d::Utility::Vec2i &pos, const uint16_t &buttons) override;
     };
 }
 

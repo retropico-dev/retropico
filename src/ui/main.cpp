@@ -20,16 +20,19 @@
 #include "platform.h"
 #include "ui.h"
 
+using namespace p2d;
 using namespace mb;
 
 int main() {
     Clock clock;
     int frames = 0;
 
-    auto platform = new MBPlatform(false);
+    auto platform = new P2DPlatform();
+    platform->addDisplay((Display *) new P2DDisplay({240, 240}, {120, 120}));
+
     auto ui = new Ui(platform);
 
-    while (ui->loop()) {
+    while (ui->loop(true)) {
         // fps
         if (clock.getElapsedTime().asSeconds() >= 1) {
             auto percent = (uint16_t) (((float) Utility::getUsedHeap() / (float) Utility::getTotalHeap()) * 100);
@@ -45,7 +48,8 @@ int main() {
 
     // reboot to bootloader for launching either nes or gb core
     // based on rom header
-    platform->reboot(Platform::RebootTarget::Auto);
+#warning TODO: reboot
+    //platform->reboot(Platform::RebootTarget::Auto);
 
     delete (ui);
     delete (platform);

@@ -6,11 +6,12 @@
 #include "settings.h"
 #include "ui.h"
 
+using namespace p2d;
 using namespace mb;
 
 Settings::Settings(const Utility::Vec2i &pos, const Utility::Vec2i &size)
         : Rectangle(pos, size, Ui::Color::Gray, 8) {
-    Settings::setColor(Ui::Color::Transparent);
+    Settings::setColor(Display::Color::Transparent);
 
     auto text = new Text((int16_t) (size.x / 2), (int16_t) (size.y / 2), "COMING SOON !");
     text->setOrigin(Origin::Center);

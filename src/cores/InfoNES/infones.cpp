@@ -9,9 +9,10 @@
 #include "InfoNES.h"
 #include "InfoNES_System.h"
 #include "K6502.h"
-#include "cores/Peanut-GB/hedley.h"
+//#include "cores/Peanut-GB/hedley.h"
 
 using namespace mb;
+using namespace p2d;
 
 #define CC(x) ((((x) >> 1) & 15) | ((((x) >> 6) & 15) << 4) | ((((x) >> 11) & 15) << 8))
 const WORD in_ram(NesPalette)[64] = {
@@ -63,13 +64,13 @@ InfoNES::InfoNES(Platform *p) : Core(p) {
     platform = p;
     core = this;
 
-    // create saves directory (edit: try to not use sdcard if not needed)
-    //p_platform->getIo()->createDir(Io::getSavePath(Core::Type::Nes));
-
     // setup audio
     p_platform->getAudio()->setup(44100, AUDIO_SAMPLE_RATE, 1);
 
     // start Core1, which processes requests to the LCD
+#if !defined(NDEBUG) && defined(PICO_STDIO_UART)
+    multicore_reset_core1(); // seems to be needed for "picoprobe" debugging
+#endif
     multicore_launch_core1(core1_main);
 }
 
@@ -165,18 +166,22 @@ InfoNES::~InfoNES() {
 }
 
 void in_ram(core1_lcd_draw_line)(const uint_fast8_t line, const uint_fast8_t index) {
-    if (line == 4) {
-        platform->getDisplay()->setCursor(0, 4);
+    if(line < 4 || line > 236) {
+        return;
+    } else if (line == 4) {
+        platform->getDisplay()->setCursorPos(0, 4);
     }
 
     // crop line buffer width by 16 pixels (240x240 display)
     auto display = platform->getDisplay();
     display->drawPixelLine(lineBufferRGB444[index] + 8, 240, Display::Format::RGB444);
 
+    /*
     if (line == 235) {
         platform->getDisplay()->flip();
         //platform->getDisplay()->setCursor(0, 0);
     }
+    */
 
     // signal we are done
     //__atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);
@@ -197,7 +202,7 @@ _Noreturn void in_ram(core1_main)() {
         }
     }
 
-    HEDLEY_UNREACHABLE();
+    //HEDLEY_UNREACHABLE();
 }
 
 void in_ram(InfoNES_PreDrawLine)(int line) {
@@ -296,6 +301,7 @@ int in_ram(InfoNES_GetSoundBufferSize)() {
 }
 
 void in_ram(InfoNES_SoundOutput)(int samples, BYTE *w1, BYTE *w2, BYTE *w3, BYTE *w4, BYTE *w5) {
+    /*
     //printf("InfoNES_SoundOutput: samples = %i\r\n", samples);
     uint8_t byte;
     int32_t sample;
@@ -312,6 +318,7 @@ void in_ram(InfoNES_SoundOutput)(int samples, BYTE *w1, BYTE *w2, BYTE *w3, BYTE
             audio_buffer_index = 0;
         }
     }
+    */
 }
 
 void InfoNES_MessageBox(const char *pszMsg, ...) {

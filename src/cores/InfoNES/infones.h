@@ -10,11 +10,11 @@
 namespace mb {
     class InfoNES : public Core {
     public:
-        explicit InfoNES(Platform *platform);
+        explicit InfoNES(p2d::Platform *platform);
 
         ~InfoNES() override;
 
-        bool loadRom(Io::FileBuffer file) override;
+        bool loadRom(p2d::Io::FileBuffer file) override;
 
         bool loop(uint16_t buttons) override;
     };

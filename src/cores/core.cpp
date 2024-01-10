@@ -6,26 +6,26 @@
 
 using namespace mb;
 
-bool Core::loop(uint16_t buttons) {
+bool in_ram(Core::loop)(uint16_t buttons) {
     // exit requested
-    if (buttons & Input::Button::START && buttons & Input::Button::SELECT
-        || buttons & Input::Button::QUIT) {
+    if (buttons & p2d::Input::Button::START && buttons & p2d::Input::Button::SELECT
+        || buttons & p2d::Input::Button::QUIT) {
         return false;
     }
 
     // volume up/down
-    if (buttons & Input::Button::SELECT) {
+    if (buttons & p2d::Input::Button::SELECT) {
         p_platform->getInput()->setRepeatDelay(INPUT_DELAY_UI);
-        if (!(buttons & Input::Button::DELAY)) {
-            if (buttons & Input::Button::UP) {
+        if (!(buttons & p2d::Input::Button::DELAY)) {
+            if (buttons & p2d::Input::Button::UP) {
                 p_platform->getAudio()->volumeUp();
                 printf("volume: %i\n", p_platform->getAudio()->getVolume());
-            } else if (buttons & Input::Button::DOWN) {
+            } else if (buttons & p2d::Input::Button::DOWN) {
                 p_platform->getAudio()->volumeDown();
                 printf("volume: %i\n", p_platform->getAudio()->getVolume());
             }
         }
-    } else if (!(buttons & Input::Button::DELAY)) {
+    } else if (!(buttons & p2d::Input::Button::DELAY)) {
         p_platform->getInput()->setRepeatDelay(0);
     }
 

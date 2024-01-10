@@ -17,7 +17,7 @@ namespace mb {
             Sms = 2
         };
 
-        explicit Core(Platform *platform) {
+        explicit Core(p2d::Platform *platform) {
             p_platform = platform;
         }
 
@@ -25,14 +25,14 @@ namespace mb {
 
         virtual bool loop(uint16_t buttons);
 
-        virtual bool loadRom(Io::FileBuffer file) { return false; }
+        virtual bool loadRom(p2d::Io::FileBuffer file) { return false; }
 
         virtual std::string getSramPath() { return m_sramPath; };
 
-        virtual Platform *getPlatform() { return p_platform; }
+        virtual p2d::Platform *getPlatform() { return p_platform; }
 
     protected:
-        Platform *p_platform;
+        p2d::Platform *p_platform;
         std::string m_romName;
         std::string m_sramPath;
     };

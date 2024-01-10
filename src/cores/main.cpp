@@ -21,26 +21,31 @@
 #include "main.h"
 
 using namespace mb;
+using namespace p2d;
 
 int main() {
     Clock clock;
     int frames = 0;
-    bool running = true;
 
-    auto platform = new MBPlatform();
+    auto platform = new P2DPlatform(false);
+    /*
+    auto display = (Display *) new P2DDisplay(
+            {240, 240}, {240, 240}, Display::ScaleMode::Scale2x, Display::Buffering::None);
+    */
+    auto display = (Display *) new PicoDisplay(
+            {240, 240}, {240, 240}, Display::ScaleMode::Scale2x, Display::Buffering::None);
+    platform->setDisplay(display);
     auto core = new MBCore(platform);
 
     Io::FileBuffer fb = platform->getIo()->readRomFromFlash();
     if (!core->loadRom(fb)) {
         // reboot to ui
-        platform->reboot(Platform::RebootTarget::Ui);
+#warning "TODO: reboot"
+        //platform->reboot(Platform::RebootTarget::Ui);
     }
 
     // emulation loop
-    while (running) {
-        // emulation loop
-        running = core->loop(platform->getInput()->getButtons());
-
+    while (core->loop(platform->getInput()->getButtons())) {
         // fps
         if (clock.getElapsedTime().asSeconds() >= 1) {
             auto percent = (uint16_t) (((float) Utility::getUsedHeap() / (float) Utility::getTotalHeap()) * 100);
@@ -57,7 +62,8 @@ int main() {
     delete (core);
 
     // reboot to ui
-    platform->reboot(Platform::RebootTarget::Ui);
+#warning "TODO: reboot"
+    //platform->reboot(Platform::RebootTarget::Ui);
 
     // unreachable
     delete (platform);

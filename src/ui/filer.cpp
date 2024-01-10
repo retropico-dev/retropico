@@ -6,6 +6,7 @@
 #include "ui.h"
 #include "filer.h"
 
+using namespace p2d;
 using namespace mb;
 
 Filer::Filer(const Utility::Vec2i &pos, const Utility::Vec2i &size) : Widget(pos, size) {

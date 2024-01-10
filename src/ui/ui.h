@@ -15,7 +15,7 @@
 #define UI_FONT_HEIGHT 16
 
 namespace mb {
-    class Ui : public Rectangle {
+    class Ui : public p2d::Rectangle {
     public:
         enum Color {
             Black = 0x0000,
@@ -27,11 +27,10 @@ namespace mb {
             GreenDark = 0x0388,
             Blue = 0x01CF,
             Gray = 0x52CB,
-            GrayDark = 0x2986,
-            Transparent = 0xABCD // fake
+            GrayDark = 0x2986
         };
 
-        explicit Ui(Platform *platform);
+        explicit Ui(p2d::Platform *platform);
 
         bool loop(bool force = false);
 
@@ -45,19 +44,19 @@ namespace mb {
 
         static Ui *getInstance();
 
-        static Platform *getPlatform();
+        static p2d::Platform *getPlatform();
 
-        static Display *getDisplay();
+        static p2d::Display *getDisplay();
 
     private:
-        Platform *p_platform;
+        p2d::Platform *p_platform;
         Filer *p_filer;
         Menu *p_menu;
         Settings *p_settings;
         InfoBox *p_infoBox;
         // auto-repeat
         uint16_t m_buttons_old = 0;
-        Clock m_repeat_clock{};
+        p2d::Clock m_repeat_clock{};
     };
 }
 

@@ -7,21 +7,17 @@
 #include "ui.h"
 #include "bitmap.h"
 
-#include "bitmaps/nes.h"
-#include "bitmaps/gameboy.h"
-#include "bitmaps/sms.h"
-#include "bitmaps/settings.h"
-
+using namespace p2d;
 using namespace mb;
 
-Menu::MenuLine::MenuLine(const Utility::Vec4i &bounds, const Bitmap::Image *image, const std::string &text)
-        : Rectangle(bounds, Ui::Color::Transparent, 8) {
+Menu::MenuLine::MenuLine(const Utility::Vec4i &bounds, const p2d::RomFs::Binary &bitmap, const std::string &text)
+        : Rectangle(bounds, Display::Color::Transparent, 8) {
     // outline
-    Menu::MenuLine::setOutlineColor(Ui::Color::Transparent);
-    Menu::MenuLine::setOutlineThickness(2);
+    Menu::MenuLine::setOutlineColor(Display::Color::Transparent);
+    Menu::MenuLine::setOutlineThickness(1);
 
     // add icon
-    p_bitmap = new Bitmap({10, (int16_t) (getSize().y / 2)}, image);
+    p_bitmap = new Bitmap(bitmap);
     p_bitmap->setOrigin(Origin::Left);
     Menu::MenuLine::add(p_bitmap);
 
@@ -34,24 +30,24 @@ Menu::MenuLine::MenuLine(const Utility::Vec4i &bounds, const Bitmap::Image *imag
 Menu::Menu(const Utility::Vec2i &pos, const Utility::Vec2i &size)
         : Rectangle(pos, size, Ui::Color::Gray, 8) {
     Menu::setOutlineColor(Ui::Color::Red);
-    Menu::setOutlineThickness(2);
+    Menu::setOutlineThickness(1);
 
-    int16_t h = (int16_t) (getSize().y / 4);
-    auto line = new MenuLine({0, 0, getSize().x, h}, &nes_img, "NES");
+    auto h = (int16_t) (getSize().y / 4);
+    auto line = new MenuLine({0, 0, getSize().x, h}, p2d::RomFs::get("romfs/nes_gray.bmp"), "NES");
     line->setOutlineColor(Ui::Color::Red);
     line->p_text->setColor(Ui::Color::Yellow);
     add(line);
     m_lines.emplace_back(line);
 
-    line = new MenuLine({0, h, getSize().x, h}, &gameboy_img, "GAMEBOY");
+    line = new MenuLine({0, h, getSize().x, h}, p2d::RomFs::get("romfs/gameboy_gray.bmp"), "GAMEBOY");
     add(line);
     m_lines.emplace_back(line);
 
-    line = new MenuLine({0, (int16_t) (h * 2), getSize().x, h}, &sms_img, "SMS");
+    line = new MenuLine({0, (int16_t) (h * 2), getSize().x, h}, p2d::RomFs::get("romfs/sms_gray.bmp"), "SMS");
     add(line);
     m_lines.emplace_back(line);
 
-    line = new MenuLine({0, (int16_t) (h * 3), getSize().x, h}, &settings_img, "SETTINGS");
+    line = new MenuLine({0, (int16_t) (h * 3), getSize().x, h}, p2d::RomFs::get("romfs/settings_gray.bmp"), "SETTINGS");
     add(line);
     m_lines.emplace_back(line);
 }
@@ -102,7 +98,7 @@ void Menu::refresh() {
             m_lines.at(i)->setOutlineColor(Ui::Color::Red);
             m_lines.at(i)->p_text->setColor(Ui::Color::Yellow);
         } else {
-            m_lines.at(i)->setOutlineColor(Ui::Color::Transparent);
+            m_lines.at(i)->setOutlineColor(Display::Color::Transparent);
             m_lines.at(i)->p_text->setColor(Ui::Color::YellowLight);
         }
     }
