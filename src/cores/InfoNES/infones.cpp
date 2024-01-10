@@ -14,7 +14,7 @@ using namespace mb;
 using namespace p2d;
 
 #define CC(x) ((((x) >> 1) & 15) | ((((x) >> 6) & 15) << 4) | ((((x) >> 11) & 15) << 8))
-const WORD in_ram(NesPalette)[64] = {
+const uint16_t in_ram(NesPalette)[64] = {
         CC(0x39ce), CC(0x1071), CC(0x0015), CC(0x2013), CC(0x440e), CC(0x5402), CC(0x5000), CC(0x3c20),
         CC(0x20a0), CC(0x0100), CC(0x0140), CC(0x00e2), CC(0x0ceb), CC(0x0000), CC(0x0000), CC(0x0000),
         CC(0x5ef7), CC(0x01dd), CC(0x10fd), CC(0x401e), CC(0x5c17), CC(0x700b), CC(0x6ca0), CC(0x6521),
@@ -29,7 +29,7 @@ static Core *core;
 static bool stopped = false;
 static bool frameLoaded = false;
 #define LINE_BUFFER_COUNT 16
-static WORD in_ram(lineBufferRGB444)[LINE_BUFFER_COUNT][NES_DISP_WIDTH];
+static uint16_t in_ram(lineBufferRGB444)[LINE_BUFFER_COUNT][NES_DISP_WIDTH];
 static uint8_t lineBufferIndex = 0;
 extern int SpriteJustHit;
 static int lcd_line_busy = 0;

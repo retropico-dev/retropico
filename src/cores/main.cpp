@@ -17,7 +17,6 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "platform.h"
 #include "main.h"
 
 using namespace mb;
@@ -35,8 +34,7 @@ int main() {
     Io::FileBuffer fb = platform->getIo()->readRomFromFlash();
     if (!core->loadRom(fb)) {
         // reboot to ui
-#warning "TODO: reboot"
-        //platform->reboot(Platform::RebootTarget::Ui);
+        platform->reboot(FLASH_MAGIC_UI);
     }
 
     // emulation loop
@@ -59,8 +57,7 @@ int main() {
     delete (core);
 
     // reboot to ui
-#warning "TODO: reboot"
-    //platform->reboot(Platform::RebootTarget::Ui);
+    platform->reboot(FLASH_MAGIC_UI);
 
     // unreachable
     delete (platform);

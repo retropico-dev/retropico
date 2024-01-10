@@ -5,6 +5,9 @@
 #ifndef MICROBOY_MAIN_H
 #define MICROBOY_MAIN_H
 
+#include "platform.h"
+#include "../bootloader/flashloader.h"
+
 #ifdef MB_NES
 #include "infones.h"
 #define MBCore InfoNES
