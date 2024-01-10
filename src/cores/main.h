@@ -11,14 +11,17 @@
 #ifdef MB_NES
 #include "infones.h"
 #define MBCore InfoNES
+#define MAX_OVERCLOCK false
 #define ROMFS_ROM "romfs/mario.nes"
 #elif MB_GB
 #include "peanut-gb.h"
-#define ROMFS_ROM "romfs/mario.gb"
 #define MBCore PeanutGB
+#define MAX_OVERCLOCK true
+#define ROMFS_ROM "romfs/mario.gb"
 #elif MB_SMS
 #include "smsplus.h"
 #define MBCore SMSPlus
+#define MAX_OVERCLOCK false
 #define ROMFS_ROM "romfs/sonic.sms"
 #endif
 

@@ -3,7 +3,6 @@
 //
 
 #include "platform.h"
-
 #include "peanut-gb.h"
 #include "gbcolors.h"
 #include "hedley.h"
@@ -298,8 +297,9 @@ bool in_ram(PeanutGB::loop)(uint16_t buttons) {
     gameboy.direct.joypad_bits.down = !(buttons & p2d::Input::Button::DOWN);
     gameboy.direct.joypad_bits.left = !(buttons & p2d::Input::Button::LEFT);
 
+#warning "TODO: hotkeys / combos"
     /*
-    // hotkey / combos
+    // hotkeys / combos
     if (buttons & p2d::Input::Button::SELECT) {
         p_platform->getInput()->setRepeatDelay(INPUT_DELAY_UI);
         // palette selection
