@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.5)
 
 if (NOT PLATFORM_LINUX)
     include(${CMAKE_SOURCE_DIR}/external/misc/libpico2d/src/platforms/pico/cmake/pico_sdk_import.cmake)
-    set(PICO_DISPLAY_DIRECT_DRAW ON CACHE BOOL "" FORCE)
+    set(PICO_DISPLAY_DIRECT_DRAW OFF CACHE BOOL "" FORCE)
 endif ()
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/external/misc/libpico2d)

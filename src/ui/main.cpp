@@ -46,7 +46,7 @@ int main() {
         frames++;
     }
 
-    // reboot to bootloader for launching either nes or gb core
+    // reboot to bootloader for launching either nes/gb/sms core
     // based on rom header
     platform->reboot();
 

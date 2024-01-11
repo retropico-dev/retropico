@@ -21,6 +21,12 @@ namespace mb {
 
         [[nodiscard]] bool isDone() const { return m_done; }
 
+        bool isEmpty() {
+            return m_files[Core::Type::Nes].count < 1
+                   && m_files[Core::Type::Gb].count < 1
+                   && m_files[Core::Type::Sms].count < 1;
+        }
+
     private:
         p2d::Platform *p_platform;
         p2d::Io::FileListBuffer m_files[3];
@@ -31,6 +37,7 @@ namespace mb {
         int m_highlight_index = 0;
         p2d::Rectangle *p_highlight;
         std::vector<p2d::Text *> p_lines;
+        p2d::Text *p_no_rom_text;
         bool m_done = false;
 
         void loop(const p2d::Utility::Vec2i &pos, const uint16_t &buttons) override;

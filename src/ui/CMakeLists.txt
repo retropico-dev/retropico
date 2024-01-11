@@ -8,11 +8,7 @@ set(CMAKE_CXX_STANDARD 20)
 # set source files
 file(GLOB UI_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.c*)
 set(UI_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR})
-set(UI_RESOURCES
-        romfs/gameboy_gray.bmp
-        romfs/nes_gray.bmp
-        romfs/settings_gray.bmp
-        romfs/sms_gray.bmp)
+file(GLOB UI_RESOURCES romfs/*)
 set(UI_FLAGS -DMB_UI)
 
 ####################

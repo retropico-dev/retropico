@@ -11,10 +11,10 @@ using namespace mb;
 //...
 static Ui *s_ui = nullptr;
 
-Ui::Ui(Platform *platform)
-        : Rectangle({2, 2}, {(int16_t) (platform->getDisplay()->getSize().x - 4),
-                             (int16_t) (platform->getDisplay()->getSize().y - 4)},
-                    Display::Color::Transparent, 8) {
+Ui::Ui(Platform *platform) : Rectangle({1, 1},
+                                       {(int16_t) (platform->getDisplay()->getSize().x - 2),
+                                        (int16_t) (platform->getDisplay()->getSize().y - 2)},
+                                       Display::Color::Transparent) {
     s_ui = this;
     p_platform = platform;
 
@@ -22,7 +22,6 @@ Ui::Ui(Platform *platform)
     p_platform->getInput()->setRepeatDelay(INPUT_DELAY_UI);
 
     // set colors
-    //Ui::setColor(Color::Black);
     Ui::setOutlineThickness(1);
     Ui::setOutlineColor(Ui::Color::Red);
 
@@ -44,7 +43,7 @@ Ui::Ui(Platform *platform)
     Ui::add(p_settings);
 
     // add menu
-    p_menu = new Menu({-8, (int16_t) (Ui::getSize().y / 2)}, {150, 192});
+    p_menu = new Menu({-1, (int16_t) (Ui::getSize().y / 2)}, {150 / 2, 192 / 2});
     p_menu->setOrigin(Origin::Left);
     p_menu->setVisibility(Visibility::Hidden);
     Ui::add(p_menu);

@@ -12,7 +12,7 @@
 #include "settings.h"
 #include "infobox.h"
 
-#define UI_FONT_HEIGHT 16
+#define UI_FONT_HEIGHT 8
 
 namespace mb {
     class Ui : public p2d::Rectangle {
