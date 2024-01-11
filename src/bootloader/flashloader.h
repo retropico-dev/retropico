@@ -31,6 +31,7 @@ extern void *__FLASHLOADER_END;
 #define FLASH_TARGET_OFFSET_ROM_DATA (FLASH_TARGET_OFFSET_ROM_HEADER + FLASH_SECTOR_SIZE)
 #define FLASH_TARGET_OFFSET_MISC (FLASH_TARGET_OFFSET_ROM_DATA + FLASH_BLOCK_SIZE + (1024 * 1024)) // 1MB max rom size
 
+#ifndef __LINUX__
 typedef struct __packed __aligned(4) {
     uint32_t magic1;
     uint32_t magic2;
@@ -38,5 +39,5 @@ typedef struct __packed __aligned(4) {
     uint32_t crc32;
     uint8_t data[];
 } tFlashHeader;
-
+#endif
 #endif // FLASHLOADER_H
