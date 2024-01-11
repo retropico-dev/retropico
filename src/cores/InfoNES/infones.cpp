@@ -33,9 +33,9 @@ static uint16_t in_ram(lineBufferRGB444)[LINE_BUFFER_COUNT][NES_DISP_WIDTH];
 static uint8_t lineBufferIndex = 0;
 extern int SpriteJustHit;
 static int lcd_line_busy = 0;
-#define AUDIO_SAMPLE_RATE 735
+#define AUDIO_SAMPLE_RATE 256
 // audio
-static int16_t in_ram(audio_buffer)[1024];
+static int16_t in_ram(audio_buffer)[AUDIO_SAMPLE_RATE];
 static int audio_buffer_index = 0;
 // buttons
 static uint16_t s_buttons = 0;
