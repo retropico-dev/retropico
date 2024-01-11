@@ -26,7 +26,7 @@ int main() {
     Clock clock;
     int frames = 0;
 
-    auto platform = new P2DPlatform(MAX_OVERCLOCK);
+    auto platform = new P2DPlatform(false);
     auto display = (Display *) new P2DDisplay({240, 240}, {240, 240});
     platform->setDisplay(display);
     auto core = new MBCore(platform);

@@ -15,7 +15,7 @@ extern "C" {
 using namespace mb;
 using namespace p2d;
 
-//#define ENABLE_RAM_BANK
+#define ENABLE_RAM_BANK
 #ifdef ENABLE_RAM_BANK
 static uint8_t rom_bank0[65536];
 #endif
@@ -28,6 +28,8 @@ static uint8_t manual_palette_selected = 0;
 
 #define AUDIO_BUFFER_SIZE (AUDIO_SAMPLES * 4)
 static uint16_t audio_stream[AUDIO_BUFFER_SIZE];
+
+static Display *s_display;
 
 /* Multicore command structure. */
 union core_cmd {
@@ -53,6 +55,8 @@ uint8_t in_ram(gb_rom_read)(struct gb_s *gb, const uint_fast32_t addr) {
 #ifdef ENABLE_RAM_BANK
     if (addr < sizeof(rom_bank0)) {
         return rom_bank0[addr];
+    } else {
+        printf("gb_rom_read: addr > rom_bank0 (%i > %i)\r\n", addr, sizeof(rom_bank0));
     }
 #endif
 
@@ -90,13 +94,13 @@ void gb_error(struct gb_s *gb, const enum gb_error_e gb_err, const uint16_t val)
 static uint16_t pixels_buffer[LCD_WIDTH];
 static Utility::Vec2i drawingPos{};
 
+
 void in_ram(core1_lcd_draw_line)(const uint_fast8_t line) {
-    auto display = gb_priv.gb->getPlatform()->getDisplay();
-    display->setCursor(drawingPos.x, drawingPos.y + line);
-    display->drawPixelLine(pixels_buffer, LCD_WIDTH);
+    s_display->setCursor(drawingPos.x, (int16_t) (drawingPos.y + line));
+    s_display->drawPixelLine(pixels_buffer, LCD_WIDTH);
 
     if (line == LCD_HEIGHT - 1) {
-        display->flip();
+        s_display->flip();
     }
 
     __atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);
@@ -104,15 +108,14 @@ void in_ram(core1_lcd_draw_line)(const uint_fast8_t line) {
 
 void in_ram(core1_lcd_flip)(const uint_fast8_t bufferIndex) {
     //printf("core1_lcd_flip(%i)\r\n", idx);
-    auto display = gb_priv.gb->getPlatform()->getDisplay();
     auto surfaceSize = gb_priv.gb->getSurface(bufferIndex)->getSize();
-    auto displaySize = display->getSize();
+    auto displaySize = s_display->getSize();
     auto dstSize = Utility::Vec2i(
             displaySize.x, (int16_t) ((float) displaySize.x * ((float) surfaceSize.y / (float) surfaceSize.x)));
     auto dstPos = Utility::Vec2i(0, (int16_t) ((displaySize.y - dstSize.y) / 2));
 
-    display->drawSurface(gb_priv.gb->getSurface(bufferIndex), dstPos, dstSize);
-    display->flip();
+    s_display->drawSurface(gb_priv.gb->getSurface(bufferIndex), dstPos, dstSize);
+    s_display->flip();
 
     if (!gb_priv.gb->isFrameSkipEnabled()) {
         __atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);
@@ -207,6 +210,8 @@ void in_ram(lcd_draw_line)(struct gb_s *gb, const uint8_t pixels[LCD_WIDTH], con
 }
 
 PeanutGB::PeanutGB(Platform *p) : Core(p) {
+    s_display = p_platform->getDisplay();
+
     // create some render surfaces (double buffering)
     p_surface[0] = new Surface({LCD_WIDTH, LCD_HEIGHT});
 #if MB_DOUBLE_BUFFER
@@ -215,8 +220,8 @@ PeanutGB::PeanutGB(Platform *p) : Core(p) {
 
     // cache drawing position
     drawingPos = {
-            (int16_t) ((p_platform->getDisplay()->getSize().x - LCD_WIDTH) / 2),
-            (int16_t) ((p_platform->getDisplay()->getSize().y - LCD_HEIGHT) / 2)
+            (int16_t) ((s_display->getSize().x - LCD_WIDTH) / 2),
+            (int16_t) ((s_display->getSize().y - LCD_HEIGHT) / 2)
     };
 
     // init audio
@@ -224,7 +229,7 @@ PeanutGB::PeanutGB(Platform *p) : Core(p) {
     audio_init();
 
     // clear display
-    p_platform->getDisplay()->clear();
+    s_display->clear();
 
     gb_priv.gb = this;
 }

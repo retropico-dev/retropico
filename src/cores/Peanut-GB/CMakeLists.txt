@@ -7,15 +7,16 @@ project(microboy-gb)
 file(GLOB GB_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/../*.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/*.c*
-        ${CMAKE_SOURCE_DIR}/external/cores/Peanut-GB/examples/sdl2/minigb_apu/*.c*
-        )
+)
 set(GB_INCLUDES
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/..
         ${CMAKE_SOURCE_DIR}/external/cores/Peanut-GB
-        ${CMAKE_SOURCE_DIR}/external/cores/Peanut-GB/examples/sdl2/minigb_apu
-        )
-set(GB_FLAGS -DMB_GB)
+)
+set(GB_FLAGS
+        -DMB_GB
+        -DPICO_AUDIO_I2S_BUFFER_SAMPLE_LENGTH=548
+)
 
 ####################
 # Peanut-GB binary
