@@ -9,6 +9,7 @@
 #include "InfoNES.h"
 #include "InfoNES_System.h"
 #include "K6502.h"
+#include "Peanut-GB/hedley.h"
 
 using namespace mb;
 using namespace p2d;
@@ -29,13 +30,13 @@ static Core *core;
 static bool stopped = false;
 static bool frameLoaded = false;
 #define LINE_BUFFER_COUNT 16
-static uint16_t in_ram(lineBufferRGB444)[LINE_BUFFER_COUNT][NES_DISP_WIDTH];
+static uint16_t lineBufferRGB444[LINE_BUFFER_COUNT][NES_DISP_WIDTH];
 static uint8_t lineBufferIndex = 0;
 extern int SpriteJustHit;
-static int lcd_line_busy = 0;
+//static int lcd_line_busy = 0;
 #define AUDIO_SAMPLE_RATE 256
 // audio
-static int16_t in_ram(audio_buffer)[AUDIO_SAMPLE_RATE];
+static int16_t audio_buffer[AUDIO_SAMPLE_RATE];
 static int audio_buffer_index = 0;
 // buttons
 static uint16_t s_buttons = 0;
@@ -174,12 +175,11 @@ void in_ram(core1_lcd_draw_line)(const uint_fast8_t line, const uint_fast8_t ind
 
     // crop line buffer width by 16 pixels (240x240 display)
     auto display = platform->getDisplay();
-    display->drawPixelLine(lineBufferRGB444[index] + 8, 240, Display::Format::RGB444);
+    display->drawPixelLine(lineBufferRGB444[index] + 8, 240);
 
     /*
     if (line == 235) {
         platform->getDisplay()->flip();
-        //platform->getDisplay()->setCursor(0, 0);
     }
     */
 
@@ -201,6 +201,8 @@ _Noreturn void in_ram(core1_main)() {
                 break;
         }
     }
+
+    HEDLEY_UNREACHABLE();
 }
 
 void in_ram(InfoNES_PreDrawLine)(int line) {
@@ -300,6 +302,7 @@ int in_ram(InfoNES_GetSoundBufferSize)() {
 
 void in_ram(InfoNES_SoundOutput)(int samples, BYTE *w1, BYTE *w2, BYTE *w3, BYTE *w4, BYTE *w5) {
     //printf("InfoNES_SoundOutput: samples = %i\r\n", samples);
+
     uint8_t byte;
     int32_t sample;
 

@@ -22,12 +22,34 @@
 using namespace mb;
 using namespace p2d;
 
+#ifdef MB_NES
+static Display::Settings ds{
+        .displaySize = {240, 240},
+        .renderSize = {240, 240},
+        .format = Display::Format::ARGB444
+};
+#elif MB_GB
+static Display::Settings ds{
+        .displaySize = {240, 240},
+        .renderSize = {240, 240},
+        .format = Display::Format::RGB565
+};
+#elif MB_SMS
+static Display::Settings ds{
+        .displaySize = {240, 240},
+        .renderSize = {240, 240},
+        .bufferingMode = Display::Buffering::Double,
+        .scaleMode = Display::ScaleMode::None,
+        .format = Display::Format::ARGB444
+};
+#endif
+
 int main() {
     Clock clock;
     int frames = 0;
 
     auto platform = new P2DPlatform(MAX_OVERCLOCK);
-    auto display = (Display *) new P2DDisplay({240, 240}, {240, 240});
+    auto display = (Display *) new P2DDisplay(ds);
     platform->setDisplay(display);
     auto core = new MBCore(platform);
 
