@@ -12,17 +12,17 @@
 #include "infones.h"
 #define MBCore InfoNES
 #define MAX_OVERCLOCK false
-#define ROMFS_ROM "romfs/mario.nes"
+#define ROMFS_ROM "romfs/rom.nes"
 #elif MB_GB
 #include "peanut-gb.h"
 #define MBCore PeanutGB
 #define MAX_OVERCLOCK true
-#define ROMFS_ROM "romfs/mario.gb"
+#define ROMFS_ROM "romfs/rom.gb"
 #elif MB_SMS
 #include "smsplus.h"
 #define MBCore SMSPlus
 #define MAX_OVERCLOCK false
-#define ROMFS_ROM "romfs/sonic.sms"
+#define ROMFS_ROM "romfs/rom.sms"
 #endif
 
 #endif //MICROBOY_MAIN_H

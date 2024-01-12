@@ -38,9 +38,7 @@ static Display::Settings ds{
 static Display::Settings ds{
         .displaySize = {240, 240},
         .renderSize = {240, 240},
-        .bufferingMode = Display::Buffering::Double,
-        .scaleMode = Display::ScaleMode::None,
-        .format = Display::Format::ARGB444
+        .format = Display::Format::RGB565
 };
 #endif
 

@@ -59,7 +59,7 @@ union core_cmd {
     uint32_t full;
 };
 
-InfoNES::InfoNES(Platform *p) : Core(p) {
+InfoNES::InfoNES(Platform *p) : Core(p, Core::Type::Nes) {
     // crappy
     platform = p;
     core = this;
@@ -167,7 +167,7 @@ InfoNES::~InfoNES() {
 }
 
 void in_ram(core1_lcd_draw_line)(const uint_fast8_t line, const uint_fast8_t index) {
-    if(line < 4 || line > 236) {
+    if (line < 4 || line > 236) {
         return;
     } else if (line == 4) {
         platform->getDisplay()->setCursor(0, 4);
@@ -177,11 +177,11 @@ void in_ram(core1_lcd_draw_line)(const uint_fast8_t line, const uint_fast8_t ind
     auto display = platform->getDisplay();
     display->drawPixelLine(lineBufferRGB444[index] + 8, 240);
 
-    /*
+#ifdef LINUX
     if (line == 235) {
         platform->getDisplay()->flip();
     }
-    */
+#endif
 
     // signal we are done
     //__atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);

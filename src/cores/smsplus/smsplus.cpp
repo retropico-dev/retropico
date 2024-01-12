@@ -52,18 +52,15 @@ union core_cmd {
     uint32_t full;
 };
 
-SMSPlus::SMSPlus(Platform *p) : Core(p) {
+SMSPlus::SMSPlus(Platform *p) : Core(p, Core::Type::Sms) {
     // crappy
     platform = p;
     display = p->getDisplay();
     core = this;
 
-    // create saves directory
-    p_platform->getIo()->createDir(Io::getSavePath(Core::Type::Sms));
-
     // setup audio
     int samples = (int) ((float) SMS_AUD_RATE / SMS_FPS);
-    p_platform->getAudio()->setup(SMS_AUD_RATE, samples, 2);
+    p_platform->getAudio()->setup(SMS_AUD_RATE, samples);
 
     // start Core1, which processes requests to the LCD
     multicore_launch_core1(core1_main);

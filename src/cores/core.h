@@ -17,8 +17,10 @@ namespace mb {
             Sms = 2
         };
 
-        explicit Core(p2d::Platform *platform) {
+        explicit Core(p2d::Platform *platform, const Core::Type &core) {
             p_platform = platform;
+            // create saves directory
+            p_platform->getIo()->createDir(p2d::Io::getSavePath(core));
         }
 
         virtual ~Core() = default;

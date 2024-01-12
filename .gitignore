@@ -13,5 +13,6 @@ cmake-build*
 .idea
 
 # debug romfs
-mario.nes
-mario.gb
+rom.nes
+rom.gb
+rom.sms
