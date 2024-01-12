@@ -26,8 +26,10 @@ static int lcd_line_busy = 0;
 static palette_t palette;
 static uint8_t manual_palette_selected = 0;
 
+#if ENABLE_SOUND
 #define AUDIO_BUFFER_SIZE (AUDIO_SAMPLES * 4)
 static uint16_t audio_stream[AUDIO_BUFFER_SIZE];
+#endif
 
 static Display *s_display;
 
@@ -55,8 +57,6 @@ uint8_t in_ram(gb_rom_read)(struct gb_s *gb, const uint_fast32_t addr) {
 #ifdef ENABLE_RAM_BANK
     if (addr < sizeof(rom_bank0)) {
         return rom_bank0[addr];
-    } else {
-        printf("gb_rom_read: addr > rom_bank0 (%i > %i)\r\n", addr, sizeof(rom_bank0));
     }
 #endif
 
@@ -224,9 +224,11 @@ PeanutGB::PeanutGB(Platform *p) : Core(p) {
             (int16_t) ((s_display->getSize().y - LCD_HEIGHT) / 2)
     };
 
+#if ENABLE_SOUND
     // init audio
     p_platform->getAudio()->setup(AUDIO_SAMPLE_RATE, AUDIO_SAMPLES);
     audio_init();
+#endif
 
     // clear display
     s_display->clear();
@@ -282,9 +284,11 @@ bool in_ram(PeanutGB::loop)(uint16_t buttons) {
         tight_loop_contents();
     } while (HEDLEY_LIKELY(gameboy.gb_frame == 0));
 
+#if ENABLE_SOUND
     // send audio buffer to playback device
     audio_callback(nullptr, reinterpret_cast<uint8_t *>(audio_stream), AUDIO_BUFFER_SIZE);
     gb_priv.gb->getPlatform()->getAudio()->play(audio_stream, AUDIO_SAMPLES);
+#endif
 
     /* Required since we do not know whether a button remains
      * pressed over a serial connection. */
