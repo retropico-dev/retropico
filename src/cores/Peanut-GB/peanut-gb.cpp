@@ -2,15 +2,15 @@
 // Created by cpasjuste on 06/06/23.
 //
 
-#include "platform.h"
-#include "peanut-gb.h"
-#include "gbcolors.h"
-#include "hedley.h"
 extern "C" {
 #define ENABLE_SOUND 1
 #include "minigb_apu.h"
 #include "peanut_gb.h"
+#include "gbcolors.h"
+#include "hedley.h"
 };
+
+#include "peanut-gb.h"
 
 using namespace mb;
 using namespace p2d;
@@ -32,6 +32,10 @@ static uint16_t audio_stream[AUDIO_BUFFER_SIZE];
 #endif
 
 static Display *s_display;
+static uint16_t pixels_buffer[LCD_WIDTH];
+static Utility::Vec2i drawingPos{};
+
+_Noreturn void in_ram(main_core1)();
 
 /* Multicore command structure. */
 union core_cmd {
@@ -48,168 +52,21 @@ union core_cmd {
 struct gb_priv {
     PeanutGB *gb;
 };
-static struct gb_priv gb_priv{};
 
+static struct gb_priv gb_priv{};
 static struct gb_s gameboy;
 
-uint8_t in_ram(gb_rom_read)(struct gb_s *gb, const uint_fast32_t addr) {
-    (void) gb;
-#ifdef ENABLE_RAM_BANK
-    if (addr < sizeof(rom_bank0)) {
-        return rom_bank0[addr];
-    }
-#endif
+uint8_t gb_rom_read(struct gb_s *gb, uint_fast32_t addr);
 
-    return gb_rom[addr];
-}
+uint8_t gb_cart_ram_read(struct gb_s *gb, uint_fast32_t addr);
 
-uint8_t in_ram(gb_cart_ram_read)(struct gb_s *gb, const uint_fast32_t addr) {
-    (void) gb;
-    return gb_ram[addr];
-}
+void gb_cart_ram_write(struct gb_s *gb, uint_fast32_t addr, uint8_t val);
 
-void in_ram(gb_cart_ram_write)(struct gb_s *gb, const uint_fast32_t addr, const uint8_t val) {
-    (void) gb;
-    gb_ram[addr] = val;
-}
+void gb_error(struct gb_s *gb, enum gb_error_e gb_err, uint16_t val);
 
-void gb_error(struct gb_s *gb, const enum gb_error_e gb_err, const uint16_t val) {
-    (void) gb;
-    (void) val;
-#if 1
-    const char *gb_err_str[GB_INVALID_MAX] = {
-            "UNKNOWN",
-            "INVALID OPCODE",
-            "INVALID READ",
-            "INVALID WRITE",
-            "HALT"
-    };
-    printf("Error %d occurred: %s (abort)\r\n",
-           gb_err,
-           gb_err >= GB_INVALID_MAX ? gb_err_str[0] : gb_err_str[gb_err]);
-    abort();
-#endif
-}
+void lcd_draw_line(struct gb_s *gb, const uint8_t pixels[LCD_WIDTH], uint_fast8_t line);
 
-static uint16_t pixels_buffer[LCD_WIDTH];
-static Utility::Vec2i drawingPos{};
-
-
-void in_ram(core1_lcd_draw_line)(const uint_fast8_t line) {
-    s_display->setCursor(drawingPos.x, (int16_t) (drawingPos.y + line));
-    s_display->drawPixelLine(pixels_buffer, LCD_WIDTH);
-
-    if (line == LCD_HEIGHT - 1) {
-        s_display->flip();
-    }
-
-    __atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);
-}
-
-void in_ram(core1_lcd_flip)(const uint_fast8_t bufferIndex) {
-    //printf("core1_lcd_flip(%i)\r\n", idx);
-    auto surfaceSize = gb_priv.gb->getSurface(bufferIndex)->getSize();
-    auto displaySize = s_display->getSize();
-    auto dstSize = Utility::Vec2i(
-            displaySize.x, (int16_t) ((float) displaySize.x * ((float) surfaceSize.y / (float) surfaceSize.x)));
-    auto dstPos = Utility::Vec2i(0, (int16_t) ((displaySize.y - dstSize.y) / 2));
-
-    s_display->drawSurface(gb_priv.gb->getSurface(bufferIndex), dstPos, dstSize);
-    s_display->flip();
-
-    if (!gb_priv.gb->isFrameSkipEnabled()) {
-        __atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);
-    }
-}
-
-_Noreturn void in_ram(main_core1)() {
-#ifndef LINUX
-    union core_cmd cmd{};
-    bool fs = gb_priv.gb->isFrameSkipEnabled();
-    bool ret = true;
-
-    // handle commands coming from core0
-    while (true) {
-        if (fs) {
-            ret = multicore_fifo_pop_timeout_us(1000, &cmd.full);
-        } else {
-            cmd.full = multicore_fifo_pop_blocking();
-        }
-        if (ret) {
-            switch (cmd.cmd) {
-                case CORE_CMD_LCD_LINE:
-                    core1_lcd_draw_line(cmd.data);
-                    break;
-                case CORE_CMD_LCD_FLIP:
-                    core1_lcd_flip(cmd.data);
-                    break;
-                case CORE_CMD_NOP:
-                default:
-                    break;
-            }
-        }
-    }
-
-    HEDLEY_UNREACHABLE();
-#endif
-}
-
-void in_ram(lcd_draw_line)(struct gb_s *gb, const uint8_t pixels[LCD_WIDTH], const uint_fast8_t line) {
-    if (gb_priv.gb->isScalingEnabled()) {
-        uint8_t bufferIndex = gb_priv.gb->getBufferIndex();
-        auto surface = gb_priv.gb->getSurface(bufferIndex);
-        for (uint_fast8_t x = 0; x < LCD_WIDTH; x++) {
-            surface->setPixel(x, line,
-                              palette[(pixels[x] & LCD_PALETTE_ALL) >> 4][pixels[x] & 3]);
-        }
-
-        if (line == LCD_HEIGHT - 1) {
-            if (!gb_priv.gb->isFrameSkipEnabled()) {
-                // wait until previous surface flip complete
-                while (__atomic_load_n(&lcd_line_busy, __ATOMIC_SEQ_CST))
-                    tight_loop_contents();
-            }
-
-            union core_cmd cmd{};
-            cmd.cmd = CORE_CMD_LCD_FLIP;
-            cmd.data = bufferIndex;
-            // flip buffers
-            gb_priv.gb->setBufferIndex(bufferIndex == 0 ? 1 : 0);
-#if LINUX
-            core1_lcd_flip(cmd.data);
-#else
-            // send cmd
-            if (!gb_priv.gb->isFrameSkipEnabled()) {
-                __atomic_store_n(&lcd_line_busy, 1, __ATOMIC_SEQ_CST);
-                multicore_fifo_push_blocking(cmd.full);
-            } else {
-                multicore_fifo_push_timeout_us(cmd.full, 1000);
-            }
-#endif
-        }
-    } else {
-        // wait until previous line is sent
-        while (__atomic_load_n(&lcd_line_busy, __ATOMIC_SEQ_CST))
-            tight_loop_contents();
-
-        for (uint_fast8_t x = 0; x < LCD_WIDTH; x++) {
-            pixels_buffer[x] = palette[(pixels[x] & LCD_PALETTE_ALL) >> 4][pixels[x] & 3];
-        }
-
-        union core_cmd cmd{};
-        cmd.cmd = CORE_CMD_LCD_LINE;
-        cmd.data = line;
-        // send cmd
-#if LINUX
-        core1_lcd_draw_line(cmd.data);
-#else
-        __atomic_store_n(&lcd_line_busy, 1, __ATOMIC_SEQ_CST);
-        multicore_fifo_push_blocking(cmd.full);
-#endif
-    }
-}
-
-PeanutGB::PeanutGB(Platform *p) : Core(p) {
+PeanutGB::PeanutGB(Platform *p) : Core(p, Core::Type::Gb) {
     s_display = p_platform->getDisplay();
 
     // create some render surfaces (double buffering)
@@ -270,7 +127,7 @@ bool PeanutGB::loadRom(Io::FileBuffer file) {
     gb_init_lcd(&gameboy, &lcd_draw_line);
 
     // not enough fps when scaling is used (with double buffering, st7789), enable interlacing
-    //if (m_doubleBuffer) gameboy.direct.interlace = 1;
+    //if (m_scaling) gameboy.direct.interlace = 1;
 
     return true;
 }
@@ -340,4 +197,171 @@ PeanutGB::~PeanutGB() {
 #if MB_DOUBLE_BUFFER
     delete (p_surface[1]);
 #endif
+}
+
+uint8_t in_ram(gb_rom_read)(struct gb_s *gb, const uint_fast32_t addr) {
+    (void) gb;
+#ifdef ENABLE_RAM_BANK
+    if (addr < sizeof(rom_bank0)) {
+        return rom_bank0[addr];
+    }
+#endif
+
+    return gb_rom[addr];
+}
+
+uint8_t in_ram(gb_cart_ram_read)(struct gb_s *gb, const uint_fast32_t addr) {
+    (void) gb;
+    return gb_ram[addr];
+}
+
+void in_ram(gb_cart_ram_write)
+(
+struct gb_s *gb,
+const uint_fast32_t addr,
+const uint8_t val
+) {
+(void)
+gb;
+gb_ram[addr] =
+val;
+}
+
+void gb_error(struct gb_s *gb, const enum gb_error_e gb_err, const uint16_t val) {
+    (void) gb;
+    (void) val;
+#if 1
+    const char *gb_err_str[GB_INVALID_MAX] = {
+            "UNKNOWN",
+            "INVALID OPCODE",
+            "INVALID READ",
+            "INVALID WRITE",
+            "HALT"
+    };
+    printf("Error %d occurred: %s (abort)\r\n",
+           gb_err,
+           gb_err >= GB_INVALID_MAX ? gb_err_str[0] : gb_err_str[gb_err]);
+    abort();
+#endif
+}
+
+void in_ram(core1_lcd_draw_line)(const uint_fast8_t line) {
+    s_display->setCursor(drawingPos.x, (int16_t) (drawingPos.y + line));
+    s_display->drawPixelLine(pixels_buffer, LCD_WIDTH);
+
+    if (line == LCD_HEIGHT - 1) {
+        s_display->flip();
+    }
+
+    __atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);
+}
+
+void in_ram(core1_lcd_flip)(const uint_fast8_t bufferIndex) {
+    //printf("core1_lcd_flip(%i)\r\n", idx);
+    auto surfaceSize = gb_priv.gb->getSurface(bufferIndex)->getSize();
+    auto renderSize = s_display->getSize();
+    auto dstSize = Utility::Vec2i(
+            renderSize.x, (int16_t) ((float) renderSize.x * ((float) surfaceSize.y / (float) surfaceSize.x)));
+    auto dstPos = Utility::Vec2i(0, (int16_t) ((renderSize.y - dstSize.y) / 2));
+
+    s_display->drawSurface(gb_priv.gb->getSurface(bufferIndex), dstPos, dstSize);
+    s_display->flip();
+
+    if (!gb_priv.gb->isFrameSkipEnabled()) {
+        __atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);
+    }
+}
+
+_Noreturn void in_ram(main_core1)() {
+#ifndef LINUX
+    union core_cmd cmd{};
+    bool fs = gb_priv.gb->isFrameSkipEnabled();
+    bool ret = true;
+
+    // handle commands coming from core0
+    while (true) {
+        if (fs) {
+            ret = multicore_fifo_pop_timeout_us(1000, &cmd.full);
+        } else {
+            cmd.full = multicore_fifo_pop_blocking();
+        }
+        if (ret) {
+            switch (cmd.cmd) {
+                case CORE_CMD_LCD_LINE:
+                    core1_lcd_draw_line(cmd.data);
+                    break;
+                case CORE_CMD_LCD_FLIP:
+                    core1_lcd_flip(cmd.data);
+                    break;
+                case CORE_CMD_NOP:
+                default:
+                    break;
+            }
+        }
+    }
+
+    HEDLEY_UNREACHABLE();
+#endif
+}
+
+void in_ram(lcd_draw_line)(struct gb_s *gb, const uint8_t pixels[LCD_WIDTH], const uint_fast8_t line) {
+    if (gb_priv.gb->isScalingEnabled()) {
+    uint8_t bufferIndex = gb_priv.gb->getBufferIndex();
+    auto surface = gb_priv.gb->getSurface(bufferIndex);
+    for (uint_fast8_t x = 0; x < LCD_WIDTH; x++) {
+        surface->setPixel(x, line, palette[(pixels[x] & LCD_PALETTE_ALL) >> 4][pixels[x] & 3]);
+    }
+
+    if (line == LCD_HEIGHT - 1) {
+        if (!gb_priv.gb->isFrameSkipEnabled()) {
+            // wait until previous surface flip complete
+            while (__atomic_load_n(&lcd_line_busy, __ATOMIC_SEQ_CST)) tight_loop_contents();
+        }
+
+        union core_cmd cmd{};
+        cmd.cmd = CORE_CMD_LCD_FLIP;
+        cmd.data = bufferIndex;
+        // flip buffers
+        gb_priv.gb->setBufferIndex(bufferIndex== 0 ? 1 : 0);
+        #if LINUX
+        core1_lcd_flip(cmd.data);
+        #else
+        // send cmd
+        if (!gb_priv.gb->isFrameSkipEnabled()) {
+            __atomic_store_n(&lcd_line_busy, 1, __ATOMIC_SEQ_CST);
+            multicore_fifo_push_blocking(cmd.full);
+        } else {
+            multicore_fifo_push_timeout_us(cmd.full, 1000);
+        }
+#endif
+    }
+} else {
+// wait until previous line is sent
+while (
+__atomic_load_n(&lcd_line_busy,
+__ATOMIC_SEQ_CST))
+
+tight_loop_contents();
+
+for (
+uint_fast8_t x = 0;
+x < LCD_WIDTH; x++) {
+pixels_buffer[x] = palette[(pixels[x] & LCD_PALETTE_ALL) >> 4][pixels[x] & 3];
+}
+
+union core_cmd cmd{};
+cmd.
+cmd = CORE_CMD_LCD_LINE;
+cmd.
+data = line;
+// send cmd
+#if LINUX
+core1_lcd_draw_line(cmd.data);
+#else
+__atomic_store_n(&lcd_line_busy,
+1, __ATOMIC_SEQ_CST);
+multicore_fifo_push_blocking(cmd
+.full);
+#endif
+}
 }

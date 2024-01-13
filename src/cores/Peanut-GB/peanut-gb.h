@@ -7,12 +7,7 @@
 
 #include "core.h"
 
-// Not enough ram to use "copy_to_ram" binary and double buffering.
-// As a "speedup hack", we overwrite the surface in main thread while
-// sending it to the display from core1 at the same time.
-// this is not great but seems to do the job without major artifacts for now
-
-//#define MB_DOUBLE_BUFFER 1
+#define MB_DOUBLE_BUFFER 1
 
 namespace mb {
     class PeanutGB : public Core {
@@ -68,7 +63,7 @@ namespace mb {
     private:
         p2d::Surface *p_surface[2] = {nullptr, nullptr};
         uint8_t m_bufferIndex = 0;
-        bool m_scaling = false;
+        bool m_scaling = true;
         bool m_frameSkip = false;
     };
 }
