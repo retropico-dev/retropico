@@ -301,12 +301,13 @@ static inline void in_ram(lcd_draw_line)(struct gb_s *gb, const uint8_t pixels[L
 
     // flip
     if (line == LCD_HEIGHT - 1) {
+        // wait until previous surface flip complete
         if (!gb_priv.gb->isFrameSkipEnabled()) {
-            // wait until previous surface flip complete
             while (__atomic_load_n(&lcd_line_busy, __ATOMIC_SEQ_CST))
                 tight_loop_contents();
         }
 
+        // send cmd to core1
         union core_cmd cmd{};
         cmd.cmd = CORE_CMD_LCD_FLIP;
         cmd.data = bufferIndex;
@@ -315,7 +316,6 @@ static inline void in_ram(lcd_draw_line)(struct gb_s *gb, const uint8_t pixels[L
 #if LINUX
         core1_lcd_flip(cmd.data);
 #else
-        // send cmd
         if (!gb_priv.gb->isFrameSkipEnabled()) {
             __atomic_store_n(&lcd_line_busy, 1, __ATOMIC_SEQ_CST);
             multicore_fifo_push_blocking(cmd.full);
