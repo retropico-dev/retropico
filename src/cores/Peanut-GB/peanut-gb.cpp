@@ -304,10 +304,17 @@ static inline void in_ram(lcd_draw_line)(struct gb_s *gb, const uint8_t pixels[L
     if (gb_priv.gb->isScalingEnabled()) {
         uint8_t bufferIndex = gb_priv.gb->getBufferIndex();
         auto surface = gb_priv.gb->getSurface(bufferIndex);
+        auto buffer = surface->getPixels();
+        auto pitch = surface->getPitch();
+        auto bpp = surface->getBpp();
+
         for (uint_fast8_t x = 0; x < LCD_WIDTH; x++) {
-            surface->setPixel(x, line, palette[(pixels[x] & LCD_PALETTE_ALL) >> 4][pixels[x] & 3]);
+            // do not use "surface->setPixel", use getPixels for speedup
+            *(uint16_t *) (buffer + line * pitch + x * bpp) =
+                    palette[(pixels[x] & LCD_PALETTE_ALL) >> 4][pixels[x] & 3];
         }
 
+        // flip
         if (line == LCD_HEIGHT - 1) {
             if (!gb_priv.gb->isFrameSkipEnabled()) {
                 // wait until previous surface flip complete
@@ -344,7 +351,7 @@ static inline void in_ram(lcd_draw_line)(struct gb_s *gb, const uint8_t pixels[L
         union core_cmd cmd{};
         cmd.cmd = CORE_CMD_LCD_LINE;
         cmd.data = line;
-// send cmd
+        // send cmd
 #if LINUX
         core1_lcd_draw_line(cmd.data);
 #else
