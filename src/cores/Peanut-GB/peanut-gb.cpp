@@ -35,7 +35,6 @@ static uint16_t audio_stream[AUDIO_BUFFER_SIZE];
 #endif
 
 static Display *s_display;
-static uint16_t pixels_buffer[LCD_WIDTH];
 static Utility::Vec2i drawingPos{};
 
 _Noreturn void in_ram(main_core1)();
@@ -44,8 +43,7 @@ _Noreturn void in_ram(main_core1)();
 union core_cmd {
     struct {
 #define CORE_CMD_NOP        0
-#define CORE_CMD_LCD_LINE   1
-#define CORE_CMD_LCD_FLIP   2
+#define CORE_CMD_LCD_FLIP   1
         uint8_t cmd;
         uint8_t data;
     };
@@ -241,24 +239,15 @@ inline void gb_error(struct gb_s *gb, const enum gb_error_e gb_err, const uint16
 #endif
 }
 
-static inline void in_ram(core1_lcd_draw_line)(const uint_fast8_t line) {
-    s_display->setCursor(drawingPos.x, (int16_t) (drawingPos.y + line));
-    s_display->drawPixelLine(pixels_buffer, LCD_WIDTH);
-
-    if (line == LCD_HEIGHT - 1) {
-        s_display->flip();
-    }
-
-    __atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);
-}
-
 static inline void in_ram(core1_lcd_flip)(const uint_fast8_t bufferIndex) {
     //printf("core1_lcd_flip(%i)\r\n", idx);
     auto surfaceSize = gb_priv.gb->getSurface(bufferIndex)->getSize();
     auto renderSize = s_display->getSize();
-    auto dstSize = Utility::Vec2i(
-            renderSize.x, (int16_t) ((float) renderSize.x * ((float) surfaceSize.y / (float) surfaceSize.x)));
-    auto dstPos = Utility::Vec2i(0, (int16_t) ((renderSize.y - dstSize.y) / 2));
+    auto dstSize = gb_priv.gb->isScalingEnabled() ? Utility::Vec2i(
+            renderSize.x, (int16_t) ((float) renderSize.x * ((float) surfaceSize.y / (float) surfaceSize.x)))
+                                                  : surfaceSize;
+    auto dstPos = Utility::Vec2i((int16_t) ((renderSize.x - dstSize.x) / 2),
+                                 (int16_t) ((renderSize.y - dstSize.y) / 2));
 
     s_display->drawSurface(gb_priv.gb->getSurface(bufferIndex), dstPos, dstSize);
     s_display->flip();
@@ -283,9 +272,6 @@ _Noreturn void in_ram(main_core1)() {
         }
         if (ret) {
             switch (cmd.cmd) {
-                case CORE_CMD_LCD_LINE:
-                    core1_lcd_draw_line(cmd.data);
-                    break;
                 case CORE_CMD_LCD_FLIP:
                     core1_lcd_flip(cmd.data);
                     break;
@@ -301,62 +287,41 @@ _Noreturn void in_ram(main_core1)() {
 }
 
 static inline void in_ram(lcd_draw_line)(struct gb_s *gb, const uint8_t pixels[LCD_WIDTH], const uint_fast8_t line) {
-    if (gb_priv.gb->isScalingEnabled()) {
-        uint8_t bufferIndex = gb_priv.gb->getBufferIndex();
-        auto surface = gb_priv.gb->getSurface(bufferIndex);
-        auto buffer = surface->getPixels();
-        auto pitch = surface->getPitch();
-        auto bpp = surface->getBpp();
+    uint8_t bufferIndex = gb_priv.gb->getBufferIndex();
+    auto surface = gb_priv.gb->getSurface(bufferIndex);
+    auto buffer = surface->getPixels();
+    auto pitch = surface->getPitch();
+    auto bpp = surface->getBpp();
 
-        for (uint_fast8_t x = 0; x < LCD_WIDTH; x++) {
-            // do not use "surface->setPixel", use getPixels for speedup
-            *(uint16_t *) (buffer + line * pitch + x * bpp) =
-                    palette[(pixels[x] & LCD_PALETTE_ALL) >> 4][pixels[x] & 3];
-        }
+    for (uint_fast8_t x = 0; x < LCD_WIDTH; x++) {
+        // do not use "surface->setPixel", use getPixels for speedup
+        *(uint16_t *) (buffer + line * pitch + x * bpp) =
+                palette[(pixels[x] & LCD_PALETTE_ALL) >> 4][pixels[x] & 3];
+    }
 
-        // flip
-        if (line == LCD_HEIGHT - 1) {
-            if (!gb_priv.gb->isFrameSkipEnabled()) {
-                // wait until previous surface flip complete
-                while (__atomic_load_n(&lcd_line_busy, __ATOMIC_SEQ_CST))
-                    tight_loop_contents();
-            }
-
-            union core_cmd cmd{};
-            cmd.cmd = CORE_CMD_LCD_FLIP;
-            cmd.data = bufferIndex;
-            // flip buffers
-            gb_priv.gb->setBufferIndex(bufferIndex == 0 ? 1 : 0);
-#if LINUX
-            core1_lcd_flip(cmd.data);
-#else
-            // send cmd
-            if (!gb_priv.gb->isFrameSkipEnabled()) {
-                __atomic_store_n(&lcd_line_busy, 1, __ATOMIC_SEQ_CST);
-                multicore_fifo_push_blocking(cmd.full);
-            } else {
-                multicore_fifo_push_timeout_us(cmd.full, 1000);
-            }
-#endif
-        }
-    } else {
-        // wait until previous line is sent
-        while (__atomic_load_n(&lcd_line_busy, __ATOMIC_SEQ_CST))
-            tight_loop_contents();
-
-        for (uint_fast8_t x = 0; x < LCD_WIDTH; x++) {
-            pixels_buffer[x] = palette[(pixels[x] & LCD_PALETTE_ALL) >> 4][pixels[x] & 3];
+    // flip
+    if (line == LCD_HEIGHT - 1) {
+        if (!gb_priv.gb->isFrameSkipEnabled()) {
+            // wait until previous surface flip complete
+            while (__atomic_load_n(&lcd_line_busy, __ATOMIC_SEQ_CST))
+                tight_loop_contents();
         }
 
         union core_cmd cmd{};
-        cmd.cmd = CORE_CMD_LCD_LINE;
-        cmd.data = line;
-        // send cmd
+        cmd.cmd = CORE_CMD_LCD_FLIP;
+        cmd.data = bufferIndex;
+        // flip buffers
+        gb_priv.gb->setBufferIndex(bufferIndex == 0 ? 1 : 0);
 #if LINUX
-        core1_lcd_draw_line(cmd.data);
+        core1_lcd_flip(cmd.data);
 #else
-        __atomic_store_n(&lcd_line_busy, 1, __ATOMIC_SEQ_CST);
-        multicore_fifo_push_blocking(cmd.full);
+        // send cmd
+        if (!gb_priv.gb->isFrameSkipEnabled()) {
+            __atomic_store_n(&lcd_line_busy, 1, __ATOMIC_SEQ_CST);
+            multicore_fifo_push_blocking(cmd.full);
+        } else {
+            multicore_fifo_push_timeout_us(cmd.full, 1000);
+        }
 #endif
     }
 }

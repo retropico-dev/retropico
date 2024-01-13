@@ -63,7 +63,7 @@ namespace mb {
     private:
         p2d::Surface *p_surface[2] = {nullptr, nullptr};
         uint8_t m_bufferIndex = 0;
-        bool m_scaling = true;
+        bool m_scaling = false;
         bool m_frameSkip = false;
     };
 }

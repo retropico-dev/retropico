@@ -22,7 +22,7 @@
 #elif MB_GB
 #include "peanut-gb.h"
 #define MBCore PeanutGB
-#define MAX_OVERCLOCK true
+#define MAX_OVERCLOCK false
 #define ROMFS_ROM "romfs/rom.gb"
 #elif MB_SMS
 #include "smsplus.h"
