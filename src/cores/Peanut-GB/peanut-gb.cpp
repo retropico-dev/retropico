@@ -3,7 +3,7 @@
 //
 
 extern "C" {
-#define ENABLE_SOUND 0
+#define ENABLE_SOUND 1
 #include "minigb_apu.h"
 #include "peanut_gb.h"
 #include "gbcolors.h"
