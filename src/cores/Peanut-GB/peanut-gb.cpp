@@ -3,7 +3,7 @@
 //
 
 extern "C" {
-#define ENABLE_SOUND 1
+#define ENABLE_SOUND 0
 #include "minigb_apu.h"
 #include "peanut_gb.h"
 #include "gbcolors.h"
@@ -14,6 +14,9 @@ extern "C" {
 
 using namespace mb;
 using namespace p2d;
+
+#undef inline
+#define inline __always_inline
 
 #define ENABLE_RAM_BANK
 #ifdef ENABLE_RAM_BANK
@@ -64,7 +67,7 @@ void gb_cart_ram_write(struct gb_s *gb, uint_fast32_t addr, uint8_t val);
 
 void gb_error(struct gb_s *gb, enum gb_error_e gb_err, uint16_t val);
 
-void lcd_draw_line(struct gb_s *gb, const uint8_t pixels[LCD_WIDTH], uint_fast8_t line);
+static inline void in_ram(lcd_draw_line)(struct gb_s *gb, const uint8_t pixels[LCD_WIDTH], uint_fast8_t line);
 
 PeanutGB::PeanutGB(Platform *p) : Core(p, Core::Type::Gb) {
     s_display = p_platform->getDisplay();
@@ -199,7 +202,7 @@ PeanutGB::~PeanutGB() {
 #endif
 }
 
-uint8_t in_ram(gb_rom_read)(struct gb_s *gb, const uint_fast32_t addr) {
+inline uint8_t gb_rom_read(struct gb_s *gb, const uint_fast32_t addr) {
     (void) gb;
 #ifdef ENABLE_RAM_BANK
     if (addr < sizeof(rom_bank0)) {
@@ -210,24 +213,17 @@ uint8_t in_ram(gb_rom_read)(struct gb_s *gb, const uint_fast32_t addr) {
     return gb_rom[addr];
 }
 
-uint8_t in_ram(gb_cart_ram_read)(struct gb_s *gb, const uint_fast32_t addr) {
+inline uint8_t gb_cart_ram_read(struct gb_s *gb, const uint_fast32_t addr) {
     (void) gb;
     return gb_ram[addr];
 }
 
-void in_ram(gb_cart_ram_write)
-(
-struct gb_s *gb,
-const uint_fast32_t addr,
-const uint8_t val
-) {
-(void)
-gb;
-gb_ram[addr] =
-val;
+inline void gb_cart_ram_write(struct gb_s *gb, const uint_fast32_t addr, const uint8_t val) {
+    (void) gb;
+    gb_ram[addr] = val;
 }
 
-void gb_error(struct gb_s *gb, const enum gb_error_e gb_err, const uint16_t val) {
+inline void gb_error(struct gb_s *gb, const enum gb_error_e gb_err, const uint16_t val) {
     (void) gb;
     (void) val;
 #if 1
@@ -245,7 +241,7 @@ void gb_error(struct gb_s *gb, const enum gb_error_e gb_err, const uint16_t val)
 #endif
 }
 
-void in_ram(core1_lcd_draw_line)(const uint_fast8_t line) {
+static inline void in_ram(core1_lcd_draw_line)(const uint_fast8_t line) {
     s_display->setCursor(drawingPos.x, (int16_t) (drawingPos.y + line));
     s_display->drawPixelLine(pixels_buffer, LCD_WIDTH);
 
@@ -256,7 +252,7 @@ void in_ram(core1_lcd_draw_line)(const uint_fast8_t line) {
     __atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);
 }
 
-void in_ram(core1_lcd_flip)(const uint_fast8_t bufferIndex) {
+static inline void in_ram(core1_lcd_flip)(const uint_fast8_t bufferIndex) {
     //printf("core1_lcd_flip(%i)\r\n", idx);
     auto surfaceSize = gb_priv.gb->getSurface(bufferIndex)->getSize();
     auto renderSize = s_display->getSize();
@@ -274,7 +270,7 @@ void in_ram(core1_lcd_flip)(const uint_fast8_t bufferIndex) {
 
 _Noreturn void in_ram(main_core1)() {
 #ifndef LINUX
-    union core_cmd cmd{};
+    static union core_cmd cmd{};
     bool fs = gb_priv.gb->isFrameSkipEnabled();
     bool ret = true;
 
@@ -304,64 +300,56 @@ _Noreturn void in_ram(main_core1)() {
 #endif
 }
 
-void in_ram(lcd_draw_line)(struct gb_s *gb, const uint8_t pixels[LCD_WIDTH], const uint_fast8_t line) {
+static inline void in_ram(lcd_draw_line)(struct gb_s *gb, const uint8_t pixels[LCD_WIDTH], const uint_fast8_t line) {
     if (gb_priv.gb->isScalingEnabled()) {
-    uint8_t bufferIndex = gb_priv.gb->getBufferIndex();
-    auto surface = gb_priv.gb->getSurface(bufferIndex);
-    for (uint_fast8_t x = 0; x < LCD_WIDTH; x++) {
-        surface->setPixel(x, line, palette[(pixels[x] & LCD_PALETTE_ALL) >> 4][pixels[x] & 3]);
-    }
+        uint8_t bufferIndex = gb_priv.gb->getBufferIndex();
+        auto surface = gb_priv.gb->getSurface(bufferIndex);
+        for (uint_fast8_t x = 0; x < LCD_WIDTH; x++) {
+            surface->setPixel(x, line, palette[(pixels[x] & LCD_PALETTE_ALL) >> 4][pixels[x] & 3]);
+        }
 
-    if (line == LCD_HEIGHT - 1) {
-        if (!gb_priv.gb->isFrameSkipEnabled()) {
-            // wait until previous surface flip complete
-            while (__atomic_load_n(&lcd_line_busy, __ATOMIC_SEQ_CST)) tight_loop_contents();
+        if (line == LCD_HEIGHT - 1) {
+            if (!gb_priv.gb->isFrameSkipEnabled()) {
+                // wait until previous surface flip complete
+                while (__atomic_load_n(&lcd_line_busy, __ATOMIC_SEQ_CST))
+                    tight_loop_contents();
+            }
+
+            union core_cmd cmd{};
+            cmd.cmd = CORE_CMD_LCD_FLIP;
+            cmd.data = bufferIndex;
+            // flip buffers
+            gb_priv.gb->setBufferIndex(bufferIndex == 0 ? 1 : 0);
+#if LINUX
+            core1_lcd_flip(cmd.data);
+#else
+            // send cmd
+            if (!gb_priv.gb->isFrameSkipEnabled()) {
+                __atomic_store_n(&lcd_line_busy, 1, __ATOMIC_SEQ_CST);
+                multicore_fifo_push_blocking(cmd.full);
+            } else {
+                multicore_fifo_push_timeout_us(cmd.full, 1000);
+            }
+#endif
+        }
+    } else {
+        // wait until previous line is sent
+        while (__atomic_load_n(&lcd_line_busy, __ATOMIC_SEQ_CST))
+            tight_loop_contents();
+
+        for (uint_fast8_t x = 0; x < LCD_WIDTH; x++) {
+            pixels_buffer[x] = palette[(pixels[x] & LCD_PALETTE_ALL) >> 4][pixels[x] & 3];
         }
 
         union core_cmd cmd{};
-        cmd.cmd = CORE_CMD_LCD_FLIP;
-        cmd.data = bufferIndex;
-        // flip buffers
-        gb_priv.gb->setBufferIndex(bufferIndex== 0 ? 1 : 0);
-        #if LINUX
-        core1_lcd_flip(cmd.data);
-        #else
-        // send cmd
-        if (!gb_priv.gb->isFrameSkipEnabled()) {
-            __atomic_store_n(&lcd_line_busy, 1, __ATOMIC_SEQ_CST);
-            multicore_fifo_push_blocking(cmd.full);
-        } else {
-            multicore_fifo_push_timeout_us(cmd.full, 1000);
-        }
-#endif
-    }
-} else {
-// wait until previous line is sent
-while (
-__atomic_load_n(&lcd_line_busy,
-__ATOMIC_SEQ_CST))
-
-tight_loop_contents();
-
-for (
-uint_fast8_t x = 0;
-x < LCD_WIDTH; x++) {
-pixels_buffer[x] = palette[(pixels[x] & LCD_PALETTE_ALL) >> 4][pixels[x] & 3];
-}
-
-union core_cmd cmd{};
-cmd.
-cmd = CORE_CMD_LCD_LINE;
-cmd.
-data = line;
+        cmd.cmd = CORE_CMD_LCD_LINE;
+        cmd.data = line;
 // send cmd
 #if LINUX
-core1_lcd_draw_line(cmd.data);
+        core1_lcd_draw_line(cmd.data);
 #else
-__atomic_store_n(&lcd_line_busy,
-1, __ATOMIC_SEQ_CST);
-multicore_fifo_push_blocking(cmd
-.full);
+        __atomic_store_n(&lcd_line_busy, 1, __ATOMIC_SEQ_CST);
+        multicore_fifo_push_blocking(cmd.full);
 #endif
-}
+    }
 }
