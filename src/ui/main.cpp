@@ -23,12 +23,20 @@
 using namespace p2d;
 using namespace mb;
 
+static Display::Settings ds{
+        .displaySize = {240, 240},
+        .renderSize = {120, 120},
+        .bufferingMode = Display::Buffering::Double,
+        .format = Display::Format::RGB565,
+        .spiSpeedMhz = 55.0f
+};
+
 int main() {
     Clock clock;
     int frames = 0;
 
     auto platform = new P2DPlatform();
-    platform->setDisplay((Display *) new P2DDisplay({240, 240}, {120, 120}));
+    platform->setDisplay((Display *) new P2DDisplay(ds));
 
     auto ui = new Ui(platform);
 

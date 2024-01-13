@@ -167,19 +167,20 @@ InfoNES::~InfoNES() {
 }
 
 void in_ram(core1_lcd_draw_line)(const uint_fast8_t line, const uint_fast8_t index) {
+    auto display = platform->getDisplay();
+
     if (line < 4 || line > 236) {
         return;
     } else if (line == 4) {
-        platform->getDisplay()->setCursor(0, 4);
+        display->setCursor(0, 4);
     }
 
     // crop line buffer width by 16 pixels (240x240 display)
-    auto display = platform->getDisplay();
     display->drawPixelLine(lineBufferRGB444[index] + 8, 240);
 
 #ifdef LINUX
     if (line == 235) {
-        platform->getDisplay()->flip();
+        display->flip();
     }
 #endif
 

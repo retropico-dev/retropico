@@ -8,6 +8,12 @@
 #include "platform.h"
 #include "../bootloader/flashloader.h"
 
+#ifdef PICO_BUILD
+// use direct drawing
+#undef P2DDisplay
+#define P2DDisplay PicoDisplayDirectDraw
+#endif
+
 #ifdef MB_NES
 #include "infones.h"
 #define MBCore InfoNES
@@ -16,7 +22,7 @@
 #elif MB_GB
 #include "peanut-gb.h"
 #define MBCore PeanutGB
-#define MAX_OVERCLOCK false
+#define MAX_OVERCLOCK true
 #define ROMFS_ROM "romfs/rom.gb"
 #elif MB_SMS
 #include "smsplus.h"

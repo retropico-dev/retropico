@@ -17,7 +17,7 @@
 namespace mb {
     class Ui : public p2d::Rectangle {
     public:
-        enum Color {
+        enum Color : uint16_t {
             Black = 0x0000,
             White = 0xFFFF,
             Red = 0xC083,
