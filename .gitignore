@@ -13,6 +13,6 @@ cmake-build*
 .idea
 
 # debug romfs
-rom.nes
-rom.gb
-rom.sms
+*.nes
+*.gb
+*.sms
