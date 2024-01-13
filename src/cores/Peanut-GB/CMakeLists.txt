@@ -15,7 +15,7 @@ set(GB_INCLUDES
 )
 set(GB_FLAGS
         -DMB_GB
-        -DPICO_AUDIO_I2S_BUFFER_SAMPLE_LENGTH=548
+        -DPICO_AUDIO_I2S_BUFFER_SAMPLE_LENGTH=256
 )
 
 ####################
