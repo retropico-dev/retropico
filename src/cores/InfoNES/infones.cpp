@@ -34,9 +34,9 @@ static uint16_t lineBufferRGB444[LINE_BUFFER_COUNT][NES_DISP_WIDTH];
 static uint8_t lineBufferIndex = 0;
 extern int SpriteJustHit;
 //static int lcd_line_busy = 0;
-#define AUDIO_SAMPLE_RATE 256
+#define AUDIO_SAMPLES 735
 // audio
-static int16_t audio_buffer[AUDIO_SAMPLE_RATE];
+static int16_t audio_buffer[AUDIO_SAMPLES];
 static int audio_buffer_index = 0;
 // buttons
 static uint16_t s_buttons = 0;
@@ -65,7 +65,7 @@ InfoNES::InfoNES(Platform *p) : Core(p, Core::Type::Nes) {
     core = this;
 
     // setup audio
-    p_platform->getAudio()->setup(44100, AUDIO_SAMPLE_RATE, 1);
+    p_platform->getAudio()->setup(44100, AUDIO_SAMPLES, 1);
 
     // start Core1, which processes requests to the LCD
 #if !defined(NDEBUG) && defined(PICO_STDIO_UART)
@@ -298,24 +298,20 @@ void InfoNES_SoundClose() {
 
 int in_ram(InfoNES_GetSoundBufferSize)() {
     //printf("InfoNES_GetSoundBufferSize\r\n");
-    return AUDIO_SAMPLE_RATE * sizeof(uint8_t);
+    return AUDIO_SAMPLES * sizeof(uint8_t);
 }
 
 void in_ram(InfoNES_SoundOutput)(int samples, BYTE *w1, BYTE *w2, BYTE *w3, BYTE *w4, BYTE *w5) {
     //printf("InfoNES_SoundOutput: samples = %i\r\n", samples);
 
     uint8_t byte;
-    int32_t sample;
 
     for (uint_fast32_t i = 0; i < samples; i++) {
         byte = (w1[i] + w2[i] + w3[i] + w4[i] + w5[i]) / 5;
-        sample = (byte - 128) * 256;
-        if (sample > 32767) sample = 32767;
-        else if (sample < -32768) sample = -32768;
-        audio_buffer[audio_buffer_index] = (int16_t) sample;
+        audio_buffer[audio_buffer_index] = (int16_t) ((byte << 8) - 32768); // U8 > S16
         audio_buffer_index++;
-        if (audio_buffer_index >= AUDIO_SAMPLE_RATE) {
-            platform->getAudio()->play(audio_buffer, audio_buffer_index);
+        if (audio_buffer_index == AUDIO_SAMPLES) {
+            platform->getAudio()->play(audio_buffer, AUDIO_SAMPLES);
             audio_buffer_index = 0;
         }
     }

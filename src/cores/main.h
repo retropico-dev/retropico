@@ -8,10 +8,12 @@
 #include "platform.h"
 #include "../bootloader/flashloader.h"
 
+#ifdef PICO_BUILD
 #if defined(MB_NES) || defined(MB_SMS)
 // use direct drawing
 #undef P2DDisplay
 #define P2DDisplay PicoDisplayDirectDraw
+#endif
 #endif
 
 #ifdef MB_NES

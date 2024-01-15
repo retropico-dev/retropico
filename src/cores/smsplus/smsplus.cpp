@@ -18,7 +18,7 @@ static Core *core;
 
 #define SMS_WIDTH 256
 #define SMS_HEIGHT 192
-#define SMS_AUD_RATE 22050
+#define SMS_AUD_RATE 44100
 #define SMS_FPS 60
 
 // rendering
