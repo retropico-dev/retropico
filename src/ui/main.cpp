@@ -26,9 +26,9 @@ using namespace mb;
 static Display::Settings ds{
         .displaySize = {240, 240},
         .renderSize = {120, 120},
+        .renderBounds = {0, 0, 240, 240},
         .bufferingMode = Display::Buffering::Double,
-        .format = Display::Format::RGB565,
-        .spiSpeedMhz = 55.0f
+        .format = Display::Format::RGB565
 };
 
 int main() {
