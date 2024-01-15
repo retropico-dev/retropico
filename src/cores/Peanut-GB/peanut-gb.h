@@ -14,31 +14,9 @@ namespace mb {
     public:
         explicit PeanutGB(p2d::Platform *platform);
 
-        ~PeanutGB() override;
-
         bool loadRom(p2d::Io::FileBuffer file) override;
 
         bool loop(uint16_t buttons) override;
-
-        p2d::Surface *getSurface(uint8_t idx) {
-            return p_surface[idx];
-        }
-
-        [[nodiscard]] uint8_t getBufferIndex() const {
-#if MB_DOUBLE_BUFFER
-            return m_bufferIndex;
-#else
-            return 0;
-#endif
-        }
-
-        void setBufferIndex(uint8_t idx) {
-#if MB_DOUBLE_BUFFER
-            m_bufferIndex = idx;
-#else
-            m_bufferIndex = 0;
-#endif
-        }
 
         [[nodiscard]] bool isScalingEnabled() const {
             return m_scaling;
@@ -61,9 +39,7 @@ namespace mb {
         }
 
     private:
-        p2d::Surface *p_surface[2] = {nullptr, nullptr};
-        uint8_t m_bufferIndex = 0;
-        bool m_scaling = false;
+        bool m_scaling = true;
         bool m_frameSkip = false;
     };
 }

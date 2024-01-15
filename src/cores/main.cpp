@@ -26,14 +26,16 @@ using namespace p2d;
 static Display::Settings ds{
         .displaySize = {240, 240},
         .renderSize = {240, 240},
+        .renderBounds = {0, 0, 240, 240},
         .bufferingMode = Display::Buffering::None,
         .format = Display::Format::ARGB444
 };
 #elif MB_GB
 static Display::Settings ds{
         .displaySize = {240, 240},
-        .renderSize = {240, 240},
-        .bufferingMode = Display::Buffering::None,
+        .renderSize = {160, 144},
+        .renderBounds = {0, 0, 240, 240},
+        .bufferingMode = Display::Buffering::Double,
         .format = Display::Format::RGB565,
         .spiSpeedMhz = 70.0f // little overclock
 };

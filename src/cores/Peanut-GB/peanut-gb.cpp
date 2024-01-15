@@ -24,7 +24,6 @@ static uint8_t rom_bank0[65536];
 #endif
 static const uint8_t *gb_rom = nullptr;
 static uint8_t gb_ram[32768];
-static int lcd_line_busy = 0;
 
 static palette_t palette;
 static uint8_t manual_palette_selected = 0;
@@ -35,26 +34,7 @@ static uint16_t audio_stream[AUDIO_BUFFER_SIZE];
 #endif
 
 static Display *s_display;
-static Utility::Vec2i drawingPos{};
 
-_Noreturn void in_ram(main_core1)();
-
-/* Multicore command structure. */
-union core_cmd {
-    struct {
-#define CORE_CMD_NOP        0
-#define CORE_CMD_LCD_FLIP   1
-        uint8_t cmd;
-        uint8_t data;
-    };
-    uint32_t full;
-};
-
-struct gb_priv {
-    PeanutGB *gb;
-};
-
-static struct gb_priv gb_priv{};
 static struct gb_s gameboy;
 
 uint8_t gb_rom_read(struct gb_s *gb, uint_fast32_t addr);
@@ -70,28 +50,11 @@ static inline void in_ram(lcd_draw_line)(struct gb_s *gb, const uint8_t pixels[L
 PeanutGB::PeanutGB(Platform *p) : Core(p, Core::Type::Gb) {
     s_display = p_platform->getDisplay();
 
-    // create some render surfaces (double buffering)
-    p_surface[0] = new Surface({LCD_WIDTH, LCD_HEIGHT});
-#if MB_DOUBLE_BUFFER
-    p_surface[1] = new Surface({LCD_WIDTH, LCD_HEIGHT});
-#endif
-
-    // cache drawing position
-    drawingPos = {
-            (int16_t) ((s_display->getSize().x - LCD_WIDTH) / 2),
-            (int16_t) ((s_display->getSize().y - LCD_HEIGHT) / 2)
-    };
-
 #if ENABLE_SOUND
     // init audio
     p_platform->getAudio()->setup(AUDIO_SAMPLE_RATE, AUDIO_SAMPLES);
     audio_init();
 #endif
-
-    // clear display
-    s_display->clear();
-
-    gb_priv.gb = this;
 }
 
 bool PeanutGB::loadRom(Io::FileBuffer file) {
@@ -107,14 +70,8 @@ bool PeanutGB::loadRom(Io::FileBuffer file) {
     memcpy(rom_bank0, file.data, sizeof(rom_bank0));
 #endif
 
-    // start Core1, which processes requests to the LCD
-#if !defined(NDEBUG) && defined(PICO_STDIO_UART)
-    multicore_reset_core1(); // seems to be needed for "picoprobe" debugging
-#endif
-    multicore_launch_core1(main_core1);
-
     // initialise GB context
-    ret = gb_init(&gameboy, &gb_rom_read, &gb_cart_ram_read, &gb_cart_ram_write, &gb_error, &gb_priv);
+    ret = gb_init(&gameboy, &gb_rom_read, &gb_cart_ram_read, &gb_cart_ram_write, &gb_error, nullptr);
 
     if (ret != GB_INIT_NO_ERROR) {
         printf("PeanutGB::loadRom: error %d\r\n", ret);
@@ -145,7 +102,7 @@ bool in_ram(PeanutGB::loop)(uint16_t buttons) {
 #if ENABLE_SOUND
     // send audio buffer to playback device
     audio_callback(nullptr, reinterpret_cast<uint8_t *>(audio_stream), AUDIO_BUFFER_SIZE);
-    gb_priv.gb->getPlatform()->getAudio()->play(audio_stream, AUDIO_SAMPLES);
+    p_platform->getAudio()->play(audio_stream, AUDIO_SAMPLES);
 #endif
 
     /* Required since we do not know whether a button remains
@@ -193,13 +150,6 @@ bool in_ram(PeanutGB::loop)(uint16_t buttons) {
     return true;
 }
 
-PeanutGB::~PeanutGB() {
-    delete (p_surface[0]);
-#if MB_DOUBLE_BUFFER
-    delete (p_surface[1]);
-#endif
-}
-
 inline uint8_t gb_rom_read(struct gb_s *gb, const uint_fast32_t addr) {
     (void) gb;
 #ifdef ENABLE_RAM_BANK
@@ -239,89 +189,17 @@ inline void gb_error(struct gb_s *gb, const enum gb_error_e gb_err, const uint16
 #endif
 }
 
-static inline void in_ram(core1_lcd_flip)(const uint_fast8_t bufferIndex) {
-    //printf("core1_lcd_flip(%i)\r\n", idx);
-    auto surfaceSize = gb_priv.gb->getSurface(bufferIndex)->getSize();
-    auto renderSize = s_display->getSize();
-    auto dstSize = gb_priv.gb->isScalingEnabled() ? Utility::Vec2i(
-            renderSize.x, (int16_t) ((float) renderSize.x * ((float) surfaceSize.y / (float) surfaceSize.x)))
-                                                  : surfaceSize;
-    auto dstPos = Utility::Vec2i((int16_t) ((renderSize.x - dstSize.x) / 2),
-                                 (int16_t) ((renderSize.y - dstSize.y) / 2));
-
-    s_display->drawSurface(gb_priv.gb->getSurface(bufferIndex), dstPos, dstSize);
-    s_display->flip();
-
-    if (!gb_priv.gb->isFrameSkipEnabled()) {
-        __atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);
-    }
-}
-
-_Noreturn void in_ram(main_core1)() {
-#ifndef LINUX
-    static union core_cmd cmd{};
-    bool fs = gb_priv.gb->isFrameSkipEnabled();
-    bool ret = true;
-
-    // handle commands coming from core0
-    while (true) {
-        if (fs) {
-            ret = multicore_fifo_pop_timeout_us(1000, &cmd.full);
-        } else {
-            cmd.full = multicore_fifo_pop_blocking();
-        }
-        if (ret) {
-            switch (cmd.cmd) {
-                case CORE_CMD_LCD_FLIP:
-                    core1_lcd_flip(cmd.data);
-                    break;
-                case CORE_CMD_NOP:
-                default:
-                    break;
-            }
-        }
-    }
-
-    HEDLEY_UNREACHABLE();
-#endif
-}
-
 static inline void in_ram(lcd_draw_line)(struct gb_s *gb, const uint8_t pixels[LCD_WIDTH], const uint_fast8_t line) {
-    uint8_t bufferIndex = gb_priv.gb->getBufferIndex();
-    auto surface = gb_priv.gb->getSurface(bufferIndex);
-    auto buffer = surface->getPixels();
-    auto pitch = surface->getPitch();
-    auto bpp = surface->getBpp();
+    uint8_t *buffer = s_display->getFramebuffer()->getPixels();
+    uint8_t bpp = s_display->getFramebuffer()->getBpp();
 
     for (uint_fast8_t x = 0; x < LCD_WIDTH; x++) {
-        // do not use "surface->setPixel", use getPixels for speedup
-        *(uint16_t *) (buffer + line * pitch + x * bpp) =
-                palette[(pixels[x] & LCD_PALETTE_ALL) >> 4][pixels[x] & 3];
+        // do not use "setPixel", use display framebuffer directly for speedup
+        *(uint16_t *) (buffer + line * (LCD_WIDTH * bpp) + x * bpp)
+                = palette[(pixels[x] & LCD_PALETTE_ALL) >> 4][pixels[x] & 3];
     }
 
-    // flip
     if (line == LCD_HEIGHT - 1) {
-        // wait until previous surface flip complete
-        if (!gb_priv.gb->isFrameSkipEnabled()) {
-            while (__atomic_load_n(&lcd_line_busy, __ATOMIC_SEQ_CST))
-                tight_loop_contents();
-        }
-
-        // send cmd to core1
-        union core_cmd cmd{};
-        cmd.cmd = CORE_CMD_LCD_FLIP;
-        cmd.data = bufferIndex;
-        // flip buffers
-        gb_priv.gb->setBufferIndex(bufferIndex == 0 ? 1 : 0);
-#if LINUX
-        core1_lcd_flip(cmd.data);
-#else
-        if (!gb_priv.gb->isFrameSkipEnabled()) {
-            __atomic_store_n(&lcd_line_busy, 1, __ATOMIC_SEQ_CST);
-            multicore_fifo_push_blocking(cmd.full);
-        } else {
-            multicore_fifo_push_timeout_us(cmd.full, 1000);
-        }
-#endif
+        s_display->flip();
     }
 }
