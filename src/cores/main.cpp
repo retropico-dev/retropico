@@ -36,8 +36,7 @@ static Display::Settings ds{
         .renderSize = {160, 144},
         .renderBounds = {0, 0, 240, 240},
         .bufferingMode = Display::Buffering::Double,
-        .format = Display::Format::RGB565,
-        .spiSpeedMhz = 70.0f // little overclock
+        .format = Display::Format::RGB565
 };
 #elif MB_SMS
 static Display::Settings ds{
