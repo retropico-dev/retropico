@@ -22,8 +22,8 @@ static Core *core;
 #define SMS_FPS 60
 
 // rendering
-#define LINE_BUFFER_COUNT 64
-static uint16_t in_ram(lineBuffer)[LINE_BUFFER_COUNT][240];
+static uint16_t in_ram(lineBuffer)[2][240];
+
 static uint8_t lineBufferIndex = 0;
 static uint8_t framebufferLine[SMS_WIDTH];
 static int palette565[32];
@@ -44,7 +44,6 @@ union core_cmd {
     struct {
 #define CORE_CMD_NOP        0
 #define CORE_CMD_LCD_LINE   1
-#define CORE_CMD_LCD_FLIP   2
         uint8_t cmd;
         uint8_t line;
         uint8_t index;
@@ -141,27 +140,21 @@ extern "C" void in_ram(sms_palette_sync)(int index) {
 }
 
 extern "C" void in_ram(sms_render_line)(int line, const uint8_t *buffer) {
-    union core_cmd cmd{};
-    cmd.cmd = CORE_CMD_LCD_LINE;
-    cmd.line = line;
-    cmd.index = lineBufferIndex;
-
+    // fill line buffer
     for (int i = 8; i < SMS_WIDTH - 8; i++) {
-        uint16_t pixel = palette565[(buffer[i]) & 31];
-        lineBuffer[lineBufferIndex][i - 8] = pixel;
+        lineBuffer[lineBufferIndex][i - 8] = palette565[(buffer[i]) & 31];
     }
 
-    // swap line buffer
-    lineBufferIndex++;
-    if (lineBufferIndex == LINE_BUFFER_COUNT) {
-        lineBufferIndex = 0;
-    }
-
+    // send to core1
 #ifdef LINUX
-    core1_lcd_draw_line(cmd.line, cmd.index);
+    core1_lcd_draw_line(line, lineBufferIndex);
 #else
+    core_cmd cmd{{CORE_CMD_LCD_LINE, (uint8_t) line, lineBufferIndex}};
     multicore_fifo_push_blocking(cmd.full);
 #endif
+
+    // swap line buffer
+    lineBufferIndex = !lineBufferIndex;
 }
 
 void in_ram(core1_lcd_draw_line)(const uint_fast8_t line, const uint_fast8_t index) {
@@ -171,11 +164,15 @@ void in_ram(core1_lcd_draw_line)(const uint_fast8_t line, const uint_fast8_t ind
     }
 
     // crop line buffer width by 16 pixels (240x240 display)
-    display->drawPixelLine(lineBuffer[index], 240);
+    for (uint_fast16_t i = 0; i < 240; i++) {
+        display->setPixel(lineBuffer[index][i]);
+    }
 
+#ifdef LINUX
     if (line == SMS_HEIGHT - 1) {
         display->flip();
     }
+#endif
 }
 
 _Noreturn void in_ram(core1_main)() {
