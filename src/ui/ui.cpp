@@ -50,7 +50,7 @@ Ui::Ui(Platform *platform) : Rectangle({1, 1},
 
     // add info box
     p_infoBox = new InfoBox({(int16_t) (Ui::getSize().x / 2), (int16_t) (Ui::getSize().y / 2)},
-                            {(int16_t) (Ui::getSize().x - 32), 64});
+                            {(int16_t) (Ui::getSize().x - 32), 128 - 64});
     p_infoBox->setOrigin(Origin::Center);
     p_infoBox->setVisibility(Visibility::Hidden);
     Ui::add(p_infoBox);

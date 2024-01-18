@@ -15,7 +15,7 @@ InfoBox::InfoBox(const Utility::Vec2i &pos, const Utility::Vec2i &size)
     InfoBox::setOutlineThickness(1);
     p_text = new Text((int16_t) (size.x / 2), (int16_t) (size.y / 2), "InfoBox !");
     p_text->setSize(size.x - 6, 0);
-    p_text->setColor(Ui::Color::Red);
+    p_text->setColor(Ui::Color::Yellow);
     p_text->setOrigin(Origin::Center);
     add(p_text);
     m_clock.restart();
