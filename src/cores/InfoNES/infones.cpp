@@ -29,11 +29,10 @@ static Platform *platform;
 static Core *core;
 static bool stopped = false;
 static bool frameLoaded = false;
-#define LINE_BUFFER_COUNT 16
-static uint16_t lineBufferRGB444[LINE_BUFFER_COUNT][NES_DISP_WIDTH];
+static uint16_t lineBufferRGB444[2][NES_DISP_WIDTH];
 static uint8_t lineBufferIndex = 0;
 extern int SpriteJustHit;
-//static int lcd_line_busy = 0;
+static int lcd_line_busy = 0;
 #define AUDIO_SAMPLES 735
 // audio
 static int16_t audio_buffer[AUDIO_SAMPLES];
@@ -167,6 +166,7 @@ InfoNES::~InfoNES() {
 }
 
 void in_ram(core1_lcd_draw_line)(const uint_fast8_t line, const uint_fast8_t index) {
+    //printf("core1_lcd_draw_line: %i\r\n", index);
     auto display = platform->getDisplay();
 
     if (line < 4 || line > 236) {
@@ -185,7 +185,7 @@ void in_ram(core1_lcd_draw_line)(const uint_fast8_t line, const uint_fast8_t ind
 #endif
 
     // signal we are done
-    //__atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);
+    __atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);
 }
 
 _Noreturn void in_ram(core1_main)() {
@@ -209,31 +209,28 @@ _Noreturn void in_ram(core1_main)() {
 void in_ram(InfoNES_PreDrawLine)(int line) {
     (void) line;
     //printf("InfoNES_PreDrawLine(%i)\r\n", line);
-
-    // wait until previous line is sent
-    //while (__atomic_load_n(&lcd_line_busy, __ATOMIC_SEQ_CST))
-    //    tight_loop_contents();
-
     InfoNES_SetLineBuffer(lineBufferRGB444[lineBufferIndex], NES_DISP_WIDTH);
 }
 
 void in_ram(InfoNES_PostDrawLine)(int line) {
-    //printf("InfoNES_PostDrawLine(%i)\r\n", line);
+    //printf("InfoNES_PostDrawLine: %i\r\n", lineBufferIndex);
 #ifdef LINUX
     // we can't draw outside main thread with sdl2
     core1_lcd_draw_line(line, lineBufferIndex);
 #else
+    // wait until previous line is sent
+    while (__atomic_load_n(&lcd_line_busy, __ATOMIC_SEQ_CST))
+        tight_loop_contents();
+
+    // set core1 in busy state
+    __atomic_store_n(&lcd_line_busy, 1, __ATOMIC_SEQ_CST);
+
     // send cmd
     core_cmd cmd{{CORE_CMD_LCD_LINE, (uint8_t) line, lineBufferIndex}};
-
-    //__atomic_store_n(&lcd_line_busy, 1, __ATOMIC_SEQ_CST);
     multicore_fifo_push_blocking(cmd.full);
 
     // swap line buffer
-    lineBufferIndex++;
-    if (lineBufferIndex == LINE_BUFFER_COUNT) {
-        lineBufferIndex = 0;
-    }
+    lineBufferIndex = !lineBufferIndex;
 #endif
 }
 

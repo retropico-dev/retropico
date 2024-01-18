@@ -147,7 +147,6 @@ extern "C" void in_ram(sms_render_line)(int line, const uint8_t *buffer) {
         lineBuffer[lineBufferIndex][i - 8] = palette565[(buffer[i]) & 31];
     }
 
-    // send to core1
 #ifdef LINUX
     core1_lcd_draw_line(line, lineBufferIndex);
 #else
@@ -158,6 +157,7 @@ extern "C" void in_ram(sms_render_line)(int line, const uint8_t *buffer) {
     // set core1 in busy state
     __atomic_store_n(&lcd_line_busy, 1, __ATOMIC_SEQ_CST);
 
+    // send to core1
     core_cmd cmd{{CORE_CMD_LCD_LINE, (uint8_t) line, lineBufferIndex}};
     multicore_fifo_push_blocking(cmd.full);
 #endif
@@ -177,6 +177,7 @@ void in_ram(core1_lcd_draw_line)(const uint_fast8_t line, const uint_fast8_t ind
         display->setPixel(lineBuffer[index][i]);
     }
 
+    // signal we are done
     __atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);
 
 #ifdef LINUX
