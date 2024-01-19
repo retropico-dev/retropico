@@ -13,15 +13,6 @@ option(PICO_USE_BOOTLOADER "Build bootloader compatible binaries" OFF)
 project(microboy)
 
 if (NOT PLATFORM_LINUX)
-    function(set_linker_script TARGET script)
-        target_link_directories(${TARGET} PRIVATE ${CMAKE_SOURCE_DIR}/src/bootloader)
-        pico_set_linker_script(${TARGET} ${CMAKE_SOURCE_DIR}/src/bootloader/${script})
-        # Add dependencies on the 'included' linker scripts so that the target gets
-        # rebuilt if they are changed
-        pico_add_link_depend(${TARGET} ${CMAKE_SOURCE_DIR}/src/bootloader/memmap_defines.ld)
-        pico_add_link_depend(${TARGET} ${CMAKE_SOURCE_DIR}/src/bootloader/memmap_default.ld)
-    endfunction()
-else ()
     # i want all executable located at root of build directory
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} CACHE STRING "" FORCE)
 endif ()

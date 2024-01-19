@@ -25,6 +25,8 @@ if (NOT PLATFORM_LINUX)
     if (PICO_USE_BOOTLOADER)
         set_linker_script(microboy-ui memmap_ui.ld)
         target_compile_definitions(microboy-ui PUBLIC ${UI_FLAGS} PICO_USE_BOOTLOADER)
+    else ()
+        set_linker_flash_size_16(microboy-ui)
     endif ()
     pico_add_uf2_output(microboy-ui)
     # debug output

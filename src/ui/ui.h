@@ -6,6 +6,7 @@
 #define MICROBOY_UI_H
 
 #include <vector>
+#include "../cores/core.h"
 #include "rectangle.h"
 #include "filer.h"
 #include "menu.h"

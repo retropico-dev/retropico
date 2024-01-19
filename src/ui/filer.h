@@ -8,7 +8,6 @@
 #include <vector>
 #include "widget.h"
 #include "text.h"
-#include "core.h"
 
 namespace mb {
     class Filer : public p2d::Widget {
