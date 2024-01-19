@@ -39,6 +39,8 @@ if (NOT PLATFORM_LINUX)
     if (PICO_USE_BOOTLOADER)
         set_linker_script(microboy-nes memmap_nes.ld)
         target_compile_definitions(microboy-nes PUBLIC ${NES_FLAGS} PICO_USE_BOOTLOADER)
+    else ()
+        set_linker_flash_size_16(microboy-nes)
     endif ()
     pico_add_uf2_output(microboy-nes)
     # debug output

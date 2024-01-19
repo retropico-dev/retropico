@@ -31,6 +31,26 @@ namespace mb {
 
         virtual p2d::Platform *getPlatform() { return p_platform; }
 
+        static std::string getRomPath(int core) {
+            if (core == 0) {
+                return "/roms/nes";
+            } else if (core == 1) {
+                return "/roms/gameboy";
+            } else {
+                return "/roms/sms";
+            }
+        }
+
+        static std::string getSavePath(int core) {
+            if (core == 0) {
+                return "/saves/nes";
+            } else if (core == 1) {
+                return "/saves/gameboy";
+            } else {
+                return "/saves/sms";
+            }
+        }
+
     protected:
         p2d::Platform *p_platform;
         std::string m_romName;

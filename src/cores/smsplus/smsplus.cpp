@@ -69,7 +69,7 @@ SMSPlus::SMSPlus(Platform *p) : Core(p, Core::Type::Sms) {
 bool SMSPlus::loadRom(Io::FileBuffer file) {
     printf("SMSPlus::loadRom: %s\r\n", file.name);
     m_romName = file.name;
-    m_sramPath = Io::getSavePath(Core::Type::Sms) + "/"
+    m_sramPath = Core::getSavePath(Core::Type::Sms) + "/"
                  + Utility::removeExt(Utility::baseName(m_romName)) + ".srm";
     uint8_t *data = file.data;
 

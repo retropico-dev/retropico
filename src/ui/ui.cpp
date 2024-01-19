@@ -26,12 +26,12 @@ Ui::Ui(Platform *platform) : Rectangle({1, 1},
     Ui::setOutlineColor(Ui::Color::Red);
 
     // create needed directories
-    p_platform->getIo()->createDir(Io::getRomPath(Core::Type::Nes));
-    p_platform->getIo()->createDir(Io::getRomPath(Core::Type::Gb));
-    p_platform->getIo()->createDir(Io::getRomPath(Core::Type::Sms));
-    p_platform->getIo()->createDir(Io::getSavePath(Core::Type::Nes));
-    p_platform->getIo()->createDir(Io::getSavePath(Core::Type::Gb));
-    p_platform->getIo()->createDir(Io::getSavePath(Core::Type::Sms));
+    p_platform->getIo()->createDir(Core::getRomPath(Core::Type::Nes));
+    p_platform->getIo()->createDir(Core::getRomPath(Core::Type::Gb));
+    p_platform->getIo()->createDir(Core::getRomPath(Core::Type::Sms));
+    p_platform->getIo()->createDir(Core::getSavePath(Core::Type::Nes));
+    p_platform->getIo()->createDir(Core::getSavePath(Core::Type::Gb));
+    p_platform->getIo()->createDir(Core::getSavePath(Core::Type::Sms));
 
     // add filer
     p_filer = new Filer({1, 1}, {(int16_t) (Ui::getSize().x - 2), (int16_t) (Ui::getSize().y - 2)});

@@ -12,10 +12,11 @@
 #include "minigb_apu.h"
 
 #ifndef LINUX
+
 #include <pico/platform.h>
 //#define in_ram __not_in_flash_func
-//#undef MIN
-//#undef MAX
+#undef MIN
+#undef MAX
 #else
 #define __force_inline inline
 #endif
@@ -26,8 +27,8 @@
 #define AUDIO_MEM_SIZE        (0xFF3F - 0xFF10 + 1)
 #define AUDIO_ADDR_COMPENSATION    0xFF10
 
-//#define MAX(a, b)		( a > b ? a : b )
-//#define MIN(a, b)		( a <= b ? a : b )
+#define MAX(a, b)        ( a > b ? a : b )
+#define MIN(a, b)        ( a <= b ? a : b )
 
 #define VOL_INIT_MAX        (INT16_MAX/8)
 #define VOL_INIT_MIN        (INT16_MIN/8)
