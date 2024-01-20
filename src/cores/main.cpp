@@ -57,14 +57,12 @@ int main() {
     auto core = new MBCore(platform);
 
 #ifndef NDEBUG
-    Io::FileBuffer fb;
     RomFs::Binary binary = RomFs::get(ROMFS_ROM);
-    fb.data = (uint8_t *) binary.data;
-    fb.size = binary.size;
+    File file{Core::getRomCachePath(), binary.data, binary.size};
 #else
-    Io::FileBuffer fb = platform->getIo()->readRomFromFlash();
+    File file{Core::getRomCachePath()};
 #endif
-    if (!core->loadRom(fb)) {
+    if (!core->loadRom(file)) {
         // reboot to ui
         platform->reboot(FLASH_MAGIC_UI);
     }

@@ -26,12 +26,12 @@ Ui::Ui(Platform *platform) : Rectangle({1, 1},
     Ui::setOutlineColor(Ui::Color::Red);
 
     // create needed directories
-    p_platform->getIo()->createDir(Core::getRomPath(Core::Type::Nes));
-    p_platform->getIo()->createDir(Core::getRomPath(Core::Type::Gb));
-    p_platform->getIo()->createDir(Core::getRomPath(Core::Type::Sms));
-    p_platform->getIo()->createDir(Core::getSavePath(Core::Type::Nes));
-    p_platform->getIo()->createDir(Core::getSavePath(Core::Type::Gb));
-    p_platform->getIo()->createDir(Core::getSavePath(Core::Type::Sms));
+    Io::create(Core::getRomPath(Core::Type::Nes));
+    Io::create(Core::getRomPath(Core::Type::Gb));
+    Io::create(Core::getRomPath(Core::Type::Sms));
+    Io::create(Core::getSavePath(Core::Type::Nes));
+    Io::create(Core::getSavePath(Core::Type::Gb));
+    Io::create(Core::getSavePath(Core::Type::Sms));
 
     // add filer
     p_filer = new Filer({1, 1}, {(int16_t) (Ui::getSize().x - 2), (int16_t) (Ui::getSize().y - 2)});
@@ -55,8 +55,15 @@ Ui::Ui(Platform *platform) : Rectangle({1, 1},
     p_infoBox->setVisibility(Visibility::Hidden);
     Ui::add(p_infoBox);
 
-    // first flip
-    p_platform->getDisplay()->clear();
+    // load files
+    p_filer->setVisibility(Visibility::Hidden);
+    p_infoBox->show("PLEASE WAIT");
+    // force flip/show
+    Rectangle::loop(m_position, 0);
+    p_platform->getDisplay()->flip();
+    p_filer->load();
+    p_infoBox->hide();
+    p_filer->setVisibility(Visibility::Visible);
     Rectangle::loop(m_position, 0);
     p_platform->getDisplay()->flip();
 }

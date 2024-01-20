@@ -66,12 +66,13 @@ SMSPlus::SMSPlus(Platform *p) : Core(p, Core::Type::Sms) {
     multicore_launch_core1(core1_main);
 }
 
-bool SMSPlus::loadRom(Io::FileBuffer file) {
-    printf("SMSPlus::loadRom: %s\r\n", file.name);
-    m_romName = file.name;
+bool SMSPlus::loadRom(const p2d::File &file) {
+    printf("SMSPlus::loadRom: %s\r\n", file.getName().c_str());
+    m_romName = file.getName();
     m_sramPath = Core::getSavePath(Core::Type::Sms) + "/"
                  + Utility::removeExt(Utility::baseName(m_romName)) + ".srm";
-    uint8_t *data = file.data;
+
+    auto data = (uint8_t *) file.ptr();
 
     memset(framebufferLine, 0x00, SMS_WIDTH);
     memset(sram, 0x00, 0x8000);
@@ -88,13 +89,13 @@ bool SMSPlus::loadRom(Io::FileBuffer file) {
 
     cart.type = TYPE_SMS;
     // take care of image header, if present
-    if ((file.size / 512) & 1) {
+    if ((file.length() / 512) & 1) {
         printf("SMSPlus::loadRom: removing rom header...\r\n");
         cart.rom = data + 512;
-        cart.pages = ((file.size - 512) / 0x4000);
+        cart.pages = ((file.length() - 512) / 0x4000);
     } else {
         cart.rom = data;
-        cart.pages = (file.size / 0x4000);
+        cart.pages = (file.length() / 0x4000);
     }
 
     memset(audio_buffer, 0x00, (SMS_AUD_RATE / SMS_FPS));

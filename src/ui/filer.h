@@ -14,6 +14,8 @@ namespace mb {
     public:
         explicit Filer(const p2d::Utility::Vec2i &pos, const p2d::Utility::Vec2i &size);
 
+        void load();
+
         void setCore(const Core::Type &core);
 
         Core::Type getCore() { return m_core; }
@@ -21,14 +23,14 @@ namespace mb {
         [[nodiscard]] bool isDone() const { return m_done; }
 
         bool isEmpty() {
-            return m_files[Core::Type::Nes].count < 1
-                   && m_files[Core::Type::Gb].count < 1
-                   && m_files[Core::Type::Sms].count < 1;
+            return m_files[Core::Type::Nes].length < 1
+                   && m_files[Core::Type::Gb].length < 1
+                   && m_files[Core::Type::Sms].length < 1;
         }
 
     private:
         p2d::Platform *p_platform;
-        p2d::Io::FileListBuffer m_files[3];
+        p2d::Io::ListBuffer m_files[3];
         Core::Type m_core = Core::Type::Nes;
         int m_max_lines = 0;
         int m_line_height = 0;

@@ -15,15 +15,16 @@ using namespace mb;
 using namespace p2d;
 
 #define CC(x) ((((x) >> 1) & 15) | ((((x) >> 6) & 15) << 4) | ((((x) >> 11) & 15) << 8))
-const uint16_t in_ram(NesPalette)[64] = {
-        CC(0x39ce), CC(0x1071), CC(0x0015), CC(0x2013), CC(0x440e), CC(0x5402), CC(0x5000), CC(0x3c20),
-        CC(0x20a0), CC(0x0100), CC(0x0140), CC(0x00e2), CC(0x0ceb), CC(0x0000), CC(0x0000), CC(0x0000),
-        CC(0x5ef7), CC(0x01dd), CC(0x10fd), CC(0x401e), CC(0x5c17), CC(0x700b), CC(0x6ca0), CC(0x6521),
-        CC(0x45c0), CC(0x0240), CC(0x02a0), CC(0x0247), CC(0x0211), CC(0x0000), CC(0x0000), CC(0x0000),
-        CC(0x7fff), CC(0x1eff), CC(0x2e5f), CC(0x223f), CC(0x79ff), CC(0x7dd6), CC(0x7dcc), CC(0x7e67),
-        CC(0x7ae7), CC(0x4342), CC(0x2769), CC(0x2ff3), CC(0x03bb), CC(0x0000), CC(0x0000), CC(0x0000),
-        CC(0x7fff), CC(0x579f), CC(0x635f), CC(0x6b3f), CC(0x7f1f), CC(0x7f1b), CC(0x7ef6), CC(0x7f75),
-        CC(0x7f94), CC(0x73f4), CC(0x57d7), CC(0x5bf9), CC(0x4ffe), CC(0x0000), CC(0x0000), CC(0x0000)};
+const uint16_t in_ram(NesPalette)
+[64] = {
+CC(0x39ce), CC(0x1071), CC(0x0015), CC(0x2013), CC(0x440e), CC(0x5402), CC(0x5000), CC(0x3c20),
+CC(0x20a0), CC(0x0100), CC(0x0140), CC(0x00e2), CC(0x0ceb), CC(0x0000), CC(0x0000), CC(0x0000),
+CC(0x5ef7), CC(0x01dd), CC(0x10fd), CC(0x401e), CC(0x5c17), CC(0x700b), CC(0x6ca0), CC(0x6521),
+CC(0x45c0), CC(0x0240), CC(0x02a0), CC(0x0247), CC(0x0211), CC(0x0000), CC(0x0000), CC(0x0000),
+CC(0x7fff), CC(0x1eff), CC(0x2e5f), CC(0x223f), CC(0x79ff), CC(0x7dd6), CC(0x7dcc), CC(0x7e67),
+CC(0x7ae7), CC(0x4342), CC(0x2769), CC(0x2ff3), CC(0x03bb), CC(0x0000), CC(0x0000), CC(0x0000),
+CC(0x7fff), CC(0x579f), CC(0x635f), CC(0x6b3f), CC(0x7f1f), CC(0x7f1b), CC(0x7ef6), CC(0x7f75),
+CC(0x7f94), CC(0x73f4), CC(0x57d7), CC(0x5bf9), CC(0x4ffe), CC(0x0000), CC(0x0000), CC(0x0000)};
 
 static Platform *platform;
 static Core *core;
@@ -73,12 +74,12 @@ InfoNES::InfoNES(Platform *p) : Core(p, Core::Type::Nes) {
     multicore_launch_core1(core1_main);
 }
 
-bool InfoNES::loadRom(Io::FileBuffer file) {
-    printf("InfoNES::loadRom: %s\r\n", file.name);
-    m_romName = file.name;
+bool InfoNES::loadRom(const p2d::File &file) {
+    printf("InfoNES::loadRom: %s\r\n", file.getPath().c_str());
+    m_romName = file.getPath();
     m_sramPath = Core::getSavePath(Core::Type::Nes) + "/"
                  + Utility::removeExt(Utility::baseName(m_romName)) + ".srm";
-    uint8_t *data = file.data;
+    auto data = (uint8_t *) file.ptr();
     memcpy(&NesHeader, data, sizeof(NesHeader));
     if (memcmp(NesHeader.byID, "NES\x1a", 4) != 0) {
         printf("InfoNES::loadRom: NES header not found in rom...\n");
@@ -206,37 +207,51 @@ _Noreturn void in_ram(core1_main)() {
     HEDLEY_UNREACHABLE();
 }
 
-void in_ram(InfoNES_PreDrawLine)(int line) {
-    (void) line;
-    //printf("InfoNES_PreDrawLine(%i)\r\n", line);
-    InfoNES_SetLineBuffer(lineBufferRGB444[lineBufferIndex], NES_DISP_WIDTH);
+void in_ram(InfoNES_PreDrawLine)
+(
+int line
+) {
+(void)
+line;
+//printf("InfoNES_PreDrawLine(%i)\r\n", line);
+InfoNES_SetLineBuffer(lineBufferRGB444[lineBufferIndex],
+NES_DISP_WIDTH);
 }
 
-void in_ram(InfoNES_PostDrawLine)(int line) {
-    //printf("InfoNES_PostDrawLine: %i\r\n", lineBufferIndex);
+void in_ram(InfoNES_PostDrawLine)
+(
+int line
+) {
+//printf("InfoNES_PostDrawLine: %i\r\n", lineBufferIndex);
 #ifdef LINUX
-    // we can't draw outside main thread with sdl2
-    core1_lcd_draw_line(line, lineBufferIndex);
+// we can't draw outside main thread with sdl2
+core1_lcd_draw_line(line, lineBufferIndex);
 #else
-    // wait until previous line is sent
-    while (__atomic_load_n(&lcd_line_busy, __ATOMIC_SEQ_CST))
-        tight_loop_contents();
+// wait until previous line is sent
+while (
+__atomic_load_n(&lcd_line_busy,
+__ATOMIC_SEQ_CST))
 
-    // set core1 in busy state
-    __atomic_store_n(&lcd_line_busy, 1, __ATOMIC_SEQ_CST);
+tight_loop_contents();
 
-    // send cmd
-    core_cmd cmd{{CORE_CMD_LCD_LINE, (uint8_t) line, lineBufferIndex}};
-    multicore_fifo_push_blocking(cmd.full);
+// set core1 in busy state
+__atomic_store_n(&lcd_line_busy,
+1, __ATOMIC_SEQ_CST);
 
-    // swap line buffer
-    lineBufferIndex = !lineBufferIndex;
+// send cmd
+core_cmd cmd{{CORE_CMD_LCD_LINE, (uint8_t) line, lineBufferIndex}};
+multicore_fifo_push_blocking(cmd
+.full);
+
+// swap line buffer
+lineBufferIndex = !lineBufferIndex;
 #endif
 }
 
-void in_ram(InfoNES_LoadFrame)() {
-    //printf("InfoNES_LoadFrame\r\n");
-    frameLoaded = true;
+void in_ram(InfoNES_LoadFrame)
+() {
+//printf("InfoNES_LoadFrame\r\n");
+frameLoaded = true;
 }
 
 int InfoNES_ReadRom(const char *pszFileName) {
@@ -252,28 +267,35 @@ void InfoNES_ReleaseRom() {
     stopped = true;
 }
 
-void in_ram(InfoNES_PadState)(DWORD *pdwPad1, DWORD *pdwPad2, DWORD *pdwSystem) {
-    static constexpr int LEFT = 1 << 6;
-    static constexpr int RIGHT = 1 << 7;
-    static constexpr int UP = 1 << 4;
-    static constexpr int DOWN = 1 << 5;
-    static constexpr int SELECT = 1 << 2;
-    static constexpr int START = 1 << 3;
-    static constexpr int A = 1 << 0;
-    static constexpr int B = 1 << 1;
-    (void) pdwPad1;
-    (void) pdwSystem;
+void in_ram(InfoNES_PadState)
+(
+DWORD *pdwPad1, DWORD
+*pdwPad2,
+DWORD *pdwSystem
+) {
+static constexpr int LEFT = 1 << 6;
+static constexpr int RIGHT = 1 << 7;
+static constexpr int UP = 1 << 4;
+static constexpr int DOWN = 1 << 5;
+static constexpr int SELECT = 1 << 2;
+static constexpr int START = 1 << 3;
+static constexpr int A = 1 << 0;
+static constexpr int B = 1 << 1;
+(void)
+pdwPad1;
+(void)
+pdwSystem;
 
-    // emulation inputs
-    auto &pad = *pdwPad1;
-    pad = (s_buttons & Input::Button::LEFT ? LEFT : 0) |
-          (s_buttons & Input::Button::RIGHT ? RIGHT : 0) |
-          (s_buttons & Input::Button::UP ? UP : 0) |
-          (s_buttons & Input::Button::DOWN ? DOWN : 0) |
-          (s_buttons & Input::Button::B1 ? A : 0) |
-          (s_buttons & Input::Button::B2 ? B : 0) |
-          (s_buttons & Input::Button::SELECT ? SELECT : 0) |
-          (s_buttons & Input::Button::START ? START : 0) | 0;
+// emulation inputs
+auto &pad = *pdwPad1;
+pad = (s_buttons & Input::Button::LEFT ? LEFT : 0) |
+      (s_buttons & Input::Button::RIGHT ? RIGHT : 0) |
+      (s_buttons & Input::Button::UP ? UP : 0) |
+      (s_buttons & Input::Button::DOWN ? DOWN : 0) |
+      (s_buttons & Input::Button::B1 ? A : 0) |
+      (s_buttons & Input::Button::B2 ? B : 0) |
+      (s_buttons & Input::Button::SELECT ? SELECT : 0) |
+      (s_buttons & Input::Button::START ? START : 0) | 0;
 }
 
 int InfoNES_Menu() {
@@ -293,25 +315,38 @@ int InfoNES_SoundOpen(int samples_per_sync, int sample_rate) {
 void InfoNES_SoundClose() {
 }
 
-int in_ram(InfoNES_GetSoundBufferSize)() {
-    //printf("InfoNES_GetSoundBufferSize\r\n");
-    return AUDIO_SAMPLES * sizeof(uint8_t);
+int in_ram(InfoNES_GetSoundBufferSize)
+() {
+//printf("InfoNES_GetSoundBufferSize\r\n");
+return AUDIO_SAMPLES * sizeof(uint8_t);
 }
 
-void in_ram(InfoNES_SoundOutput)(int samples, BYTE *w1, BYTE *w2, BYTE *w3, BYTE *w4, BYTE *w5) {
-    //printf("InfoNES_SoundOutput: samples = %i\r\n", samples);
+void in_ram(InfoNES_SoundOutput)
+(
+int samples, BYTE
+*w1,
+BYTE *w2, BYTE
+*w3,
+BYTE *w4, BYTE
+*w5) {
+//printf("InfoNES_SoundOutput: samples = %i\r\n", samples);
 
-    uint8_t byte;
+uint8_t byte;
 
-    for (uint_fast32_t i = 0; i < samples; i++) {
-        byte = (w1[i] + w2[i] + w3[i] + w4[i] + w5[i]) / 5;
-        audio_buffer[audio_buffer_index] = (int16_t) ((byte << 8) - 32768); // U8 > S16
-        audio_buffer_index++;
-        if (audio_buffer_index == AUDIO_SAMPLES) {
-            platform->getAudio()->play(audio_buffer, AUDIO_SAMPLES);
-            audio_buffer_index = 0;
-        }
-    }
+for (
+uint_fast32_t i = 0;
+i<samples;
+i++) {
+byte = (w1[i] + w2[i] + w3[i] + w4[i] + w5[i]) / 5;
+audio_buffer[audio_buffer_index] = (int16_t) ((byte << 8) - 32768); // U8 > S16
+audio_buffer_index++;
+if (audio_buffer_index == AUDIO_SAMPLES) {
+platform->getAudio()->
+play(audio_buffer,
+AUDIO_SAMPLES);
+audio_buffer_index = 0;
+}
+}
 }
 
 void InfoNES_MessageBox(const char *pszMsg, ...) {
@@ -326,7 +361,6 @@ void InfoNES_MessageBox(const char *pszMsg, ...) {
 static int nSRAM_SaveFlag;
 
 int InfoNES_LoadSRAM(const std::string &path) {
-    Io::FileBuffer fileBuffer;
     unsigned char chData;
     unsigned char chTag;
     int nRunLen;
@@ -343,11 +377,12 @@ int InfoNES_LoadSRAM(const std::string &path) {
 
     nSRAM_SaveFlag = 1;
 
-    fileBuffer = platform->getIo()->read(path, Io::Target::Flash);
-    if (!fileBuffer.data) {
+    //fileBuffer = platform->getIo()->read(path, Io::Target::Flash);
+    File file{path};
+    if (!file.isOpen()) {
         printf("InfoNES_LoadSRAM: could not load SRAM: invalid file (%s)\r\n", path.c_str());
         return -1;
-    } else if (fileBuffer.size != SRAM_SIZE) {
+    } else if (file.length() != SRAM_SIZE) {
         printf("InfoNES_LoadSRAM: could not load SRAM: invalid file size (%s)\r\n", path.c_str());
 #if LINUX
         free(fileBuffer.data);
@@ -357,13 +392,13 @@ int InfoNES_LoadSRAM(const std::string &path) {
 
     nDecoded = 0;
     nDecLen = 0;
-    chTag = fileBuffer.data[nDecoded++];
+    chTag = file.ptr()[nDecoded++];
 
     while (nDecLen < 8192) {
-        chData = fileBuffer.data[nDecoded++];
+        chData = file.ptr()[nDecoded++];
         if (chData == chTag) {
-            chData = fileBuffer.data[nDecoded++];
-            nRunLen = fileBuffer.data[nDecoded++];
+            chData = file.ptr()[nDecoded++];
+            nRunLen = file.ptr()[nDecoded++];
             for (nIdx = 0; nIdx < nRunLen + 1; ++nIdx) {
                 SRAM[nDecLen++] = chData;
             }
@@ -379,7 +414,6 @@ int InfoNES_LoadSRAM(const std::string &path) {
 
 int InfoNES_SaveSRAM(const std::string &path) {
     unsigned char pDstBuf[SRAM_SIZE];
-    Io::FileBuffer fileBuffer;
     int nUsedTable[256];
     unsigned char chData;
     unsigned char chPrevData;
@@ -439,10 +473,8 @@ int InfoNES_SaveSRAM(const std::string &path) {
             pDstBuf[nEncLen++] = chPrevData;
     }
 
-    fileBuffer.data = pDstBuf;
-    fileBuffer.size = SRAM_SIZE;
-
     printf("InfoNES_SaveSRAM: saving SRAM to %s\r\n", path.c_str());
-
-    return platform->getIo()->write(path, fileBuffer) == true;
+    File file{path, File::OpenMode::Write};
+    int wrote = file.write(0, SRAM_SIZE, (const char *) pDstBuf);
+    return wrote > 0;
 }

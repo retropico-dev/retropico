@@ -57,17 +57,17 @@ PeanutGB::PeanutGB(Platform *p) : Core(p, Core::Type::Gb) {
 #endif
 }
 
-bool PeanutGB::loadRom(Io::FileBuffer file) {
+bool PeanutGB::loadRom(const p2d::File &file) {
     enum gb_init_error_e ret;
 
-    printf("PeanutGB::loadRom: %s\r\n", file.name);
-    m_romName = file.name;
+    printf("PeanutGB::loadRom: %s\r\n", file.getName().c_str());
+    m_romName = file.getName();
     m_sramPath = Core::getSavePath(Core::Type::Sms) + "/"
                  + Utility::removeExt(Utility::baseName(m_romName)) + ".srm";
 
-    gb_rom = file.data;
+    gb_rom = file.ptr();
 #ifdef ENABLE_RAM_BANK
-    memcpy(rom_bank0, file.data, sizeof(rom_bank0));
+    memcpy(rom_bank0, file.ptr(), sizeof(rom_bank0));
 #endif
 
     // initialise GB context

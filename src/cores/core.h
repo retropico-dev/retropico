@@ -25,29 +25,31 @@ namespace mb {
 
         virtual bool loop(uint16_t buttons);
 
-        virtual bool loadRom(p2d::Io::FileBuffer file) { return false; }
+        virtual bool loadRom(const p2d::File &file) { return false; }
 
         virtual std::string getSramPath() { return m_sramPath; };
 
         virtual p2d::Platform *getPlatform() { return p_platform; }
 
+        static std::string getRomCachePath() { return "flash:/rom.bin"; }
+
         static std::string getRomPath(int core) {
-            if (core == 0) {
-                return "/roms/nes";
-            } else if (core == 1) {
-                return "/roms/gameboy";
+            if (core == Nes) {
+                return "sd:/roms/nes";
+            } else if (core == Gb) {
+                return "sd:/roms/gb";
             } else {
-                return "/roms/sms";
+                return "sd:/roms/sms";
             }
         }
 
         static std::string getSavePath(int core) {
-            if (core == 0) {
-                return "/saves/nes";
-            } else if (core == 1) {
-                return "/saves/gameboy";
+            if (core == Nes) {
+                return "sd:/saves/nes";
+            } else if (core == Gb) {
+                return "sd:/saves/gb";
             } else {
-                return "/saves/sms";
+                return "sd:/saves/sms";
             }
         }
 
