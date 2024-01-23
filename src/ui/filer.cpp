@@ -5,6 +5,8 @@
 #include "platform.h"
 #include "ui.h"
 #include "filer.h"
+#include "flash.h"
+#include "../bootloader/flashloader.h"
 
 using namespace p2d;
 using namespace mb;
@@ -48,10 +50,26 @@ Filer::Filer(const Utility::Vec2i &pos, const Utility::Vec2i &size) : Widget(pos
 
 void Filer::load() {
     // get file list
-    m_files[Core::Type::Nes] = Io::getBufferedList(Core::getRomPath(Core::Type::Nes));
-    m_files[Core::Type::Gb] = Io::getBufferedList(Core::getRomPath(Core::Type::Gb));
-    m_files[Core::Type::Sms] = Io::getBufferedList(Core::getRomPath(Core::Type::Sms));
+    uint32_t offset = FLASH_TARGET_OFFSET_CACHE;
+
+    printf("Filer::load: buffering nes roms list...");
+    m_files[Core::Type::Nes] = Io::getBufferedList(Core::getRomPath(Core::Type::Nes), offset);
+    offset += m_files[Core::Type::Nes].data_size;
+    printf(" found %i roms\r\n", m_files[Core::Type::Nes].count);
+
+    printf("Filer::load: buffering gb roms list...");
+    m_files[Core::Type::Gb] = Io::getBufferedList(Core::getRomPath(Core::Type::Gb), offset);
+    offset += m_files[Core::Type::Gb].data_size;
+    printf(" found %i roms\r\n", m_files[Core::Type::Gb].count);
+
+    printf("Filer::load: buffering sms roms list...");
+    m_files[Core::Type::Sms] = Io::getBufferedList(Core::getRomPath(Core::Type::Sms), offset);
+    printf(" found %i roms\r\n", m_files[Core::Type::Sms].count);
 }
+
+extern void p2d_display_pause();
+
+extern void p2d_display_resume();
 
 void Filer::loop(const Utility::Vec2i &pos, const uint16_t &buttons) {
     if (!isVisible()) return;
@@ -66,18 +84,18 @@ void Filer::loop(const Utility::Vec2i &pos, const uint16_t &buttons) {
                 m_highlight_index--;
             }
             if (m_highlight_index < 0) {
-                m_highlight_index = m_files[m_core].length < m_max_lines ? m_files[m_core].length - 1 : m_max_lines - 1;
-                m_file_index = m_files[m_core].length - 1 - m_highlight_index;
+                m_highlight_index = m_files[m_core].count < m_max_lines ? m_files[m_core].count - 1 : m_max_lines - 1;
+                m_file_index = m_files[m_core].count - 1 - m_highlight_index;
             }
         } else if (buttons & Input::Button::DOWN) {
             int index = m_file_index + m_highlight_index;
             int middle = m_max_lines / 2;
-            if (m_highlight_index >= middle && index + middle < m_files[m_core].length) {
+            if (m_highlight_index >= middle && index + middle < m_files[m_core].count) {
                 m_file_index++;
             } else {
                 m_highlight_index++;
             }
-            if (m_highlight_index >= m_max_lines || m_file_index + m_highlight_index >= m_files[m_core].length) {
+            if (m_highlight_index >= m_max_lines || m_file_index + m_highlight_index >= m_files[m_core].count) {
                 m_file_index = 0;
                 m_highlight_index = 0;
             }
@@ -87,14 +105,29 @@ void Filer::loop(const Utility::Vec2i &pos, const uint16_t &buttons) {
             setSelection(index);
         } else if (buttons & Input::Button::RIGHT) {
             int index = m_file_index + m_highlight_index + m_max_lines;
-            if (index > m_files[m_core].length - 1) index = m_files[m_core].length - 1;
+            if (index > m_files[m_core].count - 1) index = m_files[m_core].count - 1;
             setSelection(index);
         } else if (buttons & Input::Button::B1) {
             std::string name = m_files[m_core].at(m_file_index + m_highlight_index);
             std::string path = Core::getRomPath(m_core) + "/" + name;
+            printf("Filer: copying %s to %s\r\n", path.c_str(), Core::getRomCachePath().c_str());
             Ui::getInstance()->getInfoBox()->show("Loading...");
             auto success = Io::copy(path, Core::getRomCachePath());
             if (success) {
+                printf("Filer: copy done... writing config to flash...\r\n");
+                // write bootloader "config"
+                char magic[FLASH_SECTOR_SIZE];
+                if (m_core == Core::Type::Nes) {
+                    strcpy(magic, "NES");
+                    io_flash_write_sector(FLASH_TARGET_OFFSET_CONFIG, (const uint8_t *) magic);
+                } else if (m_core == Core::Type::Gb) {
+                    strcpy(magic, "GB");
+                    io_flash_write_sector(FLASH_TARGET_OFFSET_CONFIG, (const uint8_t *) magic);
+                } else {
+                    strcpy(magic, "SMS");
+                    io_flash_write_sector(FLASH_TARGET_OFFSET_CONFIG, (const uint8_t *) magic);
+                }
+                printf("Filer: done... rebooting to bootloader...\r\n");
                 m_done = true;
                 return;
             } else {
@@ -113,7 +146,7 @@ void Filer::loop(const Utility::Vec2i &pos, const uint16_t &buttons) {
 void Filer::refresh() {
     // update "lines"
     for (int i = 0; i < m_max_lines; i++) {
-        if (m_file_index + i >= m_files[m_core].length) {
+        if (m_file_index + i >= m_files[m_core].count) {
             p_lines[i]->setVisibility(Visibility::Hidden);
         } else {
             p_lines[i]->setVisibility(Visibility::Visible);
@@ -133,8 +166,8 @@ void Filer::setCore(const Core::Type &core) {
     m_file_index = 0;
     m_highlight_index = 0;
 
-    p_highlight->setVisibility(m_files[m_core].length ? Visibility::Visible : Visibility::Hidden);
-    p_no_rom_text->setVisibility(m_files[m_core].length ? Visibility::Hidden : Visibility::Visible);
+    p_highlight->setVisibility(m_files[m_core].count ? Visibility::Visible : Visibility::Hidden);
+    p_no_rom_text->setVisibility(m_files[m_core].count ? Visibility::Hidden : Visibility::Visible);
 
     refresh();
     // TODO: fix loop flip called twice
@@ -146,11 +179,11 @@ void Filer::setSelection(int index) {
     if (index < m_max_lines / 2) {
         m_file_index = 0;
         m_highlight_index = 0;
-    } else if (index > m_files[m_core].length - m_max_lines / 2) {
+    } else if (index > m_files[m_core].count - m_max_lines / 2) {
         m_highlight_index = m_max_lines - 1;
-        m_file_index = m_files[m_core].length - 1 - m_highlight_index;
-        if (m_highlight_index >= m_files[m_core].length) {
-            m_highlight_index = m_files[m_core].length - 1;
+        m_file_index = m_files[m_core].count - 1 - m_highlight_index;
+        if (m_highlight_index >= m_files[m_core].count) {
+            m_highlight_index = m_files[m_core].count - 1;
             m_file_index = 0;
         }
     } else {

@@ -79,7 +79,7 @@ bool InfoNES::loadRom(const p2d::File &file) {
     m_romName = file.getPath();
     m_sramPath = Core::getSavePath(Core::Type::Nes) + "/"
                  + Utility::removeExt(Utility::baseName(m_romName)) + ".srm";
-    auto data = (uint8_t *) file.ptr();
+    auto data = (uint8_t *) file.getPtr();
     memcpy(&NesHeader, data, sizeof(NesHeader));
     if (memcmp(NesHeader.byID, "NES\x1a", 4) != 0) {
         printf("InfoNES::loadRom: NES header not found in rom...\n");
@@ -361,6 +361,9 @@ void InfoNES_MessageBox(const char *pszMsg, ...) {
 static int nSRAM_SaveFlag;
 
 int InfoNES_LoadSRAM(const std::string &path) {
+#warning "TODO: update for latest io changes"
+    return -1;
+#if 0
     unsigned char chData;
     unsigned char chTag;
     int nRunLen;
@@ -382,7 +385,7 @@ int InfoNES_LoadSRAM(const std::string &path) {
     if (!file.isOpen()) {
         printf("InfoNES_LoadSRAM: could not load SRAM: invalid file (%s)\r\n", path.c_str());
         return -1;
-    } else if (file.length() != SRAM_SIZE) {
+    } else if (file.getLength() != SRAM_SIZE) {
         printf("InfoNES_LoadSRAM: could not load SRAM: invalid file size (%s)\r\n", path.c_str());
 #if LINUX
         free(fileBuffer.data);
@@ -410,6 +413,7 @@ int InfoNES_LoadSRAM(const std::string &path) {
     printf("InfoNES_LoadSRAM: loaded SRAM from %s\r\n", path.c_str());
 
     return 1;
+#endif
 }
 
 int InfoNES_SaveSRAM(const std::string &path) {

@@ -65,9 +65,9 @@ bool PeanutGB::loadRom(const p2d::File &file) {
     m_sramPath = Core::getSavePath(Core::Type::Sms) + "/"
                  + Utility::removeExt(Utility::baseName(m_romName)) + ".srm";
 
-    gb_rom = file.ptr();
+    gb_rom = file.getPtr();
 #ifdef ENABLE_RAM_BANK
-    memcpy(rom_bank0, file.ptr(), sizeof(rom_bank0));
+    memcpy(rom_bank0, file.getPtr(), sizeof(rom_bank0));
 #endif
 
     // initialise GB context

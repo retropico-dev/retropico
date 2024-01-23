@@ -34,7 +34,7 @@ endif ()
 
 if (NOT PLATFORM_LINUX)
     if (PICO_USE_BOOTLOADER)
-        set_linker_script(microboy-sms memmap_sms.ld)
+        set_linker_script(microboy-sms ${CMAKE_SOURCE_DIR}/src/bootloader/memmap_sms.ld)
         target_compile_definitions(microboy-sms PUBLIC ${SMS_FLAGS} PICO_USE_BOOTLOADER)
     else ()
         set_linker_flash_size_16(microboy-sms)

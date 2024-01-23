@@ -23,7 +23,7 @@ target_link_libraries(microboy-ui ${UI_LIBS} pico2d-skeleton)
 
 if (NOT PLATFORM_LINUX)
     if (PICO_USE_BOOTLOADER)
-        set_linker_script(microboy-ui memmap_ui.ld)
+        set_linker_script(microboy-ui ${CMAKE_SOURCE_DIR}/src/bootloader/memmap_ui.ld)
         target_compile_definitions(microboy-ui PUBLIC ${UI_FLAGS} PICO_USE_BOOTLOADER)
     else ()
         set_linker_flash_size_16(microboy-ui)

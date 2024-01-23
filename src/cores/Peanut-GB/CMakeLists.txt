@@ -34,7 +34,7 @@ endif ()
 
 if (NOT PLATFORM_LINUX)
     if (PICO_USE_BOOTLOADER)
-        set_linker_script(microboy-gb memmap_gb.ld)
+        set_linker_script(microboy-gb ${CMAKE_SOURCE_DIR}/src/bootloader/memmap_gb.ld)
         target_compile_definitions(microboy-gb PUBLIC ${GB_FLAGS} PICO_USE_BOOTLOADER)
     else ()
         set_linker_flash_size_16(microboy-gb)

@@ -23,9 +23,9 @@ namespace mb {
         [[nodiscard]] bool isDone() const { return m_done; }
 
         bool isEmpty() {
-            return m_files[Core::Type::Nes].length < 1
-                   && m_files[Core::Type::Gb].length < 1
-                   && m_files[Core::Type::Sms].length < 1;
+            return m_files[Core::Type::Nes].count < 1
+                   && m_files[Core::Type::Gb].count < 1
+                   && m_files[Core::Type::Sms].count < 1;
         }
 
     private:

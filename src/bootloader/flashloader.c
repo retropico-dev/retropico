@@ -37,7 +37,7 @@
 #include "pico/binary_info.h"
 #include "flashloader.h"
 
-#include "../../external/misc/libpico2d/src/platforms/pico/pinout.h"
+#include "../../external/misc/libpico2d/src/platforms/pico/misc/pinout.h"
 
 bi_decl(bi_program_version_string("1.10"));
 
@@ -113,35 +113,6 @@ void __assert_func(const char *filename,
 }
 
 #endif
-
-int isRomInFlash() {
-    // check for a valid nes rom
-    uint8_t *data = (uint8_t *) (XIP_BASE + FLASH_TARGET_OFFSET_ROM_DATA);
-    if (memcmp(data, "NES\x1a", 4) == 0) {
-        return 1;
-    }
-
-    // check for a valid gb rom (checksum)
-    uint8_t x = 0;
-    uint16_t i;
-    for (i = 0x0134; i <= 0x014C; i++) {
-        x = x - data[i] - 1;
-    }
-    if (x == data[0x014D]) {
-        return 2;
-    }
-
-    // check for a valid sms rom
-    // https://www.smspower.org/Development/ROMHeader
-    if (memcmp(data + 0x7FF0, "TMR SEGA", 8) == 0
-        || memcmp(data + 0x3FF0, "TMR SEGA", 8) == 0
-        || memcmp(data + 0x1FF0, "TMR SEGA", 8) == 0) {
-        return 3;
-    }
-
-    // no valid rom found, load ui
-    return 0;
-}
 
 //****************************************************************************
 // Calculate the CRC32 (no reflection, no final XOR) of a block of data.
@@ -411,6 +382,51 @@ bool check_bootloader_combo() {
     return false;
 }
 
+// check "config" set by filer to determine which core to load
+uint32_t get_core_offset() {
+    uint8_t *data = (uint8_t *) (XIP_BASE + FLASH_TARGET_OFFSET_CONFIG);
+    if (memcmp(data, "NES", 3) == 0) {
+        return XIP_BASE + (uint32_t) &__NES_START;
+    } else if (memcmp(data, "GB", 2) == 0) {
+        return XIP_BASE + (uint32_t) &__GB_START;
+    } else if (memcmp(data, "SMS", 2) == 0) {
+        return XIP_BASE + (uint32_t) &__SMS_START;
+    }
+
+    return XIP_BASE + (uint32_t) &__UI_START;
+}
+
+#if 0
+int isRomInFlash() {
+    // check for a valid nes rom
+    uint8_t *data = (uint8_t *) (XIP_BASE + FLASH_TARGET_OFFSET_ROM_DATA);
+    if (memcmp(data, "NES\x1a", 4) == 0) {
+        return 1;
+    }
+
+    // check for a valid gb rom (checksum)
+    uint8_t x = 0;
+    uint16_t i;
+    for (i = 0x0134; i <= 0x014C; i++) {
+        x = x - data[i] - 1;
+    }
+    if (x == data[0x014D]) {
+        return 2;
+    }
+
+    // check for a valid sms rom
+    // https://www.smspower.org/Development/ROMHeader
+    if (memcmp(data + 0x7FF0, "TMR SEGA", 8) == 0
+        || memcmp(data + 0x3FF0, "TMR SEGA", 8) == 0
+        || memcmp(data + 0x1FF0, "TMR SEGA", 8) == 0) {
+        return 3;
+    }
+
+    // no valid rom found, load ui
+    return 0;
+}
+#endif
+
 //****************************************************************************
 int main(void) {
     const tFlashHeader *header;
@@ -428,20 +444,11 @@ int main(void) {
     // check for combos keys
     if (check_bootloader_combo()) scratch = FLASH_MAGIC_UI;
 
-    // first check for UI magic
+    // first check for UI magic to not enter a boot loop if rom doesn't work
     if (scratch == FLASH_MAGIC_UI) {
         sAppStartOffset = XIP_BASE + (uint32_t) &__UI_START;
     } else {
-        int magic = isRomInFlash();
-        if (magic == 1) {
-            sAppStartOffset = XIP_BASE + (uint32_t) &__NES_START;
-        } else if (magic == 2) {
-            sAppStartOffset = XIP_BASE + (uint32_t) &__GB_START;
-        } else if (magic == 3) {
-            sAppStartOffset = XIP_BASE + (uint32_t) &__SMS_START;
-        } else {
-            sAppStartOffset = XIP_BASE + (uint32_t) &__UI_START;
-        }
+        sAppStartOffset = get_core_offset();
     }
 
     if ((scratch == FLASH_MAGIC1) && ((image & 0xfff) == 0) && (image > sAppStartOffset)) {

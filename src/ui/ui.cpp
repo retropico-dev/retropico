@@ -61,6 +61,7 @@ Ui::Ui(Platform *platform) : Rectangle({1, 1},
     // force flip/show
     Rectangle::loop(m_position, 0);
     p_platform->getDisplay()->flip();
+    sleep_ms(100);
     p_filer->load();
     p_infoBox->hide();
     p_filer->setVisibility(Visibility::Visible);

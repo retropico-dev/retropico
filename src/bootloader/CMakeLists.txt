@@ -28,7 +28,7 @@ set(BOOTLOADER_FLAGS -Wall -Wextra -Wno-ignored-qualifiers -Os)
 if (PICO_BOARD STREQUAL "adafruit_feather_rp2040")
     list(APPEND BOOTLOADER_FLAGS -DMICROBOY_10)
 else ()
-    list(APPEND BOOTLOADER_FLAGS -DMICROBOY_11 "-DPICO_FLASH_SIZE_BYTES=(16 * 1024 * 1024)")
+    list(APPEND BOOTLOADER_FLAGS -DMICROBOY_11)
 endif ()
 
 ######################
@@ -39,7 +39,7 @@ target_include_directories(microboy-bootloader PRIVATE ${BOOTLOADER_INCLUDES})
 target_compile_options(microboy-bootloader PRIVATE ${BOOTLOADER_FLAGS})
 target_link_libraries(microboy-bootloader ${BOOTLOADER_LIBS})
 if (NOT PLATFORM_LINUX)
-    set_linker_script(microboy-bootloader memmap_flashloader.ld)
+    set_linker_script(microboy-bootloader ${CMAKE_CURRENT_SOURCE_DIR}/memmap_flashloader.ld)
     pico_add_uf2_output(microboy-bootloader)
     # debug output
     if (PICO_STDIO_UART)
