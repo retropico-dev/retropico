@@ -10,3 +10,6 @@
 [submodule "external/cores/Peanut-GB"]
 	path = external/cores/Peanut-GB
 	url = https://github.com/deltabeard/Peanut-GB.git
+[submodule "external/misc/libpico2d"]
+	path = external/misc/libpico2d
+	url = git@github.com:retropico-dev/libpico2d.git
