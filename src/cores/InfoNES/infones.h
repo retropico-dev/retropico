@@ -14,7 +14,7 @@ namespace mb {
 
         ~InfoNES() override;
 
-        bool loadRom(const p2d::File &file) override;
+        bool loadRom(const p2d::Io::File &file) override;
 
         bool loop(uint16_t buttons) override;
     };

@@ -14,7 +14,7 @@ namespace mb {
     public:
         class MenuLine : public Rectangle {
         public:
-            MenuLine(const p2d::Utility::Vec4i &bounds, const p2d::RomFs::Binary &bitmap, const std::string &text);
+            MenuLine(const p2d::Utility::Vec4i &bounds, const p2d::Io::File &file, const std::string &text);
 
             p2d::Text *p_text;
             p2d::Bitmap *p_bitmap;

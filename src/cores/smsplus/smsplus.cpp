@@ -66,7 +66,7 @@ SMSPlus::SMSPlus(Platform *p) : Core(p, Core::Type::Sms) {
     multicore_launch_core1(core1_main);
 }
 
-bool SMSPlus::loadRom(const p2d::File &file) {
+bool SMSPlus::loadRom(const Io::File &file) {
     printf("SMSPlus::loadRom: %s\r\n", file.getName().c_str());
     m_romName = file.getName();
     m_sramPath = Core::getSavePath(Core::Type::Sms) + "/"

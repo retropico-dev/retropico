@@ -25,7 +25,7 @@ namespace mb {
 
         virtual bool loop(uint16_t buttons);
 
-        virtual bool loadRom(const p2d::File &file) { return false; }
+        virtual bool loadRom(const p2d::Io::File &file) { return false; }
 
         virtual std::string getSramPath() { return m_sramPath; };
 

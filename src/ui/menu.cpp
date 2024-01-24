@@ -10,14 +10,14 @@
 using namespace p2d;
 using namespace mb;
 
-Menu::MenuLine::MenuLine(const Utility::Vec4i &bounds, const p2d::RomFs::Binary &bitmap, const std::string &text)
+Menu::MenuLine::MenuLine(const Utility::Vec4i &bounds, const p2d::Io::File &file, const std::string &text)
         : Rectangle(bounds, Display::Color::Transparent) {
     // outline
     MenuLine::setOutlineThickness(1);
     MenuLine::setOutlineColor(Display::Color::Transparent);
 
     // add icon
-    p_bitmap = new Bitmap(bitmap, {2, (int16_t) (getSize().y / 2)});
+    p_bitmap = new Bitmap(file, {2, (int16_t) (getSize().y / 2)});
     p_bitmap->setOrigin(Origin::Left);
     Menu::MenuLine::add(p_bitmap);
 
@@ -35,24 +35,24 @@ Menu::Menu(const Utility::Vec2i &pos, const Utility::Vec2i &size) : Rectangle(po
 
     auto h = (int16_t) (getSize().y / 4);
     auto line = new MenuLine({0, 0, (int16_t) (getSize().x - 1), h},
-                             p2d::RomFs::get("romfs/nes.bmp"), "NES");
+                             Io::File("res:/romfs/nes.bmp"), "NES");
     line->setColor(Ui::Color::Red);
     line->setOutlineColor(Ui::Color::Yellow);
     add(line);
     m_lines.emplace_back(line);
 
     line = new MenuLine({0, (int16_t) (h + 1), (int16_t) (getSize().x - 1), h},
-                        p2d::RomFs::get("romfs/gameboy.bmp"), "GAMEBOY");
+                        Io::File("res:/romfs/gameboy.bmp"), "GAMEBOY");
     add(line);
     m_lines.emplace_back(line);
 
     line = new MenuLine({0, (int16_t) (h * 2 - 1), (int16_t) (getSize().x - 1), h},
-                        p2d::RomFs::get("romfs/sms.bmp"), "SMS");
+                        Io::File("res:/romfs/sms.bmp"), "SMS");
     add(line);
     m_lines.emplace_back(line);
 
     line = new MenuLine({0, (int16_t) (h * 3 - 1), (int16_t) (getSize().x - 1), h},
-                        p2d::RomFs::get("romfs/settings.bmp"), "SETTINGS");
+                        Io::File("res:/romfs/settings.bmp"), "SETTINGS");
     add(line);
     m_lines.emplace_back(line);
 }

@@ -74,11 +74,12 @@ InfoNES::InfoNES(Platform *p) : Core(p, Core::Type::Nes) {
     multicore_launch_core1(core1_main);
 }
 
-bool InfoNES::loadRom(const p2d::File &file) {
+bool InfoNES::loadRom(const Io::File &file) {
     printf("InfoNES::loadRom: %s\r\n", file.getPath().c_str());
     m_romName = file.getPath();
     m_sramPath = Core::getSavePath(Core::Type::Nes) + "/"
                  + Utility::removeExt(Utility::baseName(m_romName)) + ".srm";
+
     auto data = (uint8_t *) file.getPtr();
     memcpy(&NesHeader, data, sizeof(NesHeader));
     if (memcmp(NesHeader.byID, "NES\x1a", 4) != 0) {
@@ -478,7 +479,7 @@ int InfoNES_SaveSRAM(const std::string &path) {
     }
 
     printf("InfoNES_SaveSRAM: saving SRAM to %s\r\n", path.c_str());
-    File file{path, File::OpenMode::Write};
+    Io::File file{path, Io::File::OpenMode::Write};
     int wrote = file.write(0, SRAM_SIZE, (const char *) pDstBuf);
     return wrote > 0;
 }

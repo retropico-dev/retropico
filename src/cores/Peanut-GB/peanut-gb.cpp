@@ -57,7 +57,7 @@ PeanutGB::PeanutGB(Platform *p) : Core(p, Core::Type::Gb) {
 #endif
 }
 
-bool PeanutGB::loadRom(const p2d::File &file) {
+bool PeanutGB::loadRom(const Io::File &file) {
     enum gb_init_error_e ret;
 
     printf("PeanutGB::loadRom: %s\r\n", file.getName().c_str());

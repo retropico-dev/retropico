@@ -67,10 +67,6 @@ void Filer::load() {
     printf(" found %i roms\r\n", m_files[Core::Type::Sms].count);
 }
 
-extern void p2d_display_pause();
-
-extern void p2d_display_resume();
-
 void Filer::loop(const Utility::Vec2i &pos, const uint16_t &buttons) {
     if (!isVisible()) return;
 

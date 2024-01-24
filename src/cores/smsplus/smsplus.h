@@ -12,7 +12,7 @@ namespace mb {
     public:
         explicit SMSPlus(p2d::Platform *platform);
 
-        bool loadRom(const p2d::File &file) override;
+        bool loadRom(const p2d::Io::File &file) override;
 
         bool loop(uint16_t buttons) override;
     };
