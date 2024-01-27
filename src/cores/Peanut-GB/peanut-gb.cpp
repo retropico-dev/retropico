@@ -150,6 +150,21 @@ bool in_ram(PeanutGB::loop)(uint16_t buttons) {
     return true;
 }
 
+static inline void in_ram(lcd_draw_line)(struct gb_s *gb, const uint8_t pixels[LCD_WIDTH], const uint_fast8_t line) {
+    uint8_t *buffer = s_display->getFramebuffer()->getPixels();
+    uint8_t bpp = s_display->getFramebuffer()->getBpp();
+
+    for (uint_fast8_t x = 0; x < LCD_WIDTH; x++) {
+        // do not use "setPixel", use display framebuffer directly for speedup
+        *(uint16_t *) (buffer + line * (LCD_WIDTH * bpp) + x * bpp)
+                = palette[(pixels[x] & LCD_PALETTE_ALL) >> 4][pixels[x] & 3];
+    }
+
+    if (line == LCD_HEIGHT - 1) {
+        s_display->flip();
+    }
+}
+
 inline uint8_t gb_rom_read(struct gb_s *gb, const uint_fast32_t addr) {
     (void) gb;
 #ifdef ENABLE_RAM_BANK
@@ -187,19 +202,4 @@ inline void gb_error(struct gb_s *gb, const enum gb_error_e gb_err, const uint16
            gb_err >= GB_INVALID_MAX ? gb_err_str[0] : gb_err_str[gb_err]);
     abort();
 #endif
-}
-
-static inline void in_ram(lcd_draw_line)(struct gb_s *gb, const uint8_t pixels[LCD_WIDTH], const uint_fast8_t line) {
-    uint8_t *buffer = s_display->getFramebuffer()->getPixels();
-    uint8_t bpp = s_display->getFramebuffer()->getBpp();
-
-    for (uint_fast8_t x = 0; x < LCD_WIDTH; x++) {
-        // do not use "setPixel", use display framebuffer directly for speedup
-        *(uint16_t *) (buffer + line * (LCD_WIDTH * bpp) + x * bpp)
-                = palette[(pixels[x] & LCD_PALETTE_ALL) >> 4][pixels[x] & 3];
-    }
-
-    if (line == LCD_HEIGHT - 1) {
-        s_display->flip();
-    }
 }

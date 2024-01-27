@@ -5,10 +5,14 @@ if (NOT PLATFORM_LINUX)
     include(${CMAKE_SOURCE_DIR}/external/misc/libpico2d/src/platforms/pico/cmake/pico_sdk_import.cmake)
 endif ()
 
-add_subdirectory(${CMAKE_SOURCE_DIR}/external/misc/libpico2d)
-
 # pico options
 option(PICO_USE_BOOTLOADER "Build bootloader compatible binaries" OFF)
+option(PICO_DISPLAY_ST7789_PIO "Pico ST7789 display driver (pio)" ON)
+option(PICO_DISPLAY_ALPHA_SUPPORT "Enable alpha/transparency support" OFF)
+option(PICO_DEBUG_UART "Pico uart debug" OFF)
+option(PICO_DEBUG_USB "Pico usb debug" OFF)
+
+add_subdirectory(${CMAKE_SOURCE_DIR}/external/misc/libpico2d)
 
 project(microboy)
 

@@ -108,7 +108,7 @@ void Filer::loop(const Utility::Vec2i &pos, const uint16_t &buttons) {
             std::string path = Core::getRomPath(m_core) + "/" + name;
             printf("Filer: copying %s to %s\r\n", path.c_str(), Core::getRomCachePath().c_str());
             Ui::getInstance()->getInfoBox()->show("Loading...");
-            auto success = Io::copy(path, Core::getRomCachePath());
+            auto success = Io::copy(path, Core::getRomCachePath(), true);
             if (success) {
                 printf("Filer: copy done... writing config to flash...\r\n");
                 // write bootloader "config"

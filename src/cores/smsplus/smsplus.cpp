@@ -22,35 +22,16 @@ static Core *core;
 #define SMS_FPS 60
 
 // rendering
-static uint16_t in_ram(lineBuffer)[2][240];
-
-static uint8_t lineBufferIndex = 0;
+static uint16_t lineBuffer[240];
 static uint8_t framebufferLine[SMS_WIDTH];
 static int palette565[32];
 static uint8_t sram[0x8000];
-static int lcd_line_busy = 0;
 
 // audio
 static int audio_buffer[SMS_AUD_RATE / SMS_FPS];
 
 // input
-//static uint16_t picoButtons = 0;
 static uint16_t smsButtons = 0, smsSystem = 0;
-
-_Noreturn void in_ram(core1_main)();
-
-void in_ram(core1_lcd_draw_line)(uint_fast8_t line, uint_fast8_t index);
-
-union core_cmd {
-    struct {
-#define CORE_CMD_NOP        0
-#define CORE_CMD_LCD_LINE   1
-        uint8_t cmd;
-        uint8_t line;
-        uint8_t index;
-    };
-    uint32_t full;
-};
 
 SMSPlus::SMSPlus(Platform *p) : Core(p, Core::Type::Sms) {
     // crappy
@@ -61,9 +42,6 @@ SMSPlus::SMSPlus(Platform *p) : Core(p, Core::Type::Sms) {
     // setup audio
     int samples = (int) ((float) SMS_AUD_RATE / SMS_FPS);
     p_platform->getAudio()->setup(SMS_AUD_RATE, samples);
-
-    // start Core1, which processes requests to the LCD
-    multicore_launch_core1(core1_main);
 }
 
 bool SMSPlus::loadRom(const Io::File &file) {
@@ -145,61 +123,12 @@ extern "C" void in_ram(sms_render_line)(int line, const uint8_t *buffer) {
     //printf("sms_render_line(%i, %i)\r\n", line, lineBufferIndex);
     // fill line buffer
     for (int i = 8; i < SMS_WIDTH - 8; i++) {
-        lineBuffer[lineBufferIndex][i - 8] = palette565[(buffer[i]) & 31];
+        lineBuffer[i - 8] = palette565[(buffer[i]) & 31];
     }
 
-#ifdef LINUX
-    core1_lcd_draw_line(line, lineBufferIndex);
-#else
-    // wait until previous line is sent
-    while (__atomic_load_n(&lcd_line_busy, __ATOMIC_SEQ_CST))
-        tight_loop_contents();
-
-    // set core1 in busy state
-    __atomic_store_n(&lcd_line_busy, 1, __ATOMIC_SEQ_CST);
-
-    // send to core1
-    core_cmd cmd{{CORE_CMD_LCD_LINE, (uint8_t) line, lineBufferIndex}};
-    multicore_fifo_push_blocking(cmd.full);
-#endif
-
-    // swap line buffer
-    lineBufferIndex = !lineBufferIndex;
-}
-
-void in_ram(core1_lcd_draw_line)(const uint_fast8_t line, const uint_fast8_t index) {
-    //printf("core1_lcd_draw_line(%i, %i)\r\n", line, index);
     if (line == 0) {
         display->setCursor(0, 24);
     }
 
-    // crop line buffer width by 16 pixels (240x240 display)
-    for (uint_fast16_t i = 0; i < 240; i++) {
-        display->setPixel(lineBuffer[index][i]);
-    }
-
-    // signal we are done
-    __atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);
-
-#ifdef LINUX
-    if (line == SMS_HEIGHT - 1) {
-        display->flip();
-    }
-#endif
-}
-
-_Noreturn void in_ram(core1_main)() {
-    union core_cmd cmd{};
-
-    while (true) {
-        cmd.full = multicore_fifo_pop_blocking();
-        switch (cmd.cmd) {
-            case CORE_CMD_LCD_LINE:
-                core1_lcd_draw_line(cmd.line, cmd.index);
-                break;
-            case CORE_CMD_NOP:
-            default:
-                break;
-        }
-    }
+    display->drawPixelLine(lineBuffer, 240);
 }

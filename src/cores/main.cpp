@@ -56,11 +56,11 @@ int main() {
     platform->setDisplay(display);
     auto core = new MBCore(platform);
 
-//#ifndef NDEBUG
-//    Io::File file{"res:/romfs/rom.bin"};
-//#else
+#ifndef NDEBUG
+    Io::File file{"res:/romfs/rom.bin"};
+#else
     Io::File file{Core::getRomCachePath()};
-//#endif
+#endif
     if (!core->loadRom(file)) {
         // reboot to ui
         platform->reboot(FLASH_MAGIC_UI);
