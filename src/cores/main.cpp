@@ -51,7 +51,7 @@ int main() {
     Clock clock;
     int frames = 0;
 
-    auto platform = new P2DPlatform(MAX_OVERCLOCK);
+    auto platform = new P2DPlatform();
     auto display = (Display *) new P2DDisplay(ds);
     platform->setDisplay(display);
     auto core = new MBCore(platform);

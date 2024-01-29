@@ -19,15 +19,12 @@
 #ifdef MB_NES
 #include "infones.h"
 #define MBCore InfoNES
-#define MAX_OVERCLOCK false
 #elif MB_GB
 #include "peanut-gb.h"
 #define MBCore PeanutGB
-#define MAX_OVERCLOCK false
 #elif MB_SMS
 #include "smsplus.h"
 #define MBCore SMSPlus
-#define MAX_OVERCLOCK false
 #endif
 
 #endif //MICROBOY_MAIN_H
