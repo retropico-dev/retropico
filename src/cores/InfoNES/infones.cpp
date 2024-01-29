@@ -177,7 +177,7 @@ void in_ram(core1_lcd_draw_line)(const uint_fast8_t line, const uint_fast8_t ind
     }
 
     // crop line buffer width by 16 pixels (240x240 display)
-    display->drawPixelLine(lineBufferRGB444[index] + 8, 240);
+    display->put(lineBufferRGB444[index] + 8, 240);
 
 #ifdef LINUX
     if (line == 235) {

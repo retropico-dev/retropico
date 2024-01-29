@@ -130,5 +130,5 @@ extern "C" void in_ram(sms_render_line)(int line, const uint8_t *buffer) {
         display->setCursor(0, 24);
     }
 
-    display->drawPixelLine(lineBuffer, 240);
+    display->put(lineBuffer, 240);
 }

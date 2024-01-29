@@ -31,8 +31,7 @@ target_link_libraries(${PROJECT_NAME} ${NES_LIBS} pico2d-skeleton)
 
 # test rom
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    file(GLOB ROMFS romfs/*)
-    target_add_resources(${PROJECT_NAME} ${ROMFS})
+    target_add_resources(${PROJECT_NAME} "romfs/rom.bin")
 endif ()
 
 if (NOT PLATFORM_LINUX)
