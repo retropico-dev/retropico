@@ -1,12 +1,11 @@
 //
-// Created by cpasjuste on 14/06/23.
+// Created by cpasjuste on 06/02/24.
 //
 
-#ifndef MICROBOY_UI_H
-#define MICROBOY_UI_H
+#ifndef MICROBOY_MAIN_H
+#define MICROBOY_MAIN_H
 
 #include <vector>
-#include "../cores/core.h"
 #include "rectangle.h"
 #include "filer.h"
 #include "menu.h"
@@ -33,7 +32,9 @@ namespace mb {
 
         explicit Ui(p2d::Platform *platform);
 
-        bool loop(bool force = false);
+        void onUpdate(p2d::Time delta) override;
+
+        bool onInput(const uint16_t &buttons) override;
 
         Filer *getFiler() { return p_filer; }
 
@@ -43,11 +44,9 @@ namespace mb {
 
         InfoBox *getInfoBox() { return p_infoBox; }
 
+        p2d::Platform *getPlatform();
+
         static Ui *getInstance();
-
-        static p2d::Platform *getPlatform();
-
-        static p2d::Display *getDisplay();
 
     private:
         p2d::Platform *p_platform;
@@ -61,4 +60,4 @@ namespace mb {
     };
 }
 
-#endif //MICROBOY_UI_H
+#endif //MICROBOY_MAIN_H

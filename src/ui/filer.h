@@ -8,6 +8,7 @@
 #include <vector>
 #include "widget.h"
 #include "text.h"
+#include "../cores/core.h"
 
 namespace mb {
     class Filer : public p2d::Widget {
@@ -41,7 +42,7 @@ namespace mb {
         p2d::Text *p_no_rom_text;
         bool m_done = false;
 
-        void loop(const p2d::Utility::Vec2i &pos, const uint16_t &buttons) override;
+        bool onInput(const uint16_t &buttons) override;
 
         void refresh();
 

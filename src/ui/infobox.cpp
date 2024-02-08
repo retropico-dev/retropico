@@ -2,8 +2,7 @@
 // Created by cpasjuste on 02/08/23.
 //
 
-#include "platform.h"
-#include "ui.h"
+#include "main.h"
 #include "infobox.h"
 
 using namespace p2d;
@@ -26,18 +25,17 @@ void InfoBox::show(const std::string &text, uint32_t millis) {
     m_clock.restart();
     m_millis = millis;
     setVisibility(Visibility::Visible);
-    Ui::getInstance()->loop(true);
 }
 
 void InfoBox::hide() {
     setVisibility(Visibility::Hidden);
 }
 
-void InfoBox::loop(const Utility::Vec2i &pos, const uint16_t &buttons) {
+bool InfoBox::onInput(const uint16_t &buttons) {
     if (m_millis > 0 && m_clock.getElapsedTime().asMilliseconds() >= m_millis) {
         setVisibility(Visibility::Hidden);
-        return;
+        return true;
     }
 
-    Rectangle::loop(pos, buttons);
+    return Rectangle::onInput(buttons);
 }

@@ -2,10 +2,8 @@
 // Created by cpasjuste on 04/07/23.
 //
 
-#include "platform.h"
+#include "main.h"
 #include "menu.h"
-#include "ui.h"
-#include "bitmap.h"
 
 using namespace p2d;
 using namespace mb;
@@ -57,8 +55,8 @@ Menu::Menu(const Utility::Vec2i &pos, const Utility::Vec2i &size) : Rectangle(po
     m_lines.emplace_back(line);
 }
 
-void Menu::loop(const Utility::Vec2i &pos, const uint16_t &buttons) {
-    if (!isVisible()) return;
+bool Menu::onInput(const uint16_t &buttons) {
+    if (!isVisible()) return false;
 
     if (buttons & Input::Button::UP) {
         m_line_index--;
@@ -66,17 +64,20 @@ void Menu::loop(const Utility::Vec2i &pos, const uint16_t &buttons) {
             m_line_index = (int8_t) (m_lines.size() - 1);
         }
         refresh();
+        return true;
     } else if (buttons & Input::Button::DOWN) {
         m_line_index++;
         if (m_line_index >= m_lines.size()) {
             m_line_index = 0;
         }
         refresh();
+        return true;
     } else if (buttons & Input::Button::B1 || buttons & Input::Button::B2) {
         setVisibility(Visibility::Hidden);
+        return true;
     }
 
-    Rectangle::loop(pos, buttons);
+    return Rectangle::onInput(buttons);
 }
 
 void Menu::refresh() {
@@ -95,7 +96,6 @@ void Menu::refresh() {
     } else {
         Ui::getInstance()->getFiler()->setVisibility(Visibility::Hidden);
         Ui::getInstance()->getSettings()->setVisibility(Visibility::Visible);
-        Ui::getInstance()->loop(true);
     }
 
     for (int i = 0; i < m_lines.size(); i++) {

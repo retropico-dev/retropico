@@ -17,8 +17,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "platform.h"
-#include "ui.h"
+#include "main.h"
 
 using namespace p2d;
 using namespace mb;
@@ -31,33 +30,121 @@ static Display::Settings ds{
         .format = Display::Format::RGB565
 };
 
-int main() {
-    Clock clock;
-    int frames = 0;
+//...
+static Ui *s_ui = nullptr;
 
-    auto platform = new P2DPlatform();
-    platform->setDisplay((Display *) new P2DDisplay(ds));
+Ui::Ui(Platform *p) : Rectangle({1, 1},
+                                {(int16_t) (p->getDisplay()->getSize().x - 2),
+                                 (int16_t) (p->getDisplay()->getSize().y - 2)}) {
+    s_ui = this;
+    p_platform = p;
 
-    auto ui = new Ui(platform);
+    // title/wait screen
+    Clock titleClock;
+    auto surface = new Surface(Io::File("res:/romfs/retropico.bmp"));
+    p_platform->getDisplay()->drawSurface(surface);
+    p_platform->getDisplay()->flip();
+    delete (surface);
 
-    while (ui->loop(true)) {
-        // fps
-        if (clock.getElapsedTime().asSeconds() >= 1) {
-            auto percent = (uint16_t) (((float) Utility::getUsedHeap() / (float) Utility::getTotalHeap()) * 100);
-            printf("fps: %i, heap: %i/%i (%i%%)\r\n",
-                   (int) ((float) frames / clock.restart().asSeconds()),
-                   Utility::getUsedHeap(), Utility::getTotalHeap(), percent);
-            frames = 0;
+    // set repeat delay for ui
+    p_platform->getInput()->setRepeatDelay(INPUT_DELAY_UI);
+
+    // set colors
+    setColor(Color::GrayDark);
+    setOutlineColor(Color::Red);
+    setOutlineThickness(1);
+
+    // create needed directories
+    Io::create(Core::getRomPath(Core::Type::Nes));
+    Io::create(Core::getRomPath(Core::Type::Gb));
+    Io::create(Core::getRomPath(Core::Type::Sms));
+    Io::create(Core::getSavePath(Core::Type::Nes));
+    Io::create(Core::getSavePath(Core::Type::Gb));
+    Io::create(Core::getSavePath(Core::Type::Sms));
+
+    // add filer
+    p_filer = new Filer({1, 1}, {(int16_t) (getSize().x - 2), (int16_t) (getSize().y - 2)});
+    add(p_filer);
+
+    // add settings
+    p_settings = new Settings(p_filer->getPosition(), p_filer->getSize());
+    p_settings->setVisibility(Visibility::Hidden);
+    add(p_settings);
+
+    // add menu
+    p_menu = new Menu({-1, (int16_t) (getSize().y / 2)}, {150 / 2, 192 / 2});
+    p_menu->setOrigin(Origin::Left);
+    p_menu->setVisibility(Visibility::Hidden);
+    add(p_menu);
+
+    // add info box
+    p_infoBox = new InfoBox({(int16_t) (getSize().x / 2), (int16_t) (getSize().y / 2)},
+                            {(int16_t) (getSize().x - 32), 128 - 64});
+    p_infoBox->setOrigin(Origin::Center);
+    p_infoBox->setVisibility(Visibility::Hidden);
+    add(p_infoBox);
+
+    // load / cache files
+    p_filer->load();
+
+    // give some time for title screen
+    while (titleClock.getElapsedTime().asSeconds() < 2) tight_loop_contents();
+}
+
+void Ui::onUpdate(p2d::Time delta) {
+    Rectangle::onUpdate(delta);
+
+    // handle auto-repeat speed
+    uint16_t buttons = p_platform->getInput()->getButtons();
+    if (buttons != Input::Button::DELAY) {
+        bool changed = (m_buttons_old ^ buttons) != 0;
+        m_buttons_old = buttons;
+        if (!changed) {
+            if (m_repeat_clock.getElapsedTime().asSeconds() > 6) {
+                p_platform->getInput()->setRepeatDelay(INPUT_DELAY_UI / 20);
+            } else if (m_repeat_clock.getElapsedTime().asSeconds() > 4) {
+                p_platform->getInput()->setRepeatDelay(INPUT_DELAY_UI / 8);
+            } else if (m_repeat_clock.getElapsedTime().asSeconds() > 2) {
+                p_platform->getInput()->setRepeatDelay(INPUT_DELAY_UI / 4);
+            }
+        } else {
+            p_platform->getInput()->setRepeatDelay(INPUT_DELAY_UI);
+            m_repeat_clock.restart();
         }
-
-        // increment frames for fps counter
-        frames++;
     }
+}
+
+bool Ui::onInput(const uint16_t &buttons) {
+    if (buttons & Input::Button::QUIT || p_filer->isDone()) return false;
+
+    if (buttons & Input::Button::SELECT && !p_menu->isVisible()) {
+        p_menu->setVisibility(Visibility::Visible);
+        return true;
+    }
+
+    return Widget::onInput(buttons);
+}
+
+Platform *Ui::getPlatform() {
+    return p_platform;
+}
+
+Ui *Ui::getInstance() {
+    return s_ui;
+}
+
+int main() {
+    auto platform = new P2DPlatform(ds);
+    auto ui = new Ui(platform);
+    platform->add(ui);
+
+    while (platform->loop()) {}
 
     // reboot to bootloader for launching either nes/gb/sms core
     // based on rom header
     platform->reboot();
 
+    // not really needed...
     delete (ui);
     delete (platform);
 

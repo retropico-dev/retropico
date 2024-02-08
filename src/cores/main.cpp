@@ -48,7 +48,7 @@ static Display::Settings ds{
 #endif
 
 int main() {
-    Clock clock;
+    Clock fpsClock, runtimeClock;
     int frames = 0;
 
     auto platform = new P2DPlatform();
@@ -70,12 +70,17 @@ int main() {
     while (true) {
         if (!core->loop(platform->getInput()->getButtons())) break;
 
+        p2d::Platform::battery()->loop();
+
         // fps
-        if (clock.getElapsedTime().asSeconds() >= 1) {
+        if (fpsClock.getElapsedTime().asSeconds() >= 1) {
+
             auto percent = (uint16_t) (((float) Utility::getUsedHeap() / (float) Utility::getTotalHeap()) * 100);
-            printf("fps: %i, heap: %i/%i (%i%%)\r\n",
-                   (int) ((float) frames / clock.restart().asSeconds()),
-                   Utility::getUsedHeap(), Utility::getTotalHeap(), percent);
+            printf("fps: %i, heap: %i/%i (%i%%), battery: %i%% (%.02fv), runtime: %i minutes\r\n",
+                   (int) ((float) frames / fpsClock.restart().asSeconds()),
+                   Utility::getUsedHeap(), Utility::getTotalHeap(), percent,
+                   platform->getBattery()->getPercent(), platform->getBattery()->getVoltage(),
+                   (int) runtimeClock.getElapsedTime().asSeconds());
             frames = 0;
         }
         // increment frames for fps counter

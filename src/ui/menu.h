@@ -28,7 +28,7 @@ namespace mb {
 
         void refresh();
 
-        void loop(const p2d::Utility::Vec2i &pos, const uint16_t &buttons) override;
+        bool onInput(const uint16_t &buttons) override;
     };
 }
 

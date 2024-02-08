@@ -19,7 +19,7 @@ namespace mb {
         void hide();
 
     private:
-        void loop(const p2d::Utility::Vec2i &pos, const uint16_t &buttons) override;
+        bool onInput(const uint16_t &buttons) override;
 
         p2d::Text *p_text{};
         p2d::Clock m_clock{};
