@@ -10,11 +10,13 @@
 namespace mb {
     class SMSPlus : public Core {
     public:
-        explicit SMSPlus(p2d::Platform *platform);
+        explicit SMSPlus(const p2d::Display::Settings &displaySettings);
+
+        bool loop() override;
+
+        //void close() override;
 
         bool loadRom(const p2d::Io::File &file) override;
-
-        bool loop(uint16_t buttons) override;
     };
 }
 

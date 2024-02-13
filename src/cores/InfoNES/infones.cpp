@@ -26,8 +26,7 @@ const uint16_t NesPalette[64] = {
         CC(0x7f94), CC(0x73f4), CC(0x57d7), CC(0x5bf9), CC(0x4ffe), CC(0x0000), CC(0x0000), CC(0x0000)
 };
 
-static Platform *platform;
-static Core *core;
+static Core *s_core;
 static bool stopped = false;
 static bool frameLoaded = false;
 static uint16_t lineBufferRGB444[2][NES_DISP_WIDTH];
@@ -59,13 +58,12 @@ union core_cmd {
     uint32_t full;
 };
 
-InfoNES::InfoNES(Platform *p) : Core(p, Core::Type::Nes) {
+InfoNES::InfoNES(const p2d::Display::Settings &ds) : Core(ds, Core::Type::Nes) {
     // crappy
-    platform = p;
-    core = this;
+    s_core = this;
 
     // setup audio
-    p_platform->getAudio()->setup(44100, AUDIO_SAMPLES, 1);
+    getAudio()->setup(44100, AUDIO_SAMPLES, 1);
 
     // start Core1, which processes requests to the LCD
 #if defined(PICO_DEBUG_UART)
@@ -116,19 +114,19 @@ bool InfoNES::loadRom(const Io::File &file) {
     // finally, load SRAM if any
     InfoNES_LoadSRAM(m_sramPath);
 
-    p_platform->getDisplay()->clear();
+    s_core->getDisplay()->clear();
 
     stopped = false;
 
     return true;
 }
 
-bool in_ram(InfoNES::loop)(uint16_t buttons) {
-    if (!Core::loop(buttons)) return false;
+bool in_ram(InfoNES::loop)() {
+    if (!Core::loop()) return false;
     if (InfoNES_Menu() == -1) return false;
 
     // static buttons
-    s_buttons = buttons;
+    s_buttons = getInput()->getButtons();
 
     while (!frameLoaded && !stopped) {
         if (SpriteJustHit == PPU_Scanline && PPU_ScanTable[PPU_Scanline] == SCAN_ON_SCREEN) {
@@ -158,19 +156,18 @@ bool in_ram(InfoNES::loop)(uint16_t buttons) {
     }
 
     frameLoaded = false;
-
     return true;
 }
 
-InfoNES::~InfoNES() {
-    printf("~InfoNES()\n");
+void InfoNES::close() {
+    printf("InfoNES::close()\n");
     InfoNES_SaveSRAM(getSramPath());
     InfoNES_Fin();
 }
 
 void in_ram(core1_lcd_draw_line)(const uint_fast8_t line, const uint_fast8_t index) {
     //printf("core1_lcd_draw_line: %i => %i\r\n", line, index);
-    auto display = platform->getDisplay();
+    auto display = s_core->getDisplay();
 
     if (line == 4) {
         display->setCursor(0, 4);
@@ -310,7 +307,7 @@ void InfoNES_SoundOutput(int samples, BYTE *w1, BYTE *w2, BYTE *w3, BYTE *w4, BY
         audio_buffer[audio_buffer_index] = (int16_t) ((byte << 8) - 32768); // U8 > S16
         audio_buffer_index++;
         if (audio_buffer_index == AUDIO_SAMPLES) {
-            platform->getAudio()->play(audio_buffer, AUDIO_SAMPLES);
+            s_core->getAudio()->play(audio_buffer, AUDIO_SAMPLES);
             audio_buffer_index = 0;
         }
     }
@@ -328,11 +325,9 @@ void InfoNES_MessageBox(const char *pszMsg, ...) {
 static int nSRAM_SaveFlag;
 
 int InfoNES_LoadSRAM(const std::string &path) {
-#warning "TODO: update for latest io changes"
-    return -1;
-#if 0
-    unsigned char chData;
-    unsigned char chTag;
+    uint8_t pSrcBuf[SRAM_SIZE];
+    uint8_t chData;
+    uint8_t chTag;
     int nRunLen;
     int nDecoded;
     int nDecLen;
@@ -341,34 +336,38 @@ int InfoNES_LoadSRAM(const std::string &path) {
     nSRAM_SaveFlag = 0;
 
     if (!ROM_SRAM) {
-        printf("InfoNES_LoadSRAM: game does not support SRAM, skipping...\r\n");
+        printf("InfoNES_LoadSRAM: game does not use sram, skipping...\r\n");
         return 1;
     }
 
     nSRAM_SaveFlag = 1;
 
-    //fileBuffer = platform->getIo()->read(path, Io::Target::Flash);
-    File file{path};
+    Io::File file{path};
     if (!file.isOpen()) {
-        printf("InfoNES_LoadSRAM: could not load SRAM: invalid file (%s)\r\n", path.c_str());
+        printf("InfoNES_LoadSRAM: could not load SRAM: file does not exist... (%s)\r\n", path.c_str());
         return -1;
     } else if (file.getLength() != SRAM_SIZE) {
-        printf("InfoNES_LoadSRAM: could not load SRAM: invalid file size (%s)\r\n", path.c_str());
-#if LINUX
-        free(fileBuffer.data);
-#endif
+        printf("InfoNES_LoadSRAM: could not load SRAM: invalid SRAM size... (%s)\r\n", path.c_str());
+        return -1;
+    }
+
+    int32_t read = file.read(0, SRAM_SIZE, (char *) (pSrcBuf));
+    if (read != SRAM_SIZE) {
+        printf("InfoNES_LoadSRAM: could not load SRAM: read failed... (%s)\r\n", path.c_str());
         return -1;
     }
 
     nDecoded = 0;
     nDecLen = 0;
-    chTag = file.ptr()[nDecoded++];
+
+    chTag = pSrcBuf[nDecoded++];
 
     while (nDecLen < 8192) {
-        chData = file.ptr()[nDecoded++];
+        chData = pSrcBuf[nDecoded++];
+
         if (chData == chTag) {
-            chData = file.ptr()[nDecoded++];
-            nRunLen = file.ptr()[nDecoded++];
+            chData = pSrcBuf[nDecoded++];
+            nRunLen = pSrcBuf[nDecoded++];
             for (nIdx = 0; nIdx < nRunLen + 1; ++nIdx) {
                 SRAM[nDecLen++] = chData;
             }
@@ -380,15 +379,14 @@ int InfoNES_LoadSRAM(const std::string &path) {
     printf("InfoNES_LoadSRAM: loaded SRAM from %s\r\n", path.c_str());
 
     return 1;
-#endif
 }
 
 int InfoNES_SaveSRAM(const std::string &path) {
-    unsigned char pDstBuf[SRAM_SIZE];
     int nUsedTable[256];
-    unsigned char chData;
-    unsigned char chPrevData;
-    unsigned char chTag;
+    uint8_t pDstBuf[SRAM_SIZE];
+    uint8_t chData;
+    uint8_t chPrevData;
+    uint8_t chTag;
     int nIdx;
     int nEncoded;
     int nEncLen;
@@ -447,5 +445,5 @@ int InfoNES_SaveSRAM(const std::string &path) {
     printf("InfoNES_SaveSRAM: saving SRAM to %s\r\n", path.c_str());
     Io::File file{path, Io::File::OpenMode::Write};
     int wrote = file.write(0, SRAM_SIZE, (const char *) pDstBuf);
-    return wrote > 0;
+    return wrote == SRAM_SIZE;
 }

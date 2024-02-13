@@ -9,7 +9,7 @@
 #include "platform.h"
 
 namespace mb {
-    class Core {
+    class Core : public P2DPlatform {
     public:
         enum Type {
             Nes = 0,
@@ -17,19 +17,16 @@ namespace mb {
             Sms = 2
         };
 
-        explicit Core(p2d::Platform *platform, const Core::Type &core) {
-            p_platform = platform;
-        }
+        explicit Core(const p2d::Display::Settings &displaySettings, const Core::Type &core)
+                : P2DPlatform(displaySettings) {}
 
-        virtual ~Core() = default;
+        bool loop() override;
 
-        virtual bool loop(uint16_t buttons);
+        virtual void close() {}
 
         virtual bool loadRom(const p2d::Io::File &file) { return false; }
 
         virtual std::string getSramPath() { return m_sramPath; };
-
-        virtual p2d::Platform *getPlatform() { return p_platform; }
 
         static std::string getRomCachePath() { return "flash:/rom.bin"; }
 
@@ -54,7 +51,6 @@ namespace mb {
         }
 
     protected:
-        p2d::Platform *p_platform;
         std::string m_romName;
         std::string m_sramPath;
     };

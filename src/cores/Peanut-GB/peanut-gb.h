@@ -12,11 +12,13 @@
 namespace mb {
     class PeanutGB : public Core {
     public:
-        explicit PeanutGB(p2d::Platform *platform);
+        explicit PeanutGB(const p2d::Display::Settings &displaySettings);
+
+        bool loop() override;
+
+        //void close() override;
 
         bool loadRom(const p2d::Io::File &file) override;
-
-        bool loop(uint16_t buttons) override;
 
         [[nodiscard]] bool isScalingEnabled() const {
             return m_scaling;
@@ -25,7 +27,7 @@ namespace mb {
         void setScalingEnabled(bool enable) {
             if (enable == m_scaling) return;
             if (!enable) {
-                p_platform->getDisplay()->clear();
+                getDisplay()->clear();
             }
             m_scaling = enable;
         }

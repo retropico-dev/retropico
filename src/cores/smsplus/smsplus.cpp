@@ -12,9 +12,8 @@ extern "C" {
 using namespace mb;
 using namespace p2d;
 
-static Platform *platform;
-static Display *display;
-static Core *core;
+static Display *s_display;
+static Core *s_core;
 
 #define SMS_WIDTH 256
 #define SMS_HEIGHT 192
@@ -33,15 +32,14 @@ static int audio_buffer[SMS_AUD_RATE / SMS_FPS];
 // input
 static uint16_t smsButtons = 0, smsSystem = 0;
 
-SMSPlus::SMSPlus(Platform *p) : Core(p, Core::Type::Sms) {
+SMSPlus::SMSPlus(const p2d::Display::Settings &ds) : Core(ds, Core::Type::Sms) {
     // crappy
-    platform = p;
-    display = p->getDisplay();
-    core = this;
+    s_core = this;
+    s_display = getDisplay();
 
     // setup audio
     int samples = (int) ((float) SMS_AUD_RATE / SMS_FPS);
-    p_platform->getAudio()->setup(SMS_AUD_RATE, samples);
+    getAudio()->setup(SMS_AUD_RATE, samples);
 }
 
 bool SMSPlus::loadRom(const Io::File &file) {
@@ -79,16 +77,17 @@ bool SMSPlus::loadRom(const Io::File &file) {
     memset(audio_buffer, 0x00, (SMS_AUD_RATE / SMS_FPS));
     system_init(SMS_AUD_RATE);
 
-    p_platform->getDisplay()->clear();
+    getDisplay()->clear();
 
     return true;
 }
 
-bool in_ram(SMSPlus::loop)(uint16_t buttons) {
+bool in_ram(SMSPlus::loop)() {
     //printf("SMSPlus::loop\r\n");
-    if (!Core::loop(buttons)) return false;
+    if (!Core::loop()) return false;
 
     smsButtons = 0;
+    uint16_t buttons = getInput()->getButtons();
     if (buttons & Input::Button::UP) smsButtons |= INPUT_UP;
     if (buttons & Input::Button::DOWN) smsButtons |= INPUT_DOWN;
     if (buttons & Input::Button::LEFT) smsButtons |= INPUT_LEFT;
@@ -108,7 +107,7 @@ bool in_ram(SMSPlus::loop)(uint16_t buttons) {
         audio_buffer[x] = (snd.buffer[0][x] << 16) + snd.buffer[1][x];
         //audio_buffer[x] = ((snd.buffer[0][x] + snd.buffer[1][x]) / 512) + 128;
     }
-    platform->getAudio()->play((void *) &audio_buffer, snd.bufsize);
+    getAudio()->play((void *) &audio_buffer, snd.bufsize);
 
     return true;
 }
@@ -120,15 +119,24 @@ extern "C" void in_ram(sms_palette_sync)(int index) {
 }
 
 extern "C" void in_ram(sms_render_line)(int line, const uint8_t *buffer) {
-    //printf("sms_render_line(%i, %i)\r\n", line, lineBufferIndex);
+    printf("sms_render_line(%i)\r\n", line);
     // fill line buffer
     for (int i = 8; i < SMS_WIDTH - 8; i++) {
         lineBuffer[i - 8] = palette565[(buffer[i]) & 31];
     }
 
     if (line == 0) {
-        display->setCursor(0, 24);
+        s_display->setCursor(0, 24);
     }
 
-    display->put(lineBuffer, 240);
+    s_display->put(lineBuffer, 240);
+
+#ifdef LINUX
+    if (line == SMS_HEIGHT - 1) {
+        s_display->flip();
+    }
+#endif
 }
+
+#warning "TODO: system_load_sram"
+void system_load_sram(void) {}

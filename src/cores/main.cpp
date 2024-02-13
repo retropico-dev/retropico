@@ -48,13 +48,7 @@ static Display::Settings ds{
 #endif
 
 int main() {
-    Clock fpsClock, runtimeClock;
-    int frames = 0;
-
-    auto platform = new P2DPlatform();
-    auto display = (Display *) new P2DDisplay(ds);
-    platform->setDisplay(display);
-    auto core = new MBCore(platform);
+    auto core = new MBCore(ds);
 
 #ifndef NDEBUG
     Io::File file{"res:/romfs/rom.bin"};
@@ -63,38 +57,20 @@ int main() {
 #endif
     if (!core->loadRom(file)) {
         // reboot to ui
-        platform->reboot(FLASH_MAGIC_UI);
+        core->reboot(FLASH_MAGIC_UI);
     }
 
     // emulation loop
-    while (true) {
-        if (!core->loop(platform->getInput()->getButtons())) break;
-
-        p2d::Platform::battery()->loop();
-
-        // fps
-        if (fpsClock.getElapsedTime().asSeconds() >= 1) {
-
-            auto percent = (uint16_t) (((float) Utility::getUsedHeap() / (float) Utility::getTotalHeap()) * 100);
-            printf("fps: %i, heap: %i/%i (%i%%), battery: %i%% (%.02fv), runtime: %i minutes\r\n",
-                   (int) ((float) frames / fpsClock.restart().asSeconds()),
-                   Utility::getUsedHeap(), Utility::getTotalHeap(), percent,
-                   platform->getBattery()->getPercent(), platform->getBattery()->getVoltage(),
-                   (int) runtimeClock.getElapsedTime().asSeconds());
-            frames = 0;
-        }
-        // increment frames for fps counter
-        frames++;
-    }
+    while (core->loop()) {}
 
     // cleanly close core (handle saves and such)
-    delete (core);
+    core->close();
 
     // reboot to ui
-    platform->reboot(FLASH_MAGIC_UI);
+    core->reboot(FLASH_MAGIC_UI);
 
     // unreachable
-    delete (platform);
+    delete (core);
 
     return 0;
 }

@@ -47,12 +47,12 @@ void gb_error(struct gb_s *gb, enum gb_error_e gb_err, uint16_t val);
 
 static inline void in_ram(lcd_draw_line)(struct gb_s *gb, const uint8_t pixels[LCD_WIDTH], uint_fast8_t line);
 
-PeanutGB::PeanutGB(Platform *p) : Core(p, Core::Type::Gb) {
-    s_display = p_platform->getDisplay();
+PeanutGB::PeanutGB(const p2d::Display::Settings &ds) : Core(ds, Core::Type::Gb) {
+    s_display = getDisplay();
 
 #if ENABLE_SOUND
     // init audio
-    p_platform->getAudio()->setup(AUDIO_SAMPLE_RATE, AUDIO_SAMPLES);
+    getAudio()->setup(AUDIO_SAMPLE_RATE, AUDIO_SAMPLES);
     audio_init();
 #endif
 }
@@ -90,8 +90,8 @@ bool PeanutGB::loadRom(const Io::File &file) {
     return true;
 }
 
-bool in_ram(PeanutGB::loop)(uint16_t buttons) {
-    if (!Core::loop(buttons)) return false;
+bool in_ram(PeanutGB::loop)() {
+    if (!Core::loop()) return false;
 
     gameboy.gb_frame = 0;
     do {
@@ -102,7 +102,7 @@ bool in_ram(PeanutGB::loop)(uint16_t buttons) {
 #if ENABLE_SOUND
     // send audio buffer to playback device
     audio_callback(nullptr, reinterpret_cast<uint8_t *>(audio_stream), AUDIO_BUFFER_SIZE);
-    p_platform->getAudio()->play(audio_stream, AUDIO_SAMPLES);
+    getAudio()->play(audio_stream, AUDIO_SAMPLES);
 #endif
 
     /* Required since we do not know whether a button remains
@@ -112,6 +112,7 @@ bool in_ram(PeanutGB::loop)(uint16_t buttons) {
 
     // handle input
     // emulation inputs
+    uint16_t buttons = getInput()->getButtons();
     gameboy.direct.joypad_bits.a = !(buttons & p2d::Input::Button::B1);
     gameboy.direct.joypad_bits.b = !(buttons & p2d::Input::Button::B2);
     gameboy.direct.joypad_bits.select = !(buttons & p2d::Input::Button::SELECT);
