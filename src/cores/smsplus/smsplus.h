@@ -14,7 +14,7 @@ namespace mb {
 
         bool loop() override;
 
-        //void close() override;
+        void close() override;
 
         bool loadRom(const p2d::Io::File &file) override;
     };

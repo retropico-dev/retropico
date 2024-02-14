@@ -12,7 +12,6 @@ extern "C" {
 using namespace mb;
 using namespace p2d;
 
-static Display *s_display;
 static Core *s_core;
 
 #define SMS_WIDTH 256
@@ -32,10 +31,11 @@ static int audio_buffer[SMS_AUD_RATE / SMS_FPS];
 // input
 static uint16_t smsButtons = 0, smsSystem = 0;
 
+void system_save_sram();
+
 SMSPlus::SMSPlus(const p2d::Display::Settings &ds) : Core(ds, Core::Type::Sms) {
     // crappy
     s_core = this;
-    s_display = getDisplay();
 
     // setup audio
     int samples = (int) ((float) SMS_AUD_RATE / SMS_FPS);
@@ -76,6 +76,7 @@ bool SMSPlus::loadRom(const Io::File &file) {
 
     memset(audio_buffer, 0x00, (SMS_AUD_RATE / SMS_FPS));
     system_init(SMS_AUD_RATE);
+    system_reset();
 
     getDisplay()->clear();
 
@@ -112,6 +113,11 @@ bool in_ram(SMSPlus::loop)() {
     return true;
 }
 
+void SMSPlus::close() {
+    printf("SMSPlus::close()\r\n");
+    system_save_sram();
+}
+
 extern "C" void in_ram(sms_palette_sync)(int index) {
     palette565[index] = ((bitmap.pal.color[index][0] >> 3) << 11)
                         | ((bitmap.pal.color[index][1] >> 2) << 5)
@@ -119,24 +125,59 @@ extern "C" void in_ram(sms_palette_sync)(int index) {
 }
 
 extern "C" void in_ram(sms_render_line)(int line, const uint8_t *buffer) {
-    printf("sms_render_line(%i)\r\n", line);
+    //printf("sms_render_line(%i)\r\n", line);
     // fill line buffer
     for (int i = 8; i < SMS_WIDTH - 8; i++) {
         lineBuffer[i - 8] = palette565[(buffer[i]) & 31];
     }
 
     if (line == 0) {
-        s_display->setCursor(0, 24);
+        s_core->getDisplay()->setCursor(0, 24);
     }
 
-    s_display->put(lineBuffer, 240);
+    s_core->getDisplay()->put(lineBuffer, 240);
 
 #ifdef LINUX
     if (line == SMS_HEIGHT - 1) {
-        s_display->flip();
+        s_core->getDisplay()->flip();
     }
 #endif
 }
 
-#warning "TODO: system_load_sram"
-void system_load_sram(void) {}
+void system_load_sram(void) {
+    printf("system_load_sram: loading sram from %s\r\n", s_core->getSramPath().c_str());
+
+    auto file = Io::File(s_core->getSramPath());
+    if (!file.isOpen()) {
+        printf("system_load_sram: sram file does not exist, skipping... (%s)\r\n",
+               s_core->getSramPath().c_str());
+        return;
+    }
+
+    if (file.read(0, 0x8000, (char *) sms.sram) != 0x8000) {
+        printf("system_load_sram: sram file does not exist, skipping... (%s)\r\n",
+               s_core->getSramPath().c_str());
+        return;
+    }
+
+    printf("system_load_sram: loaded sram file (%s)\r\n", s_core->getSramPath().c_str());
+}
+
+void system_save_sram() {
+    printf("system_save_sram: saving sram to %s\r\n", s_core->getSramPath().c_str());
+
+    Io::File file{s_core->getSramPath(), Io::File::OpenMode::Write};
+    if (!file.isOpen()) {
+        printf("system_save_sram: sram file could not be opened for writing, skipping... (%s)\r\n",
+               s_core->getSramPath().c_str());
+        return;
+    }
+
+    int wrote = file.write(0, 0x8000, (const char *) sms.sram);
+    if (wrote != 0x8000) {
+        printf("system_save_sram: something went wrong when writing to sram file, skipping... (%s)\r\n",
+               s_core->getSramPath().c_str());
+    } else {
+        printf("system_save_sram: saved sram file (%s)\r\n", s_core->getSramPath().c_str());
+    }
+}
