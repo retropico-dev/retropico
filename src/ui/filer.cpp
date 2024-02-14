@@ -51,17 +51,17 @@ void Filer::load() {
     uint32_t offset = FLASH_TARGET_OFFSET_CACHE;
 
     printf("Filer::load: buffering nes roms list...");
-    m_files[Core::Type::Nes] = Io::getBufferedList(Core::getRomPath(Core::Type::Nes), offset);
+    m_files[Core::Type::Nes] = Io::getBufferedList(Core::getRomsPath(Core::Type::Nes), offset);
     offset += m_files[Core::Type::Nes].data_size;
     printf(" found %i roms\r\n", m_files[Core::Type::Nes].count);
 
     printf("Filer::load: buffering gb roms list...");
-    m_files[Core::Type::Gb] = Io::getBufferedList(Core::getRomPath(Core::Type::Gb), offset);
+    m_files[Core::Type::Gb] = Io::getBufferedList(Core::getRomsPath(Core::Type::Gb), offset);
     offset += m_files[Core::Type::Gb].data_size;
     printf(" found %i roms\r\n", m_files[Core::Type::Gb].count);
 
     printf("Filer::load: buffering sms roms list...");
-    m_files[Core::Type::Sms] = Io::getBufferedList(Core::getRomPath(Core::Type::Sms), offset);
+    m_files[Core::Type::Sms] = Io::getBufferedList(Core::getRomsPath(Core::Type::Sms), offset);
     printf(" found %i roms\r\n", m_files[Core::Type::Sms].count);
 
     // set no rom message if needed
@@ -114,7 +114,7 @@ bool Filer::onInput(const uint16_t &buttons) {
         return true;
     } else if (buttons & Input::Button::B1 && m_files[m_core].count > m_file_index + m_highlight_index) {
         std::string name = m_files[m_core].at(m_file_index + m_highlight_index);
-        std::string path = Core::getRomPath(m_core) + "/" + name;
+        std::string path = Core::getRomsPath(m_core) + "/" + name;
         printf("Filer: copying %s to %s\r\n", path.c_str(), Core::getRomCachePath().c_str());
         Ui::getInstance()->getInfoBox()->show("Loading...");
         auto success = Io::copy(path, Core::getRomCachePath());

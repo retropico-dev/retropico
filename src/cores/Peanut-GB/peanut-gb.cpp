@@ -62,7 +62,7 @@ bool PeanutGB::loadRom(const Io::File &file) {
 
     printf("InfoNES::loadRom: %s (%lu bytes)\r\n", file.getPath().c_str(), file.getLength());
     m_romName = file.getName();
-    m_sramPath = Core::getSavePath(Core::Type::Sms) + "/"
+    m_sramPath = Core::getSavesPath(Core::Type::Sms) + "/"
                  + Utility::removeExt(Utility::baseName(m_romName)) + ".srm";
 
     gb_rom = file.getPtr();

@@ -28,9 +28,11 @@ namespace mb {
 
         virtual std::string getSramPath() { return m_sramPath; };
 
+        virtual std::string getSavePath() { return m_savePath; };
+
         static std::string getRomCachePath() { return "flash:/rom.bin"; }
 
-        static std::string getRomPath(int core) {
+        static std::string getRomsPath(int core) {
             if (core == Nes) {
                 return "sd:/roms/nes";
             } else if (core == Gb) {
@@ -40,7 +42,7 @@ namespace mb {
             }
         }
 
-        static std::string getSavePath(int core) {
+        static std::string getSavesPath(int core) {
             if (core == Nes) {
                 return "sd:/saves/nes";
             } else if (core == Gb) {
@@ -53,6 +55,7 @@ namespace mb {
     protected:
         std::string m_romName;
         std::string m_sramPath;
+        std::string m_savePath;
     };
 }
 

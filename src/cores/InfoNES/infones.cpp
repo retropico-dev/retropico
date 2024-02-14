@@ -75,7 +75,7 @@ InfoNES::InfoNES(const p2d::Display::Settings &ds) : Core(ds, Core::Type::Nes) {
 bool InfoNES::loadRom(const Io::File &file) {
     printf("InfoNES::loadRom: %s (%lu bytes)\r\n", file.getPath().c_str(), file.getLength());
     m_romName = file.getPath();
-    m_sramPath = Core::getSavePath(Core::Type::Nes) + "/"
+    m_sramPath = Core::getSavesPath(Core::Type::Nes) + "/"
                  + Utility::removeExt(Utility::baseName(m_romName)) + ".srm";
 
     auto data = (uint8_t *) file.getPtr();

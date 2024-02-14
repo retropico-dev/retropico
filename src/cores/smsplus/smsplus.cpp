@@ -33,6 +33,10 @@ static uint16_t smsButtons = 0, smsSystem = 0;
 
 void system_save_sram();
 
+void system_load_state();
+
+void system_save_state();
+
 SMSPlus::SMSPlus(const p2d::Display::Settings &ds) : Core(ds, Core::Type::Sms) {
     // crappy
     s_core = this;
@@ -45,8 +49,9 @@ SMSPlus::SMSPlus(const p2d::Display::Settings &ds) : Core(ds, Core::Type::Sms) {
 bool SMSPlus::loadRom(const Io::File &file) {
     printf("SMSPlus::loadRom: %s\r\n", file.getName().c_str());
     m_romName = file.getName();
-    m_sramPath = Core::getSavePath(Core::Type::Sms) + "/"
+    m_sramPath = Core::getSavesPath(Core::Type::Sms) + "/"
                  + Utility::removeExt(Utility::baseName(m_romName)) + ".srm";
+    m_savePath = Utility::replace(m_sramPath, ".srm", ".sav");
 
     auto data = (uint8_t *) file.getPtr();
 
@@ -76,7 +81,9 @@ bool SMSPlus::loadRom(const Io::File &file) {
 
     memset(audio_buffer, 0x00, (SMS_AUD_RATE / SMS_FPS));
     system_init(SMS_AUD_RATE);
-    system_reset();
+
+    //system_reset();
+    system_load_state();
 
     getDisplay()->clear();
 
@@ -116,6 +123,7 @@ bool in_ram(SMSPlus::loop)() {
 void SMSPlus::close() {
     printf("SMSPlus::close()\r\n");
     system_save_sram();
+    system_save_state();
 }
 
 extern "C" void in_ram(sms_palette_sync)(int index) {
@@ -147,7 +155,7 @@ extern "C" void in_ram(sms_render_line)(int line, const uint8_t *buffer) {
 void system_load_sram(void) {
     printf("system_load_sram: loading sram from %s\r\n", s_core->getSramPath().c_str());
 
-    auto file = Io::File(s_core->getSramPath());
+    Io::File file(s_core->getSramPath());
     if (!file.isOpen()) {
         printf("system_load_sram: sram file does not exist, skipping... (%s)\r\n",
                s_core->getSramPath().c_str());
@@ -166,7 +174,7 @@ void system_load_sram(void) {
 void system_save_sram() {
     printf("system_save_sram: saving sram to %s\r\n", s_core->getSramPath().c_str());
 
-    Io::File file{s_core->getSramPath(), Io::File::OpenMode::Write};
+    Io::File file(s_core->getSramPath(), Io::File::OpenMode::Write);
     if (!file.isOpen()) {
         printf("system_save_sram: sram file could not be opened for writing, skipping... (%s)\r\n",
                s_core->getSramPath().c_str());
@@ -180,4 +188,139 @@ void system_save_sram() {
     } else {
         printf("system_save_sram: saved sram file (%s)\r\n", s_core->getSramPath().c_str());
     }
+}
+
+void system_load_state() {
+    uint8 reg[0x40];
+    uint32_t offset = 0;
+
+    Io::File file(s_core->getSavePath());
+    if (!file.isOpen()) {
+        printf("system_load_state: state file does not exist, skipping... (%s)\r\n",
+               s_core->getSramPath().c_str());
+        return;
+    }
+
+    /* Initialize everything */
+    cpu_reset();
+    system_reset();
+
+    /* Load VDP context */
+    offset += file.read(offset, sizeof(t_vdp), reinterpret_cast<char *>(&vdp));
+
+    /* Load SMS context */
+    offset += file.read(offset, sizeof(t_sms), reinterpret_cast<char *>(&sms));
+
+    /* Load Z80 context */
+    offset += file.read(offset, sizeof(Z80_Regs), reinterpret_cast<char *>(Z80_Context));
+    offset += file.read(offset, sizeof(int), reinterpret_cast<char *>(&after_EI));
+
+    /* Load YM2413 registers */
+    offset += file.read(offset, 0x40, reinterpret_cast<char *>(reg));
+
+    /* Load SN76489 context */
+    file.read(offset, sizeof(t_SN76496), reinterpret_cast<char *>(&sn[0]));
+
+    /* Restore callbacks */
+    z80_set_irq_callback(sms_irq_callback);
+
+    cpu_readmap[0] = cart.rom + 0x0000; /* 0000-3FFF */
+    cpu_readmap[1] = cart.rom + 0x2000;
+    cpu_readmap[2] = cart.rom + 0x4000; /* 4000-7FFF */
+    cpu_readmap[3] = cart.rom + 0x6000;
+    cpu_readmap[4] = cart.rom + 0x0000; /* 0000-3FFF */
+    cpu_readmap[5] = cart.rom + 0x2000;
+    cpu_readmap[6] = sms.ram;
+    cpu_readmap[7] = sms.ram;
+
+    cpu_writemap[0] = sms.dummy;
+    cpu_writemap[1] = sms.dummy;
+    cpu_writemap[2] = sms.dummy;
+    cpu_writemap[3] = sms.dummy;
+    cpu_writemap[4] = sms.dummy;
+    cpu_writemap[5] = sms.dummy;
+    cpu_writemap[6] = sms.ram;
+    cpu_writemap[7] = sms.ram;
+
+    sms_mapper_w(3, sms.fcr[3]);
+    sms_mapper_w(2, sms.fcr[2]);
+    sms_mapper_w(1, sms.fcr[1]);
+    sms_mapper_w(0, sms.fcr[0]);
+
+    /* Force full pattern cache update */
+    //is_vram_dirty = 1;
+    //memset(vram_dirty, 1, 0x200);
+
+    /* Restore palette */
+    for (int i = 0; i < PALETTE_SIZE; i += 1)
+        palette_sync(i);
+
+    /* Restore sound state */
+    if (snd.enabled) {
+#if 0
+        /* Clear YM2413 context */
+        OPLL_reset(opll) ;
+        OPLL_reset_patch(opll,0) ;            /* if use default voice data. */
+
+        /* Restore rhythm enable first */
+        ym2413_write(0, 0, 0x0E);
+        ym2413_write(0, 1, reg[0x0E]);
+
+        /* User instrument settings */
+        for(i = 0x00; i <= 0x07; i += 1)
+        {
+            ym2413_write(0, 0, i);
+            ym2413_write(0, 1, reg[i]);
+        }
+
+        /* Channel frequency */
+        for(i = 0x10; i <= 0x18; i += 1)
+        {
+            ym2413_write(0, 0, i);
+            ym2413_write(0, 1, reg[i]);
+        }
+
+        /* Channel frequency + ctrl. */
+        for(i = 0x20; i <= 0x28; i += 1)
+        {
+            ym2413_write(0, 0, i);
+            ym2413_write(0, 1, reg[i]);
+        }
+
+        /* Instrument and volume settings  */
+        for(i = 0x30; i <= 0x38; i += 1)
+        {
+            ym2413_write(0, 0, i);
+            ym2413_write(0, 1, reg[i]);
+        }
+#endif
+    }
+}
+
+void system_save_state() {
+    uint8 reg[0x40];
+    uint32_t offset = 0;
+
+    Io::File file(s_core->getSavePath(), Io::File::OpenMode::Write);
+    if (!file.isOpen()) {
+        printf("system_save_state: state file could not be opened for writing, skipping... (%s)\r\n",
+               s_core->getSavePath().c_str());
+        return;
+    }
+
+    /* Save VDP context */
+    offset += file.write(offset, sizeof(t_vdp), reinterpret_cast<const char *>(&vdp));
+
+    /* Save SMS context */
+    offset += file.write(offset, sizeof(t_sms), reinterpret_cast<const char *>(&sms));
+
+    /* Save Z80 context */
+    offset += file.write(offset, sizeof(Z80_Regs), reinterpret_cast<const char *>(Z80_Context));
+    offset += file.write(offset, sizeof(int), reinterpret_cast<const char *>(&after_EI));
+
+    /* Save YM2413 registers */
+    offset += file.write(offset, 0x40, reinterpret_cast<const char *>(reg));
+
+    /* Save SN76489 context */
+    file.write(offset, sizeof(t_SN76496), reinterpret_cast<const char *>(&sn[0]));
 }
