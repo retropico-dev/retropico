@@ -7,8 +7,6 @@
 
 #include "core.h"
 
-#define MB_DOUBLE_BUFFER 1
-
 namespace mb {
     class PeanutGB : public Core {
     public:
@@ -20,6 +18,15 @@ namespace mb {
 
         bool loadRom(const p2d::Io::File &file) override;
 
+        [[nodiscard]] bool isFrameSkipEnabled() const {
+            return m_frameSkip;
+        }
+
+        void setFrameSkipEnabled(bool enable) {
+            m_frameSkip = enable;
+        }
+
+#if 0   // we don't want unscaled rendering, too small...
         [[nodiscard]] bool isScalingEnabled() const {
             return m_scaling;
         }
@@ -31,14 +38,7 @@ namespace mb {
             }
             m_scaling = enable;
         }
-
-        [[nodiscard]] bool isFrameSkipEnabled() const {
-            return m_frameSkip;
-        }
-
-        void setFrameSkipEnabled(bool enable) {
-            m_frameSkip = enable;
-        }
+#endif
 
     private:
         bool m_scaling = true;

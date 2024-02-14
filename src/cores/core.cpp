@@ -8,26 +8,14 @@ using namespace p2d;
 using namespace mb;
 
 bool Core::loop() {
-    // input
+    // update inputs
     Platform::onInput(0);
+
+    // check for quit
     uint16_t buttons = getInput()->getButtons();
     if (buttons & p2d::Input::Button::START && buttons & p2d::Input::Button::SELECT ||
         p_input->getButtons() & Input::Button::QUIT) {
         return false;
-    }
-
-    // volume up/down
-    if (buttons & p2d::Input::Button::SELECT) {
-        getInput()->setRepeatDelay(INPUT_DELAY_UI);
-        if (buttons & p2d::Input::Button::UP) {
-            getAudio()->volumeUp();
-            printf("volume: %i\n", getAudio()->getVolume());
-        } else if (buttons & p2d::Input::Button::DOWN) {
-            getAudio()->volumeDown();
-            printf("volume: %i\n", getAudio()->getVolume());
-        }
-    } else if (!(buttons & p2d::Input::Button::DELAY)) {
-        getInput()->setRepeatDelay(0);
     }
 
     // update loop

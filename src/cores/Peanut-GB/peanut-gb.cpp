@@ -81,11 +81,7 @@ bool PeanutGB::loadRom(const Io::File &file) {
     // automatically assign a colour palette to the game
     char rom_title[16];
     auto_assign_palette(palette, gb_colour_hash(&gameboy), gb_get_rom_name(&gameboy, rom_title));
-
     gb_init_lcd(&gameboy, &lcd_draw_line);
-
-    // not enough fps when scaling is used (with double buffering, st7789), enable interlacing
-    //if (m_scaling) gameboy.direct.interlace = 1;
 
     return true;
 }
@@ -122,31 +118,26 @@ bool in_ram(PeanutGB::loop)() {
     gameboy.direct.joypad_bits.down = !(buttons & p2d::Input::Button::DOWN);
     gameboy.direct.joypad_bits.left = !(buttons & p2d::Input::Button::LEFT);
 
-#warning "TODO: hotkeys / combos"
-    /*
     // hotkeys / combos
     if (buttons & p2d::Input::Button::SELECT) {
-        p_platform->getInput()->setRepeatDelay(INPUT_DELAY_UI);
-        // palette selection
-        if (buttons & p2d::Input::Button::LEFT) {
-            if (manual_palette_selected > 0) {
-                manual_palette_selected--;
-                manual_assign_palette(palette, manual_palette_selected);
+        getInput()->setRepeatDelay(INPUT_DELAY_UI);
+        if (!(buttons & Input::Button::DELAY)) {
+            // palette selection
+            if (buttons & p2d::Input::Button::LEFT) {
+                if (manual_palette_selected > 0) {
+                    manual_palette_selected--;
+                    manual_assign_palette(palette, manual_palette_selected);
+                }
+            } else if (buttons & p2d::Input::Button::RIGHT) {
+                if (manual_palette_selected < NUMBER_OF_MANUAL_PALETTES - 1) {
+                    manual_palette_selected++;
+                    manual_assign_palette(palette, manual_palette_selected);
+                }
             }
-        } else if (buttons & p2d::Input::Button::RIGHT) {
-            if (manual_palette_selected < NUMBER_OF_MANUAL_PALETTES) {
-                manual_palette_selected++;
-                manual_assign_palette(palette, manual_palette_selected);
-            }
-        } else if (buttons & p2d::Input::Button::UP) {
-            setScalingEnabled(true);
-        } else if (buttons & p2d::Input::Button::DOWN) {
-            setScalingEnabled(false);
         }
-    } else {
-        p_platform->getInput()->setRepeatDelay(0);
+    } else if (!(buttons & Input::Button::DELAY)) {
+        getInput()->setRepeatDelay(0);
     }
-    */
 
     return true;
 }
