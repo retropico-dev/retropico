@@ -20,8 +20,9 @@ static Core *s_core;
 #define SMS_FPS 60
 
 // rendering
-static uint16_t lineBuffer[240];
-static uint8_t framebufferLine[SMS_WIDTH];
+static uint8_t screenCropX = 0;
+static uint16_t screenBufferLine[240];
+static uint8_t smsBufferLine[SMS_WIDTH];
 static int palette565[32];
 static uint8_t sram[0x8000];
 
@@ -53,39 +54,48 @@ bool SMSPlus::loadRom(const Io::File &file) {
                  + Utility::removeExt(Utility::baseName(m_romName)) + ".srm";
     m_savePath = Utility::replace(m_sramPath, ".srm", ".sav");
 
-    auto data = (uint8_t *) file.getPtr();
-
-    memset(framebufferLine, 0x00, SMS_WIDTH);
+    // clear some buffers...
+    memset(audio_buffer, 0x00, (SMS_AUD_RATE / SMS_FPS));
+    memset(smsBufferLine, 0x00, SMS_WIDTH);
     memset(sram, 0x00, 0x8000);
+
+    cart.type = Utility::endsWith(m_romName, ".gg") ? TYPE_GG : TYPE_SMS;
+    if (IS_GG) {
+        getDisplay()->setDisplayBounds((int16_t) ((240 - BMP_WIDTH) / 2), (int16_t) ((240 - BMP_HEIGHT) / 2),
+                                       BMP_WIDTH, BMP_HEIGHT);
+        m_sramPath = Utility::replace(m_sramPath, "/sms", "/gg");
+        m_savePath = Utility::replace(m_savePath, "/sms", "/gg");
+    } else {
+        getDisplay()->setDisplayBounds(0, 24, 240, BMP_HEIGHT);
+        screenCropX = 8;
+    }
 
     sms.use_fm = 0;
     sms.country = TYPE_OVERSEAS;
     sms.sram = sram;
-    sms.dummy = framebufferLine;
-    bitmap.data = framebufferLine;
-    bitmap.width = 256;
-    bitmap.height = 192;
-    bitmap.pitch = 256;
+    sms.dummy = smsBufferLine;
+    bitmap.data = smsBufferLine;
+    bitmap.width = BMP_WIDTH;
+    bitmap.height = BMP_HEIGHT;
+    bitmap.pitch = BMP_WIDTH;
     bitmap.depth = 8;
 
-    cart.type = TYPE_SMS;
     // take care of image header, if present
+    auto romData = (uint8_t *) file.getPtr();
     if ((file.getLength() / 512) & 1) {
         printf("SMSPlus::loadRom: removing rom header...\r\n");
-        cart.rom = data + 512;
+        cart.rom = romData + 512;
         cart.pages = ((file.getLength() - 512) / 0x4000);
     } else {
-        cart.rom = data;
+        cart.rom = romData;
         cart.pages = (file.getLength() / 0x4000);
     }
 
-    memset(audio_buffer, 0x00, (SMS_AUD_RATE / SMS_FPS));
+    // init sms
     system_init(SMS_AUD_RATE);
 
-    //system_reset();
+    // load state if any
     system_load_state();
-
-    getDisplay()->clear();
 
     return true;
 }
@@ -134,19 +144,14 @@ extern "C" void in_ram(sms_palette_sync)(int index) {
 
 extern "C" void in_ram(sms_render_line)(int line, const uint8_t *buffer) {
     //printf("sms_render_line(%i)\r\n", line);
-    // fill line buffer
-    for (int i = 8; i < SMS_WIDTH - 8; i++) {
-        lineBuffer[i - 8] = palette565[(buffer[i]) & 31];
+    for (int i = screenCropX; i < BMP_WIDTH - screenCropX; i++) {
+        screenBufferLine[i - screenCropX] = palette565[(buffer[i + BMP_X_OFFSET]) & 31];
     }
 
-    if (line == 0) {
-        s_core->getDisplay()->setCursor(0, 24);
-    }
-
-    s_core->getDisplay()->put(lineBuffer, 240);
+    s_core->getDisplay()->put(screenBufferLine, BMP_WIDTH - (screenCropX * 2));
 
 #ifdef LINUX
-    if (line == SMS_HEIGHT - 1) {
+    if (line == BMP_HEIGHT + BMP_Y_OFFSET - 1) {
         s_core->getDisplay()->flip();
     }
 #endif
@@ -252,49 +257,7 @@ void system_load_state() {
     //memset(vram_dirty, 1, 0x200);
 
     /* Restore palette */
-    for (int i = 0; i < PALETTE_SIZE; i += 1)
-        palette_sync(i);
-
-    /* Restore sound state */
-    if (snd.enabled) {
-#if 0
-        /* Clear YM2413 context */
-        OPLL_reset(opll) ;
-        OPLL_reset_patch(opll,0) ;            /* if use default voice data. */
-
-        /* Restore rhythm enable first */
-        ym2413_write(0, 0, 0x0E);
-        ym2413_write(0, 1, reg[0x0E]);
-
-        /* User instrument settings */
-        for(i = 0x00; i <= 0x07; i += 1)
-        {
-            ym2413_write(0, 0, i);
-            ym2413_write(0, 1, reg[i]);
-        }
-
-        /* Channel frequency */
-        for(i = 0x10; i <= 0x18; i += 1)
-        {
-            ym2413_write(0, 0, i);
-            ym2413_write(0, 1, reg[i]);
-        }
-
-        /* Channel frequency + ctrl. */
-        for(i = 0x20; i <= 0x28; i += 1)
-        {
-            ym2413_write(0, 0, i);
-            ym2413_write(0, 1, reg[i]);
-        }
-
-        /* Instrument and volume settings  */
-        for(i = 0x30; i <= 0x38; i += 1)
-        {
-            ym2413_write(0, 0, i);
-            ym2413_write(0, 1, reg[i]);
-        }
-#endif
-    }
+    for (int i = 0; i < PALETTE_SIZE; i += 1) palette_sync(i);
 }
 
 void system_save_state() {

@@ -16,4 +16,5 @@ cmake-build*
 *.nes
 *.gb
 *.sms
+*.gg
 rom.bin
