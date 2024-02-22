@@ -50,11 +50,19 @@ static Display::Settings ds{
 int main() {
     auto core = new MBCore(ds);
 
+    // retrieve rom from flash
 #ifndef NDEBUG
     Io::File file{"res:/romfs/rom.bin"};
 #else
-    Io::File file{Core::getRomCachePath()};
+    auto list = Io::getList("flash:/");
+    if (list.empty()) {
+        // reboot to ui
+        core->reboot(FLASH_MAGIC_UI);
+    }
+    Io::File file{"flash:/" + list[0].name};
 #endif
+
+    // load rom
     if (!core->loadRom(file)) {
         // reboot to ui
         core->reboot(FLASH_MAGIC_UI);

@@ -67,6 +67,8 @@ void Filer::load() {
     // set no rom message if needed
     p_highlight->setVisibility(m_files[m_core].count ? Visibility::Visible : Visibility::Hidden);
     p_no_rom_text->setVisibility(m_files[m_core].count ? Visibility::Hidden : Visibility::Visible);
+
+    refresh();
 }
 
 bool Filer::onInput(const uint16_t &buttons) {
@@ -115,9 +117,16 @@ bool Filer::onInput(const uint16_t &buttons) {
     } else if (buttons & Input::Button::B1 && m_files[m_core].count > m_file_index + m_highlight_index) {
         std::string name = m_files[m_core].at(m_file_index + m_highlight_index);
         std::string path = Core::getRomsPath(m_core) + "/" + name;
-        printf("Filer: copying %s to %s\r\n", path.c_str(), Core::getRomCachePath().c_str());
+        // remove old rom
+        auto list = Io::getList("flash:/");
+        for (auto &f: list) {
+            printf("Filer: deleting previous rom (%s)\r\n", std::string("flash:/" + f.name).c_str());
+            Io::remove("flash:/" + f.name);
+        }
+        // copy new rom
+        printf("Filer: copying %s to flash:/%s\r\n", path.c_str(), name.c_str());
         Ui::getInstance()->getInfoBox()->show("Loading...");
-        auto success = Io::copy(path, Core::getRomCachePath());
+        auto success = Io::copy(path, "flash:/" + name);
         if (success) {
             printf("Filer: copy done... writing config to flash...\r\n");
             // write bootloader "config"

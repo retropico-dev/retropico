@@ -30,8 +30,6 @@ namespace mb {
 
         virtual std::string getSavePath() { return m_savePath; };
 
-        static std::string getRomCachePath() { return "flash:/rom.bin"; }
-
         static std::string getRomsPath(int core) {
             if (core == Nes) {
                 return "sd:/roms/nes";
