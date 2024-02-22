@@ -58,9 +58,11 @@ Ui::Ui(Platform *p) : Rectangle({1, 1},
     Io::create(Core::getRomsPath(Core::Type::Nes));
     Io::create(Core::getRomsPath(Core::Type::Gb));
     Io::create(Core::getRomsPath(Core::Type::Sms));
+    Io::create(Core::getRomsPath(Core::Type::Gg));
     Io::create(Core::getSavesPath(Core::Type::Nes));
     Io::create(Core::getSavesPath(Core::Type::Gb));
     Io::create(Core::getSavesPath(Core::Type::Sms));
+    Io::create(Core::getSavesPath(Core::Type::Gg));
 
     // add filer
     p_filer = new Filer({1, 1}, {(int16_t) (getSize().x - 2), (int16_t) (getSize().y - 2)});

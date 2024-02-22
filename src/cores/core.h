@@ -14,7 +14,8 @@ namespace mb {
         enum Type {
             Nes = 0,
             Gb = 1,
-            Sms = 2
+            Sms = 2,
+            Gg = 3
         };
 
         explicit Core(const p2d::Display::Settings &displaySettings, const Core::Type &core)
@@ -35,8 +36,10 @@ namespace mb {
                 return "sd:/roms/nes";
             } else if (core == Gb) {
                 return "sd:/roms/gb";
-            } else {
+            } else if (core == Sms) {
                 return "sd:/roms/sms";
+            } else {
+                return "sd:/roms/gg";
             }
         }
 
@@ -45,8 +48,10 @@ namespace mb {
                 return "sd:/saves/nes";
             } else if (core == Gb) {
                 return "sd:/saves/gb";
-            } else {
+            } else if (core == Sms) {
                 return "sd:/saves/sms";
+            } else {
+                return "sd:/saves/gg";
             }
         }
 

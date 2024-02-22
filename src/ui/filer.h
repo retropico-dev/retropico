@@ -26,12 +26,13 @@ namespace mb {
         bool isEmpty() {
             return m_files[Core::Type::Nes].count < 1
                    && m_files[Core::Type::Gb].count < 1
-                   && m_files[Core::Type::Sms].count < 1;
+                   && m_files[Core::Type::Sms].count < 1
+                   && m_files[Core::Type::Gg].count < 1;
         }
 
     private:
         p2d::Platform *p_platform;
-        p2d::Io::ListBuffer m_files[3];
+        p2d::Io::ListBuffer m_files[4];
         Core::Type m_core = Core::Type::Nes;
         int m_max_lines = 0;
         int m_line_height = 0;

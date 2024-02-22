@@ -53,16 +53,24 @@ void Filer::load() {
     printf("Filer::load: buffering nes roms list...");
     m_files[Core::Type::Nes] = Io::getBufferedList(Core::getRomsPath(Core::Type::Nes), offset);
     offset += m_files[Core::Type::Nes].data_size;
-    printf(" found %i roms\r\n", m_files[Core::Type::Nes].count);
+    printf(" found %i nes roms\r\n", m_files[Core::Type::Nes].count);
 
     printf("Filer::load: buffering gb roms list...");
     m_files[Core::Type::Gb] = Io::getBufferedList(Core::getRomsPath(Core::Type::Gb), offset);
     offset += m_files[Core::Type::Gb].data_size;
-    printf(" found %i roms\r\n", m_files[Core::Type::Gb].count);
+    printf(" found %i gb roms\r\n", m_files[Core::Type::Gb].count);
 
     printf("Filer::load: buffering sms roms list...");
     m_files[Core::Type::Sms] = Io::getBufferedList(Core::getRomsPath(Core::Type::Sms), offset);
-    printf(" found %i roms\r\n", m_files[Core::Type::Sms].count);
+    offset += m_files[Core::Type::Sms].data_size;
+    printf(" found %i sms roms\r\n", m_files[Core::Type::Sms].count);
+
+    printf("Filer::load: buffering gg roms list...");
+    m_files[Core::Type::Gg] = Io::getBufferedList(Core::getRomsPath(Core::Type::Gg), offset);
+    printf(" found %i gg roms\r\n", m_files[Core::Type::Gg].count);
+
+    printf("Filer::load: loaded %lu bytes in flash\r\n",
+           offset + m_files[Core::Type::Gg].data_size - FLASH_TARGET_OFFSET_CACHE);
 
     // set no rom message if needed
     p_highlight->setVisibility(m_files[m_core].count ? Visibility::Visible : Visibility::Hidden);

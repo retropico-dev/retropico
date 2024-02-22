@@ -16,6 +16,7 @@ Menu::MenuLine::MenuLine(const Utility::Vec4i &bounds, const p2d::Io::File &file
 
     // add icon
     p_bitmap = new Bitmap(file, {2, (int16_t) (getSize().y / 2)});
+    p_bitmap->setAlphaEnabled(true);
     p_bitmap->setOrigin(Origin::Left);
     Menu::MenuLine::add(p_bitmap);
 
@@ -50,9 +51,17 @@ Menu::Menu(const Utility::Vec2i &pos, const Utility::Vec2i &size) : Rectangle(po
     m_lines.emplace_back(line);
 
     line = new MenuLine({0, (int16_t) (h * 3 - 1), (int16_t) (getSize().x - 1), h},
+                        Io::File("res:/romfs/gamegear.bmp"), "GAMEGEAR");
+    add(line);
+    m_lines.emplace_back(line);
+
+#warning "TODO: settings"
+    /*
+    line = new MenuLine({0, (int16_t) (h * 3 - 1), (int16_t) (getSize().x - 1), h},
                         Io::File("res:/romfs/settings.bmp"), "SETTINGS");
     add(line);
     m_lines.emplace_back(line);
+    */
 }
 
 bool Menu::onInput(const uint16_t &buttons) {
@@ -93,10 +102,17 @@ void Menu::refresh() {
         Ui::getInstance()->getFiler()->setVisibility(Visibility::Visible);
         Ui::getInstance()->getSettings()->setVisibility(Visibility::Hidden);
         Ui::getInstance()->getFiler()->setCore(Core::Sms);
+    } else if (m_line_index == 3) {
+        Ui::getInstance()->getFiler()->setVisibility(Visibility::Visible);
+        Ui::getInstance()->getSettings()->setVisibility(Visibility::Hidden);
+        Ui::getInstance()->getFiler()->setCore(Core::Gg);
+    }
+    /*
     } else {
         Ui::getInstance()->getFiler()->setVisibility(Visibility::Hidden);
         Ui::getInstance()->getSettings()->setVisibility(Visibility::Visible);
     }
+    */
 
     for (int i = 0; i < m_lines.size(); i++) {
         if (i == m_line_index) {

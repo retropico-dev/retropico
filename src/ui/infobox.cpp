@@ -25,6 +25,7 @@ void InfoBox::show(const std::string &text, uint32_t millis) {
     m_clock.restart();
     m_millis = millis;
     setVisibility(Visibility::Visible);
+    Ui::getInstance()->getPlatform()->loop();
 }
 
 void InfoBox::hide() {
