@@ -8,7 +8,6 @@ endif ()
 # pico options
 option(PICO_USE_BOOTLOADER "Build bootloader compatible binaries" OFF)
 option(PICO_DISPLAY_ST7789_PIO "Pico ST7789 display driver (pio)" ON)
-option(PICO_DISPLAY_ALPHA_SUPPORT "Enable alpha/transparency support" OFF)
 option(PICO_DEBUG_UART "Pico uart debug" OFF)
 option(PICO_DEBUG_USB "Pico usb debug" OFF)
 

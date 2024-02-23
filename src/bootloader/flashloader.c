@@ -23,6 +23,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <hardware/gpio.h>
+#include <pico/time.h>
 #include "hardware/regs/addressmap.h"
 #include "hardware/regs/m0plus.h"
 #include "hardware/structs/watchdog.h"
@@ -358,8 +359,9 @@ void initClock() {
 bool check_bootloader_combo() {
     if (BTN_PIN_UP > -1) {
         gpio_set_function(BTN_PIN_UP, GPIO_FUNC_SIO);
-        gpio_set_dir(BTN_PIN_UP, false);
+        gpio_set_dir(BTN_PIN_UP, GPIO_IN);
         gpio_pull_up(BTN_PIN_UP);
+        sleep_ms(10);
         if (!gpio_get(BTN_PIN_UP)) {
             reset_usb_boot(0, 0);
             while (true) tight_loop_contents();
@@ -368,12 +370,12 @@ bool check_bootloader_combo() {
 
     if (BTN_PIN_A > -1 && BTN_PIN_B > -1) {
         gpio_set_function(BTN_PIN_A, GPIO_FUNC_SIO);
-        gpio_set_dir(BTN_PIN_A, false);
+        gpio_set_dir(BTN_PIN_A, GPIO_IN);
         gpio_pull_up(BTN_PIN_A);
         gpio_set_function(BTN_PIN_B, GPIO_FUNC_SIO);
-        gpio_set_dir(BTN_PIN_B, false);
+        gpio_set_dir(BTN_PIN_B, GPIO_IN);
         gpio_pull_up(BTN_PIN_B);
-
+        sleep_ms(10);
         if (!gpio_get(BTN_PIN_A) && !gpio_get(BTN_PIN_B)) {
             return true;
         }

@@ -34,21 +34,15 @@ endif ()
 ######################
 # bootloader binary
 ######################
-add_executable(microboy-bootloader ${BOOTLOADER_SOURCES})
-target_include_directories(microboy-bootloader PRIVATE ${BOOTLOADER_INCLUDES})
-target_compile_options(microboy-bootloader PRIVATE ${BOOTLOADER_FLAGS})
-target_link_libraries(microboy-bootloader ${BOOTLOADER_LIBS})
+add_executable(${PROJECT_NAME} ${BOOTLOADER_SOURCES})
+target_include_directories(${PROJECT_NAME} PRIVATE ${BOOTLOADER_INCLUDES})
+target_compile_options(${PROJECT_NAME} PRIVATE ${BOOTLOADER_FLAGS})
+target_link_libraries(${PROJECT_NAME} ${BOOTLOADER_LIBS})
 if (NOT PLATFORM_LINUX)
-    set_linker_script(microboy-bootloader ${CMAKE_CURRENT_SOURCE_DIR}/memmap_flashloader.ld)
-    pico_add_uf2_output(microboy-bootloader)
-    # debug output
-    if (PICO_STDIO_UART)
-        pico_enable_stdio_usb(microboy-bootloader 0)
-        pico_enable_stdio_uart(microboy-bootloader 1)
-    else ()
-        pico_enable_stdio_usb(microboy-bootloader 1)
-        pico_enable_stdio_uart(microboy-bootloader 0)
-    endif ()
+    set_linker_script(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/memmap_flashloader.ld)
+    pico_add_uf2_output(${PROJECT_NAME})
+    pico_enable_stdio_usb(${PROJECT_NAME} 0)
+    pico_enable_stdio_uart(${PROJECT_NAME} 0)
 
     # combine the bootloader (flashloader) and apps into one UF2 image
     set(COMPLETE_UF2 ${CMAKE_BINARY_DIR}/microboy.uf2)
