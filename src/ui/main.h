@@ -46,6 +46,8 @@ namespace mb {
 
         p2d::Platform *getPlatform();
 
+        bool isDone() { return p_filer->isDone(); }
+
         static Ui *getInstance();
 
     private:

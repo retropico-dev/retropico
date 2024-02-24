@@ -140,7 +140,7 @@ int main() {
     auto ui = new Ui(platform);
     platform->add(ui);
 
-    while (platform->loop()) {}
+    while (platform->loop() && !ui->isDone()) {}
 
     // reboot to bootloader for launching either nes/gb/sms core
     // based on rom header
