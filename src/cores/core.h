@@ -2,8 +2,8 @@
 // Created by cpasjuste on 06/06/23.
 //
 
-#ifndef MICROBOY_CORE_H
-#define MICROBOY_CORE_H
+#ifndef RETROPICO_CORE_H
+#define RETROPICO_CORE_H
 
 #include <string>
 #include "platform.h"
@@ -62,4 +62,4 @@ namespace mb {
     };
 }
 
-#endif //MICROBOY_CORE_H
+#endif //RETROPICO_CORE_H

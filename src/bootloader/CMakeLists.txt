@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 #set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON")
 
-project(microboy-bootloader)
+project(retropico-bootloader)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
@@ -24,11 +24,11 @@ set(BOOTLOADER_LIBS
 )
 set(BOOTLOADER_FLAGS -Wall -Wextra -Wno-ignored-qualifiers -Os)
 
-# microboy board revision define
+# retropico board revision define
 if (PICO_BOARD STREQUAL "adafruit_feather_rp2040")
-    list(APPEND BOOTLOADER_FLAGS -DMICROBOY_10)
+    list(APPEND BOOTLOADER_FLAGS -DRETROPICO_10)
 else ()
-    list(APPEND BOOTLOADER_FLAGS -DMICROBOY_11)
+    list(APPEND BOOTLOADER_FLAGS -DRETROPICO_11)
 endif ()
 
 ######################
@@ -45,7 +45,7 @@ if (NOT PLATFORM_LINUX)
     pico_enable_stdio_uart(${PROJECT_NAME} 0)
 
     # combine the bootloader (flashloader) and apps into one UF2 image
-    set(COMPLETE_UF2 ${CMAKE_BINARY_DIR}/microboy.uf2)
+    set(COMPLETE_UF2 ${CMAKE_BINARY_DIR}/retropico.uf2)
 
     find_package(Python3 REQUIRED COMPONENTS Interpreter)
     add_custom_command(OUTPUT ${COMPLETE_UF2}
@@ -60,5 +60,5 @@ if (NOT PLATFORM_LINUX)
             ${CMAKE_BINARY_DIR}/src/cores/Peanut-GB/${CMAKE_PROJECT_NAME}-gb.uf2
             ${CMAKE_BINARY_DIR}/src/cores/smsplus/${CMAKE_PROJECT_NAME}-sms.uf2
     )
-    add_custom_target(microboy ALL DEPENDS ${COMPLETE_UF2})
+    add_custom_target(retropico ALL DEPENDS ${COMPLETE_UF2})
 endif ()

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 #set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON")
 
-project(microboy-gb)
+project(retropico-gb)
 
 # set source files
 file(GLOB GB_SOURCES

@@ -2,8 +2,8 @@
 // Created by cpasjuste on 06/02/24.
 //
 
-#ifndef MICROBOY_MAIN_H
-#define MICROBOY_MAIN_H
+#ifndef RETROPICO_MAIN_H
+#define RETROPICO_MAIN_H
 
 #include <vector>
 #include "retropico_config.h"
@@ -66,4 +66,4 @@ namespace mb {
     };
 }
 
-#endif //MICROBOY_MAIN_H
+#endif //RETROPICO_MAIN_H

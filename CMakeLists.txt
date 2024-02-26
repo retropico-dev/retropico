@@ -13,7 +13,7 @@ option(PICO_DEBUG_USB "Pico usb debug" OFF)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/external/misc/libpico2d)
 
-project(microboy)
+project(retropico)
 
 if (NOT PLATFORM_LINUX)
     # i want all executable located at root of build directory

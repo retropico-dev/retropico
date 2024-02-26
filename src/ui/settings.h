@@ -2,8 +2,8 @@
 // Created by cpasjuste on 04/07/23.
 //
 
-#ifndef MICROBOY_SETTINGS_H
-#define MICROBOY_SETTINGS_H
+#ifndef RETROPICO_SETTINGS_H
+#define RETROPICO_SETTINGS_H
 
 #include "rectangle.h"
 #include "text.h"
@@ -16,4 +16,4 @@ namespace mb {
     };
 }
 
-#endif //MICROBOY_SETTINGS_H
+#endif //RETROPICO_SETTINGS_H

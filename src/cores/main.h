@@ -2,8 +2,8 @@
 // Created by cpasjuste on 02/08/23.
 //
 
-#ifndef MICROBOY_MAIN_H
-#define MICROBOY_MAIN_H
+#ifndef RETROPICO_MAIN_H
+#define RETROPICO_MAIN_H
 
 #include "platform.h"
 #include "../bootloader/flashloader.h"
@@ -27,4 +27,4 @@
 #define MBCore SMSPlus
 #endif
 
-#endif //MICROBOY_MAIN_H
+#endif //RETROPICO_MAIN_H

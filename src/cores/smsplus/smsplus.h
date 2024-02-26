@@ -2,8 +2,8 @@
 // Created by cpasjuste on 06/06/23.
 //
 
-#ifndef MICROBOY_PEANUT_GB_H
-#define MICROBOY_PEANUT_GB_H
+#ifndef RETROPICO_SMS_H
+#define RETROPICO_SMS_H
 
 #include "core.h"
 
@@ -20,4 +20,4 @@ namespace mb {
     };
 }
 
-#endif //MICROBOY_PEANUT_GB_H
+#endif //RETROPICO_SMS_H

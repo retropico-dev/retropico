@@ -2,8 +2,8 @@
 // Created by cpasjuste on 04/07/23.
 //
 
-#ifndef MICROBOY_MENU_H
-#define MICROBOY_MENU_H
+#ifndef RETROPICO_MENU_H
+#define RETROPICO_MENU_H
 
 #include "rectangle.h"
 #include "text.h"
@@ -32,4 +32,4 @@ namespace mb {
     };
 }
 
-#endif //MICROBOY_MENU_H
+#endif //RETROPICO_MENU_H

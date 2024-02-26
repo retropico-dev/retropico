@@ -2,8 +2,8 @@
 // Created by cpasjuste on 02/08/23.
 //
 
-#ifndef MICROBOY_INFOBOX_H
-#define MICROBOY_INFOBOX_H
+#ifndef RETROPICO_INFOBOX_H
+#define RETROPICO_INFOBOX_H
 
 #include "rectangle.h"
 #include "text.h"
@@ -27,4 +27,4 @@ namespace mb {
     };
 }
 
-#endif //MICROBOY_INFOBOX_H
+#endif //RETROPICO_INFOBOX_H

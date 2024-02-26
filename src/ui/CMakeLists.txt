@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 #set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON")
 
-project(microboy-ui)
+project(retropico-ui)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 20)
 
