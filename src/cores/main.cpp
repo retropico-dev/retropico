@@ -54,12 +54,12 @@ int main() {
 #ifndef NDEBUG
     Io::File file{"res:/romfs/rom.bin"};
 #else
-    auto list = Io::getList("flash:/");
+    auto list = Io::getList("flash:/rom/");
     if (list.empty()) {
         // reboot to ui
         core->reboot(FLASH_MAGIC_UI);
     }
-    Io::File file{"flash:/" + list[0].name};
+    Io::File file{"flash:/rom/" + list[0].name};
 #endif
 
     // load rom
