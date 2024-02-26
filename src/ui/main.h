@@ -6,6 +6,7 @@
 #define MICROBOY_MAIN_H
 
 #include <vector>
+#include "retropico_config.h"
 #include "rectangle.h"
 #include "filer.h"
 #include "menu.h"
@@ -36,6 +37,8 @@ namespace mb {
 
         bool onInput(const uint16_t &buttons) override;
 
+        Config *getConfig() { return p_config; }
+
         Filer *getFiler() { return p_filer; }
 
         Menu *getMenu() { return p_menu; }
@@ -52,6 +55,7 @@ namespace mb {
 
     private:
         p2d::Platform *p_platform;
+        Config *p_config;
         Filer *p_filer;
         Menu *p_menu;
         Settings *p_settings;

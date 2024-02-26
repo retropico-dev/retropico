@@ -10,6 +10,8 @@
 #include "text.h"
 #include "../cores/core.h"
 
+#define ROMS_FOLDER_COUNT 4
+
 namespace mb {
     class Filer : public p2d::Widget {
     public:
@@ -24,15 +26,14 @@ namespace mb {
         [[nodiscard]] bool isDone() const { return m_done; }
 
         bool isEmpty() {
-            return m_files[Core::Type::Nes].count < 1
-                   && m_files[Core::Type::Gb].count < 1
-                   && m_files[Core::Type::Sms].count < 1
-                   && m_files[Core::Type::Gg].count < 1;
+            return getListBuffer(Core::Type::Nes)->count < 1
+                   && getListBuffer(Core::Type::Gb)->count < 1
+                   && getListBuffer(Core::Type::Sms)->count < 1
+                   && getListBuffer(Core::Type::Gg)->count < 1;
         }
 
     private:
         p2d::Platform *p_platform;
-        p2d::Io::ListBuffer m_files[4];
         Core::Type m_core = Core::Type::Nes;
         int m_max_lines = 0;
         int m_line_height = 0;
@@ -48,6 +49,8 @@ namespace mb {
         void refresh();
 
         void setSelection(int index);
+
+        p2d::Io::ListBuffer *getListBuffer(uint8_t index);
     };
 }
 

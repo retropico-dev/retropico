@@ -39,6 +39,9 @@ Ui::Ui(Platform *p) : Rectangle({1, 1},
     s_ui = this;
     p_platform = p;
 
+    // config
+    p_config = new Config();
+
     // title/wait screen
     Clock titleClock;
     auto surface = new Surface(Io::File("res:/romfs/retropico.bmp"));
@@ -55,6 +58,7 @@ Ui::Ui(Platform *p) : Rectangle({1, 1},
     setOutlineThickness(1);
 
     // create needed directories
+    Io::create("flash:/rom/");
     Io::create(Core::getRomsPath(Core::Type::Nes));
     Io::create(Core::getRomsPath(Core::Type::Gb));
     Io::create(Core::getRomsPath(Core::Type::Sms));
@@ -90,7 +94,7 @@ Ui::Ui(Platform *p) : Rectangle({1, 1},
     p_filer->load();
 
     // give some time for title screen
-    while (titleClock.getElapsedTime().asSeconds() < 2) tight_loop_contents();
+    while (titleClock.getElapsedTime().asSeconds() < 1) tight_loop_contents();
 }
 
 void Ui::onUpdate(p2d::Time delta) {

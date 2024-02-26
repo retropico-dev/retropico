@@ -20,6 +20,9 @@ if (NOT PLATFORM_LINUX)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} CACHE STRING "" FORCE)
 endif ()
 
+# microboy-common (common library)
+add_subdirectory(src/common)
+
 # microboy-ui (ui binary)
 add_subdirectory(src/ui)
 

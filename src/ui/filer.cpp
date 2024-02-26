@@ -47,34 +47,28 @@ Filer::Filer(const Utility::Vec2i &pos, const Utility::Vec2i &size) : Widget(pos
 }
 
 void Filer::load() {
-    // get file list
-    uint32_t offset = FLASH_TARGET_OFFSET_CACHE;
+    // buffer roms lists
+    if (Ui::getInstance()->getConfig()->getListBuffer(0)->data == nullptr) {
+        uint32_t offset = FLASH_TARGET_OFFSET_CACHE;
+        for (int i = 0; i < ROMS_FOLDER_COUNT; i++) {
+            printf("Filer::load: buffering roms list %i...", i);
+            Io::ListBuffer listBuffer = Io::getBufferedList(Core::getRomsPath(i), offset);
+            getListBuffer(i)->data = listBuffer.data;
+            getListBuffer(i)->data_size = listBuffer.data_size;
+            getListBuffer(i)->count = listBuffer.count;
+            offset += listBuffer.data_size;
+            printf(" found %i roms\r\n", listBuffer.count);
+        }
 
-    printf("Filer::load: buffering nes roms list...");
-    m_files[Core::Type::Nes] = Io::getBufferedList(Core::getRomsPath(Core::Type::Nes), offset);
-    offset += m_files[Core::Type::Nes].data_size;
-    printf(" found %i nes roms\r\n", m_files[Core::Type::Nes].count);
+        Ui::getInstance()->getConfig()->save();
 
-    printf("Filer::load: buffering gb roms list...");
-    m_files[Core::Type::Gb] = Io::getBufferedList(Core::getRomsPath(Core::Type::Gb), offset);
-    offset += m_files[Core::Type::Gb].data_size;
-    printf(" found %i gb roms\r\n", m_files[Core::Type::Gb].count);
-
-    printf("Filer::load: buffering sms roms list...");
-    m_files[Core::Type::Sms] = Io::getBufferedList(Core::getRomsPath(Core::Type::Sms), offset);
-    offset += m_files[Core::Type::Sms].data_size;
-    printf(" found %i sms roms\r\n", m_files[Core::Type::Sms].count);
-
-    printf("Filer::load: buffering gg roms list...");
-    m_files[Core::Type::Gg] = Io::getBufferedList(Core::getRomsPath(Core::Type::Gg), offset);
-    printf(" found %i gg roms\r\n", m_files[Core::Type::Gg].count);
-
-    printf("Filer::load: loaded %lu bytes in flash\r\n",
-           offset + m_files[Core::Type::Gg].data_size - FLASH_TARGET_OFFSET_CACHE);
+        printf("Filer::load: loaded %lu bytes in flash\r\n",
+               offset + getListBuffer(Core::Gg)->data_size - FLASH_TARGET_OFFSET_CACHE);
+    }
 
     // set no rom message if needed
-    p_highlight->setVisibility(m_files[m_core].count ? Visibility::Visible : Visibility::Hidden);
-    p_no_rom_text->setVisibility(m_files[m_core].count ? Visibility::Hidden : Visibility::Visible);
+    p_highlight->setVisibility(getListBuffer(m_core)->count ? Visibility::Visible : Visibility::Hidden);
+    p_no_rom_text->setVisibility(getListBuffer(m_core)->count ? Visibility::Hidden : Visibility::Visible);
 
     refresh();
 }
@@ -91,20 +85,21 @@ bool Filer::onInput(const uint16_t &buttons) {
             m_highlight_index--;
         }
         if (m_highlight_index < 0) {
-            m_highlight_index = m_files[m_core].count < m_max_lines ? m_files[m_core].count - 1 : m_max_lines - 1;
-            m_file_index = m_files[m_core].count - 1 - m_highlight_index;
+            m_highlight_index =
+                    getListBuffer(m_core)->count < m_max_lines ? getListBuffer(m_core)->count - 1 : m_max_lines - 1;
+            m_file_index = getListBuffer(m_core)->count - 1 - m_highlight_index;
         }
         refresh();
         return true;
     } else if (buttons & Input::Button::DOWN) {
         int index = m_file_index + m_highlight_index;
         int middle = m_max_lines / 2;
-        if (m_highlight_index >= middle && index + middle < m_files[m_core].count) {
+        if (m_highlight_index >= middle && index + middle < getListBuffer(m_core)->count) {
             m_file_index++;
         } else {
             m_highlight_index++;
         }
-        if (m_highlight_index >= m_max_lines || m_file_index + m_highlight_index >= m_files[m_core].count) {
+        if (m_highlight_index >= m_max_lines || m_file_index + m_highlight_index >= getListBuffer(m_core)->count) {
             m_file_index = 0;
             m_highlight_index = 0;
         }
@@ -118,23 +113,23 @@ bool Filer::onInput(const uint16_t &buttons) {
         return true;
     } else if (buttons & Input::Button::RIGHT) {
         int index = m_file_index + m_highlight_index + m_max_lines;
-        if (index > m_files[m_core].count - 1) index = m_files[m_core].count - 1;
+        if (index > getListBuffer(m_core)->count - 1) index = getListBuffer(m_core)->count - 1;
         setSelection(index);
         refresh();
         return true;
-    } else if (buttons & Input::Button::B1 && m_files[m_core].count > m_file_index + m_highlight_index) {
-        std::string name = m_files[m_core].at(m_file_index + m_highlight_index);
+    } else if (buttons & Input::Button::B1 && getListBuffer(m_core)->count > m_file_index + m_highlight_index) {
+        std::string name = getListBuffer(m_core)->at(m_file_index + m_highlight_index);
         std::string path = Core::getRomsPath(m_core) + "/" + name;
         // remove old rom
-        auto list = Io::getList("flash:/");
+        auto list = Io::getList("flash:/rom/");
         for (auto &f: list) {
-            printf("Filer: deleting previous rom (%s)\r\n", std::string("flash:/" + f.name).c_str());
-            Io::remove("flash:/" + f.name);
+            printf("Filer: deleting previous rom (%s)\r\n", std::string("flash:/rom/" + f.name).c_str());
+            Io::remove("flash:/rom/" + f.name);
         }
         // copy new rom
-        printf("Filer: copying %s to flash:/%s\r\n", path.c_str(), name.c_str());
+        printf("Filer: copying %s to flash:/rom/%s\r\n", path.c_str(), name.c_str());
         Ui::getInstance()->getInfoBox()->show("Loading...");
-        auto success = Io::copy(path, "flash:/" + name);
+        auto success = Io::copy(path, "flash:/rom/" + name);
         if (success) {
             printf("Filer: copy done... writing config to flash...\r\n");
             // write bootloader "config"
@@ -164,11 +159,11 @@ bool Filer::onInput(const uint16_t &buttons) {
 void Filer::refresh() {
     // update "lines"
     for (int i = 0; i < m_max_lines; i++) {
-        if (m_file_index + i >= m_files[m_core].count) {
+        if (m_file_index + i >= getListBuffer(m_core)->count) {
             p_lines[i]->setVisibility(Visibility::Hidden);
         } else {
             p_lines[i]->setVisibility(Visibility::Visible);
-            p_lines[i]->setString(m_files[m_core].at(i + m_file_index));
+            p_lines[i]->setString(getListBuffer(m_core)->at(i + m_file_index));
             if (i == m_highlight_index) {
                 p_lines[i]->setColor(Ui::Color::Yellow);
                 p_highlight->setPosition(p_highlight->getPosition().x, (int16_t) (p_lines[i]->getPosition().y - 5));
@@ -183,11 +178,11 @@ void Filer::setSelection(int index) {
     if (index < m_max_lines / 2) {
         m_file_index = 0;
         m_highlight_index = 0;
-    } else if (index > m_files[m_core].count - m_max_lines / 2) {
+    } else if (index > getListBuffer(m_core)->count - m_max_lines / 2) {
         m_highlight_index = m_max_lines - 1;
-        m_file_index = m_files[m_core].count - 1 - m_highlight_index;
-        if (m_highlight_index >= m_files[m_core].count) {
-            m_highlight_index = m_files[m_core].count - 1;
+        m_file_index = getListBuffer(m_core)->count - 1 - m_highlight_index;
+        if (m_highlight_index >= getListBuffer(m_core)->count) {
+            m_highlight_index = getListBuffer(m_core)->count - 1;
             m_file_index = 0;
         }
     } else {
@@ -201,8 +196,12 @@ void Filer::setCore(const Core::Type &core) {
     m_file_index = 0;
     m_highlight_index = 0;
 
-    p_highlight->setVisibility(m_files[m_core].count ? Visibility::Visible : Visibility::Hidden);
-    p_no_rom_text->setVisibility(m_files[m_core].count ? Visibility::Hidden : Visibility::Visible);
+    p_highlight->setVisibility(getListBuffer(m_core)->count ? Visibility::Visible : Visibility::Hidden);
+    p_no_rom_text->setVisibility(getListBuffer(m_core)->count ? Visibility::Hidden : Visibility::Visible);
 
     refresh();
+}
+
+p2d::Io::ListBuffer *Filer::getListBuffer(uint8_t index) {
+    return Ui::getInstance()->getConfig()->getListBuffer(index);
 }

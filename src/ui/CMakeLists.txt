@@ -18,7 +18,7 @@ add_executable(${PROJECT_NAME} ${UI_SOURCES})
 target_add_resources(${PROJECT_NAME} ${UI_RESOURCES})
 target_include_directories(${PROJECT_NAME} PUBLIC ${UI_INCLUDES})
 target_compile_definitions(${PROJECT_NAME} PUBLIC ${UI_FLAGS})
-target_link_libraries(${PROJECT_NAME} ${UI_LIBS} pico2d-skeleton)
+target_link_libraries(${PROJECT_NAME} ${UI_LIBS} retropico-common pico2d-skeleton)
 
 if (NOT PLATFORM_LINUX)
     if (PICO_USE_BOOTLOADER)
