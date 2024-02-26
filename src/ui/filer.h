@@ -12,7 +12,7 @@
 
 #define ROMS_FOLDER_COUNT 4
 
-namespace mb {
+namespace retropico {
     class Filer : public p2d::Widget {
     public:
         explicit Filer(const p2d::Utility::Vec2i &pos, const p2d::Utility::Vec2i &size);

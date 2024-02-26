@@ -5,7 +5,7 @@
 #include "core.h"
 
 using namespace p2d;
-using namespace mb;
+using namespace retropico;
 
 bool Core::loop() {
     // update inputs

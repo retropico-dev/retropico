@@ -19,7 +19,7 @@
 
 #include "main.h"
 
-using namespace mb;
+using namespace retropico;
 using namespace p2d;
 
 #ifdef MB_NES

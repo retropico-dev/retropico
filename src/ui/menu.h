@@ -9,7 +9,7 @@
 #include "text.h"
 #include "bitmap.h"
 
-namespace mb {
+namespace retropico {
     class Menu : public p2d::Rectangle {
     public:
         class MenuLine : public Rectangle {

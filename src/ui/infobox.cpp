@@ -6,7 +6,7 @@
 #include "infobox.h"
 
 using namespace p2d;
-using namespace mb;
+using namespace retropico;
 
 InfoBox::InfoBox(const Utility::Vec2i &pos, const Utility::Vec2i &size)
         : Rectangle(pos, size, Ui::Color::GrayDark, 8) {

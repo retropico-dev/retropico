@@ -12,7 +12,7 @@ extern "C" {
 
 #include "peanut-gb.h"
 
-using namespace mb;
+using namespace retropico;
 using namespace p2d;
 
 #undef inline

@@ -15,7 +15,7 @@
 
 #define UI_FONT_HEIGHT 8
 
-namespace mb {
+namespace retropico {
     class Ui : public p2d::Rectangle {
     public:
         enum Color : uint16_t {

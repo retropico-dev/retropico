@@ -6,7 +6,7 @@
 #include "settings.h"
 
 using namespace p2d;
-using namespace mb;
+using namespace retropico;
 
 Settings::Settings(const Utility::Vec2i &pos, const Utility::Vec2i &size)
         : Rectangle(pos, size, Ui::Color::Gray, 8) {

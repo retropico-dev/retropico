@@ -7,7 +7,7 @@
 
 #include "core.h"
 
-namespace mb {
+namespace retropico {
     class PeanutGB : public Core {
     public:
         explicit PeanutGB(const p2d::Display::Settings &displaySettings);

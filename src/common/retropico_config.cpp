@@ -8,7 +8,7 @@
 #define RETROPICO_CFG_PATH "flash:/config.dat"
 
 using namespace p2d;
-using namespace mb;
+using namespace retropico;
 
 Config::Config() {
     Io::init();

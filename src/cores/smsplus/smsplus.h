@@ -7,7 +7,7 @@
 
 #include "core.h"
 
-namespace mb {
+namespace retropico {
     class SMSPlus : public Core {
     public:
         explicit SMSPlus(const p2d::Display::Settings &displaySettings);

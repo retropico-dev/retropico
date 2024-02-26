@@ -9,7 +9,7 @@ extern "C" {
 #include "shared.h"
 }
 
-using namespace mb;
+using namespace retropico;
 using namespace p2d;
 
 static Core *s_core;

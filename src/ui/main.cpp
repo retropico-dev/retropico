@@ -20,7 +20,7 @@
 #include "main.h"
 
 using namespace p2d;
-using namespace mb;
+using namespace retropico;
 
 static Display::Settings ds{
         .displaySize = {240, 240},

@@ -9,7 +9,7 @@
 #include "text.h"
 #include "utility.h"
 
-namespace mb {
+namespace retropico {
     class InfoBox : public p2d::Rectangle {
     public:
         InfoBox(const p2d::Utility::Vec2i &pos, const p2d::Utility::Vec2i &size);

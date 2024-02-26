@@ -6,7 +6,7 @@
 #include "menu.h"
 
 using namespace p2d;
-using namespace mb;
+using namespace retropico;
 
 Menu::MenuLine::MenuLine(const Utility::Vec4i &bounds, const p2d::Io::File &file, const std::string &text)
         : Rectangle(bounds, Display::Color::Transparent) {

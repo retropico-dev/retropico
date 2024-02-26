@@ -9,7 +9,7 @@
 #include "text.h"
 #include "bitmap.h"
 
-namespace mb {
+namespace retropico {
     class Settings : public p2d::Rectangle {
     public:
         Settings(const p2d::Utility::Vec2i &pos, const p2d::Utility::Vec2i &size);

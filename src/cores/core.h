@@ -8,7 +8,7 @@
 #include <string>
 #include "platform.h"
 
-namespace mb {
+namespace retropico {
     class Core : public P2DPlatform {
     public:
         enum Type {

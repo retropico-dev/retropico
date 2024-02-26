@@ -11,7 +11,7 @@
 #include "K6502.h"
 #include "Peanut-GB/hedley.h"
 
-using namespace mb;
+using namespace retropico;
 using namespace p2d;
 
 #define CC(x) ((((x) >> 1) & 15) | ((((x) >> 6) & 15) << 4) | ((((x) >> 11) & 15) << 8))

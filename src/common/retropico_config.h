@@ -8,7 +8,7 @@
 #include <cstdint>
 #include "io.h"
 
-namespace mb {
+namespace retropico {
     class Config {
     public:
         Config();

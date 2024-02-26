@@ -7,7 +7,7 @@
 
 #include "core.h"
 
-namespace mb {
+namespace retropico {
     class InfoNES : public Core {
     public:
         explicit InfoNES(const p2d::Display::Settings &displaySettings);
