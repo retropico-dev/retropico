@@ -1,3 +1,3 @@
 # RetroPico
 
-<img src="https://your-image-url.type" width="50%" height="50%">
+<img src="https://github.com/retropico-dev/retropico/raw/dev/docs/pics/retropico-pic-01.jpg" width="50%" height="50%" alt="RetroPico !">
