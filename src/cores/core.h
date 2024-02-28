@@ -7,6 +7,8 @@
 
 #include <string>
 #include "platform.h"
+#include "retropico_config.h"
+#include "retropico_overlay.h"
 
 namespace retropico {
     class Core : public P2DPlatform {
@@ -18,8 +20,7 @@ namespace retropico {
             Gg = 3
         };
 
-        explicit Core(const p2d::Display::Settings &displaySettings, const Core::Type &core)
-                : P2DPlatform(displaySettings) {}
+        explicit Core(const p2d::Display::Settings &displaySettings, const Core::Type &core);
 
         bool loop() override;
 
@@ -30,6 +31,10 @@ namespace retropico {
         virtual std::string getSramPath() { return m_sramPath; };
 
         virtual std::string getSavePath() { return m_savePath; };
+
+        virtual Config *getConfig() { return p_config; }
+
+        virtual Overlay *getOverlay() { return p_overlay; }
 
         static std::string getRomsPath(int core) {
             if (core == Nes) {
@@ -56,6 +61,8 @@ namespace retropico {
         }
 
     protected:
+        Config *p_config;
+        Overlay *p_overlay;
         std::string m_romName;
         std::string m_sramPath;
         std::string m_savePath;

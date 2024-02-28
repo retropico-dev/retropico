@@ -53,9 +53,7 @@ void Filer::load() {
         for (int i = 0; i < ROMS_FOLDER_COUNT; i++) {
             printf("Filer::load: buffering roms list %i...", i);
             Io::ListBuffer listBuffer = Io::getBufferedList(Core::getRomsPath(i), offset);
-            getListBuffer(i)->data = listBuffer.data;
-            getListBuffer(i)->data_size = listBuffer.data_size;
-            getListBuffer(i)->count = listBuffer.count;
+            listBuffer.copy(getListBuffer(i));
             offset += listBuffer.data_size;
             printf(" found %i roms\r\n", listBuffer.count);
         }

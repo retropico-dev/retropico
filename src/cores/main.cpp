@@ -18,6 +18,7 @@
  */
 
 #include "main.h"
+#include "retropico_overlay.h"
 
 using namespace retropico;
 using namespace p2d;
@@ -70,6 +71,9 @@ int main() {
 
     // emulation loop
     while (core->loop()) {}
+
+    // save...
+    core->getConfig()->save();
 
     // cleanly close core (handle saves and such)
     core->close();

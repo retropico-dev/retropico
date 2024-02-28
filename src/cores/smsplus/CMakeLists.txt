@@ -24,7 +24,7 @@ set(SMS_FLAGS -DMB_SMS -DLSB_FIRST=0
 add_executable(${PROJECT_NAME} ${SMS_SOURCES})
 target_include_directories(${PROJECT_NAME} PUBLIC ${SMS_INCLUDES})
 target_compile_definitions(${PROJECT_NAME} PUBLIC ${SMS_FLAGS})
-target_link_libraries(${PROJECT_NAME} ${SMS_LIBS} pico2d-skeleton)
+target_link_libraries(${PROJECT_NAME} ${SMS_LIBS} retropico-common)
 
 # test rom
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")

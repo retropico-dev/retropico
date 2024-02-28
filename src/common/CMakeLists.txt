@@ -4,7 +4,10 @@ cmake_minimum_required(VERSION 3.13)
 project(retropico-common)
 
 # set source files
-file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+file(GLOB SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/widgets/*.cpp
+)
 set(INCLUDES ${CMAKE_CURRENT_SOURCE_DIR})
 set(FLAGS)
 

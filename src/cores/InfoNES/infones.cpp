@@ -44,7 +44,7 @@ int InfoNES_LoadSRAM(const std::string &path);
 
 int InfoNES_SaveSRAM(const std::string &path);
 
-_Noreturn void in_ram(core1_main)();
+[[noreturn]] _Noreturn void in_ram(core1_main)();
 
 union core_cmd {
     struct {
@@ -178,6 +178,9 @@ void in_ram(core1_lcd_draw_line)(const uint_fast8_t line, const uint_fast8_t ind
 
 #ifdef LINUX
     if (line == 235) {
+        if (s_core->getOverlay()->isVisible()) {
+            s_core->getOverlay()->onDraw({}, true);
+        }
         display->flip();
     }
 #endif
@@ -186,7 +189,7 @@ void in_ram(core1_lcd_draw_line)(const uint_fast8_t line, const uint_fast8_t ind
     __atomic_store_n(&lcd_line_busy, 0, __ATOMIC_SEQ_CST);
 }
 
-_Noreturn void in_ram(core1_main)() {
+[[noreturn]] _Noreturn void in_ram(core1_main)() {
     union core_cmd cmd{};
 
     while (true) {

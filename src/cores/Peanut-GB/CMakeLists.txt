@@ -24,7 +24,7 @@ set(GB_FLAGS
 add_executable(${PROJECT_NAME} ${GB_SOURCES})
 target_include_directories(${PROJECT_NAME} PUBLIC ${GB_INCLUDES})
 target_compile_definitions(${PROJECT_NAME} PUBLIC ${GB_FLAGS})
-target_link_libraries(${PROJECT_NAME} ${GB_LIBS} pico2d-skeleton)
+target_link_libraries(${PROJECT_NAME} ${GB_LIBS} retropico-common)
 
 # test rom
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")

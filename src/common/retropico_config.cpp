@@ -2,7 +2,6 @@
 // Created by cpasjuste on 26/02/24.
 //
 
-#include "platform.h"
 #include "retropico_config.h"
 
 #define RETROPICO_CFG_PATH "flash:/config.dat"
@@ -20,9 +19,10 @@ Config::Config() {
             file.read(0, sizeof(Data), reinterpret_cast<char *>(&m_data));
             printf("Config::Config: volume: %i\r\n", m_data.volume);
             printf("Config::Config: brightness: %i\r\n", m_data.brightness);
-            for (int i = 0; i < 4; i++) {
-                printf("Config::Config: buffered list %i: ptr: %p, size: %lu, count: %i\r\n",
-                       i, m_data.listBuffers[i].data, m_data.listBuffers[i].data_size, m_data.listBuffers[i].count);
+            for (auto &listBuffer: m_data.listBuffers) {
+                if (listBuffer.count == 0 || listBuffer.data_size == 0) {
+                    listBuffer.data = nullptr;
+                }
             }
         }
     } else {

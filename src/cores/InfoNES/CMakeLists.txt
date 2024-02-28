@@ -27,7 +27,7 @@ set(NES_FLAGS -DMB_NES
 add_executable(${PROJECT_NAME} ${NES_SOURCES})
 target_include_directories(${PROJECT_NAME} PUBLIC ${NES_INCLUDES})
 target_compile_definitions(${PROJECT_NAME} PUBLIC ${NES_FLAGS})
-target_link_libraries(${PROJECT_NAME} ${NES_LIBS} pico2d-skeleton)
+target_link_libraries(${PROJECT_NAME} ${NES_LIBS} retropico-common)
 
 # test rom
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")

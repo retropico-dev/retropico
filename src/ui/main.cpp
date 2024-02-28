@@ -42,8 +42,11 @@ Ui::Ui(Platform *p) : Rectangle({1, 1},
     // config
     p_config = new Config();
 
+#ifdef NDEBUG
     // title/wait screen
     Clock titleClock;
+#endif
+
     auto surface = new Surface(Io::File("res:/romfs/retropico.bmp"));
     p_platform->getDisplay()->drawSurface(surface);
     p_platform->getDisplay()->flip();
@@ -58,15 +61,16 @@ Ui::Ui(Platform *p) : Rectangle({1, 1},
     setOutlineThickness(1);
 
     // create needed directories
-    Io::create("flash:/rom/");
-    Io::create(Core::getRomsPath(Core::Type::Nes));
-    Io::create(Core::getRomsPath(Core::Type::Gb));
-    Io::create(Core::getRomsPath(Core::Type::Sms));
-    Io::create(Core::getRomsPath(Core::Type::Gg));
-    Io::create(Core::getSavesPath(Core::Type::Nes));
-    Io::create(Core::getSavesPath(Core::Type::Gb));
-    Io::create(Core::getSavesPath(Core::Type::Sms));
-    Io::create(Core::getSavesPath(Core::Type::Gg));
+    printf("Ui::Ui: creating needed directories\r\n");
+    if (!Io::directoryExists("flash:/rom/")) Io::create("flash:/rom/");
+    if (!Io::directoryExists(Core::getRomsPath(Core::Type::Nes))) Io::create(Core::getRomsPath(Core::Type::Nes));
+    if (!Io::directoryExists(Core::getRomsPath(Core::Type::Gb))) Io::create(Core::getRomsPath(Core::Type::Gb));
+    if (!Io::directoryExists(Core::getRomsPath(Core::Type::Sms))) Io::create(Core::getRomsPath(Core::Type::Sms));
+    if (!Io::directoryExists(Core::getRomsPath(Core::Type::Gg))) Io::create(Core::getRomsPath(Core::Type::Gg));
+    if (!Io::directoryExists(Core::getSavesPath(Core::Type::Nes))) Io::create(Core::getSavesPath(Core::Type::Nes));
+    if (!Io::directoryExists(Core::getSavesPath(Core::Type::Gb))) Io::create(Core::getSavesPath(Core::Type::Gb));
+    if (!Io::directoryExists(Core::getSavesPath(Core::Type::Sms))) Io::create(Core::getSavesPath(Core::Type::Sms));
+    if (!Io::directoryExists(Core::getSavesPath(Core::Type::Gg))) Io::create(Core::getSavesPath(Core::Type::Gg));
 
     // add filer
     p_filer = new Filer({1, 1}, {(int16_t) (getSize().x - 2), (int16_t) (getSize().y - 2)});
@@ -93,8 +97,14 @@ Ui::Ui(Platform *p) : Rectangle({1, 1},
     // load / cache files
     p_filer->load();
 
+    // add overlay
+    p_overlay = new Overlay(p_config, p_platform, getBounds());
+    add(p_overlay);
+
+#ifdef NDEBUG
     // give some time for title screen
     while (titleClock.getElapsedTime().asSeconds() < 1) tight_loop_contents();
+#endif
 }
 
 void Ui::onUpdate(p2d::Time delta) {
@@ -145,6 +155,9 @@ int main() {
     platform->add(ui);
 
     while (platform->loop() && !ui->isDone()) {}
+
+    // save...
+    ui->getConfig()->save();
 
     // reboot to bootloader for launching either nes/gb/sms core
     // based on rom header

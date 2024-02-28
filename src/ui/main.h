@@ -6,6 +6,7 @@
 #define RETROPICO_MAIN_H
 
 #include <vector>
+#include "retropico_overlay.h"
 #include "retropico_config.h"
 #include "rectangle.h"
 #include "filer.h"
@@ -56,6 +57,7 @@ namespace retropico {
     private:
         p2d::Platform *p_platform;
         Config *p_config;
+        Overlay *p_overlay;
         Filer *p_filer;
         Menu *p_menu;
         Settings *p_settings;

@@ -8,6 +8,8 @@
 #include <cstdint>
 #include "io.h"
 
+#define LIST_BUFFER_MAX 6
+
 namespace retropico {
     class Config {
     public:
@@ -31,7 +33,7 @@ namespace retropico {
         struct Data {
             uint8_t volume = 50;
             uint8_t brightness = 100;
-            p2d::Io::ListBuffer listBuffers[8];
+            p2d::Io::ListBuffer listBuffers[LIST_BUFFER_MAX];
         };
 
         Data m_data{};

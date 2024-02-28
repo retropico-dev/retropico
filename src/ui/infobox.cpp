@@ -25,7 +25,9 @@ void InfoBox::show(const std::string &text, uint32_t millis) {
     m_clock.restart();
     m_millis = millis;
     setVisibility(Visibility::Visible);
-    Ui::getInstance()->getPlatform()->loop();
+    InfoBox::onDraw({static_cast<int16_t>(getPosition().x - getSize().x / 2),
+                     static_cast<int16_t>(getPosition().y - getSize().y / 2)}, true);
+    Ui::getInstance()->getPlatform()->getDisplay()->flip();
 }
 
 void InfoBox::hide() {
