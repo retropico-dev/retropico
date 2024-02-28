@@ -19,6 +19,7 @@ Config::Config() {
             file.read(0, sizeof(Data), reinterpret_cast<char *>(&m_data));
             printf("Config::Config: volume: %i\r\n", m_data.volume);
             printf("Config::Config: brightness: %i\r\n", m_data.brightness);
+            printf("Config::Config: current filer core: %i\r\n", m_data.filer_current_core);
             for (auto &listBuffer: m_data.listBuffers) {
                 if (listBuffer.count == 0 || listBuffer.data_size == 0) {
                     listBuffer.data = nullptr;

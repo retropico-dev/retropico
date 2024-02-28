@@ -42,6 +42,9 @@ Filer::Filer(const Utility::Vec2i &pos, const Utility::Vec2i &size) : Widget(pos
     p_no_rom_text->setVisibility(Visibility::Hidden);
     add(p_no_rom_text);
 
+    // set current browsing directory (core) to latest one
+    m_core = (Core::Type) Ui::getInstance()->getConfig()->getFilerCurrentCore();
+
     // set repeat delay for ui
     p_platform->getInput()->setRepeatDelay(INPUT_DELAY_UI);
 }
@@ -190,6 +193,7 @@ void Filer::setSelection(int index) {
 }
 
 void Filer::setCore(const Core::Type &core) {
+    Ui::getInstance()->getConfig()->setFilerCurrentCores((uint8_t) core);
     m_core = core;
     m_file_index = 0;
     m_highlight_index = 0;

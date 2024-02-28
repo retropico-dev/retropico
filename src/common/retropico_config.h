@@ -25,6 +25,10 @@ namespace retropico {
 
         void setBrightness(uint8_t brightness) { m_data.brightness = brightness; }
 
+        uint8_t getFilerCurrentCore() { return m_data.filer_current_core; }
+
+        void setFilerCurrentCores(uint8_t core) { m_data.filer_current_core = core; }
+
         p2d::Io::ListBuffer *getListBuffer(uint8_t index) {
             return &m_data.listBuffers[index];
         }
@@ -33,6 +37,7 @@ namespace retropico {
         struct Data {
             uint8_t volume = 50;
             uint8_t brightness = 100;
+            uint8_t filer_current_core = 0;
             p2d::Io::ListBuffer listBuffers[LIST_BUFFER_MAX];
         };
 
