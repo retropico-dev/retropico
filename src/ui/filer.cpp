@@ -4,7 +4,7 @@
 
 #include "main.h"
 #include "filer.h"
-#include "../bootloader/flashloader.h"
+#include "../bootloader/bootloader.h"
 
 using namespace p2d;
 using namespace retropico;
