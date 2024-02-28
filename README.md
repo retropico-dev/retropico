@@ -10,5 +10,5 @@ The cost of the device is currently ~30€ for the components (and shipping). Bu
 
 The "retropico" os currently support four 8 bits consoles indlucing the nes, gameboy, master system and gamegear.
 
-While a lot of work have been put in porting the emulated systems (including 60fps, sram support, ...), the emulation is far from perfect. A few games wont run, more will hqve graphical glitches, but the fun is here.
+While a lot of work have been put in porting the emulated systems (including 60fps, sram support, ...), the emulation is far from perfect. A few games wont run, more will have graphical glitches, but the fun is here.
 
