@@ -42,9 +42,6 @@ Filer::Filer(const Utility::Vec2i &pos, const Utility::Vec2i &size) : Widget(pos
     p_no_rom_text->setVisibility(Visibility::Hidden);
     add(p_no_rom_text);
 
-    // set current browsing directory (core) to latest one
-    m_core = (Core::Type) Ui::getInstance()->getConfig()->getFilerCurrentCore();
-
     // set repeat delay for ui
     p_platform->getInput()->setRepeatDelay(INPUT_DELAY_UI);
 }
@@ -66,6 +63,10 @@ void Filer::load() {
         printf("Filer::load: loaded %lu bytes in flash\r\n",
                offset + getListBuffer(Core::Gg)->data_size - FLASH_TARGET_OFFSET_CACHE);
     }
+
+    // set current browsing directory (core) to latest one
+    m_core = (Core::Type) Ui::getInstance()->getConfig()->getFilerCurrentCore();
+    setSelection(Ui::getInstance()->getConfig()->getFilerCurrentCoreIndex());
 
     // set no rom message if needed
     p_highlight->setVisibility(getListBuffer(m_core)->count ? Visibility::Visible : Visibility::Hidden);
@@ -173,6 +174,9 @@ void Filer::refresh() {
             }
         }
     }
+
+    // set config
+    Ui::getInstance()->getConfig()->setFilerCurrentCoreIndex(m_file_index + m_highlight_index);
 }
 
 void Filer::setSelection(int index) {

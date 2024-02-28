@@ -20,6 +20,7 @@ Config::Config() {
             printf("Config::Config: volume: %i\r\n", m_data.volume);
             printf("Config::Config: brightness: %i\r\n", m_data.brightness);
             printf("Config::Config: current filer core: %i\r\n", m_data.filer_current_core);
+            printf("Config::Config: current filer core index: %i\r\n", m_data.filer_current_core_index);
             for (auto &listBuffer: m_data.listBuffers) {
                 if (listBuffer.count == 0 || listBuffer.data_size == 0) {
                     listBuffer.data = nullptr;

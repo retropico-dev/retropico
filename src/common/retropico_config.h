@@ -29,6 +29,10 @@ namespace retropico {
 
         void setFilerCurrentCores(uint8_t core) { m_data.filer_current_core = core; }
 
+        uint16_t getFilerCurrentCoreIndex() { return m_data.filer_current_core_index; }
+
+        void setFilerCurrentCoreIndex(uint16_t index) { m_data.filer_current_core_index = index; }
+
         p2d::Io::ListBuffer *getListBuffer(uint8_t index) {
             return &m_data.listBuffers[index];
         }
@@ -38,6 +42,7 @@ namespace retropico {
             uint8_t volume = 50;
             uint8_t brightness = 100;
             uint8_t filer_current_core = 0;
+            uint16_t filer_current_core_index = 0;
             p2d::Io::ListBuffer listBuffers[LIST_BUFFER_MAX];
         };
 
