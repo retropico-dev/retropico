@@ -81,7 +81,9 @@ bool Menu::onInput(const uint16_t &buttons) {
         }
         refresh();
         return true;
-    } else if (buttons & Input::Button::B1 || buttons & Input::Button::B2) {
+    } else if (buttons & Input::Button::B1
+               || buttons & Input::Button::B2
+               || buttons & Input::Button::RIGHT) {
         setVisibility(Visibility::Hidden);
         return true;
     }
