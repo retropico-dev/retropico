@@ -6,7 +6,7 @@
 #define RETROPICO_MAIN_H
 
 #include "platform.h"
-#include "../bootloader/flashloader.h"
+#include "../bootloader/bootloader.h"
 
 #ifdef PICO_BUILD
 #if defined(MB_NES) || defined(MB_SMS)
