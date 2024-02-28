@@ -1,6 +1,6 @@
 # RetroPico
 
-<img src="https://github.com/retropico-dev/retropico/raw/dev/docs/pics/retropico-pic-01.jpg" width="50%" height="50%" alt="RetroPico !">
+<img src="https://github.com/retropico-dev/retropico/raw/dev/docs/pics/retropico-pic-01.jpg" width="70%" height="70%" alt="RetroPico !">
 
 RertroPico is "yet another" rp2040 handeld deivce. The whole project was done by me, alone, and i'm very prood of it!
 
