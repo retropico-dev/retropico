@@ -7,3 +7,8 @@ RertroPico is "yet another" rp2040 handeld deivce. The whole project was done by
 The main goal was to make a cheap handheld capable of running a few 8 bits consoles on a home made tiny device, which can be "easily" (with a few soldering skills) done at a reasonable price. Finally, it would be totally open source, of course.
 
 The cost of the device is currently ~30€ for the components (and shipping). Building instructions and documention is in the work.
+
+The "retropico" os currently support four 8 bits consoles indlucing the nes, gameboy, master system and gamegear.
+
+While a lot work have been put in the emulated systems porting (including 60fps for each), the emulation is far from perfect. A few games wont run, more will hqve graphical glitches, but the fun is here.
+
