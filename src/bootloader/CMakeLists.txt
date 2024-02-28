@@ -6,7 +6,10 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
 # set source files
-file(GLOB BOOTLOADER_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/flashloader.c)
+file(GLOB BOOTLOADER_SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/bootloader.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/bootloader_helper.c
+)
 set(BOOTLOADER_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR})
 set(BOOTLOADER_LIBS
         hardware_structs
