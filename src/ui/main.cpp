@@ -116,11 +116,11 @@ void Ui::onUpdate(p2d::Time delta) {
         bool changed = (m_buttons_old ^ buttons) != 0;
         m_buttons_old = buttons;
         if (!changed) {
-            if (m_repeat_clock.getElapsedTime().asSeconds() > 6) {
+            if (m_repeat_clock.getElapsedTime().asSeconds() > 3) {
                 p_platform->getInput()->setRepeatDelay(INPUT_DELAY_UI / 20);
-            } else if (m_repeat_clock.getElapsedTime().asSeconds() > 4) {
-                p_platform->getInput()->setRepeatDelay(INPUT_DELAY_UI / 8);
             } else if (m_repeat_clock.getElapsedTime().asSeconds() > 2) {
+                p_platform->getInput()->setRepeatDelay(INPUT_DELAY_UI / 8);
+            } else if (m_repeat_clock.getElapsedTime().asSeconds() > 1) {
                 p_platform->getInput()->setRepeatDelay(INPUT_DELAY_UI / 4);
             }
         } else {
