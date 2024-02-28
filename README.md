@@ -1,14 +1,11 @@
-# RetroPico
+<h1 align="center">RetroPico</h1>
 
-<img src="https://github.com/retropico-dev/retropico/raw/dev/docs/pics/retropico-pic-01.jpg" width="70%" height="70%" alt="RetroPico !">
+<p align=center>
+  <img src="https://github.com/retropico-dev/retropico/raw/dev/docs/pics/retropico-pic-01.jpg" width="50%" height="50%" alt="RetroPico !">
+</p>
 
-RertroPico is "yet another" rp2040 handeld deivce. The whole project was done by me, alone, and i'm very prood of it!
+RertroPico is "yet another" rp2040 handeld deivce.
+The whole project was done by myself, and I'm very proud of it. This includes familiarizing with microcontrollers, writing a cross platform framework for linux and the chosen one (rp2040), porting some emulators, designing a pcb and finally buying, designing and printing a 3d case for it.
+The main goal was to make a cheap handheld capable of running a few 8 bit consoles on a homemade tiny device, which can be "easily" (with a few soldering skills) done at a reasonable price. Finally, it would be totally open source, of course. The cost of the device is currently ~30€ for the components (and shipping). Building instructions and documentation is in the work.
 
-The main goal was to make a cheap handheld capable of running a few 8 bits consoles on a home made tiny device, which can be "easily" (with a few soldering skills) done at a reasonable price. Finally, it would be totally open source, of course.
-
-The cost of the device is currently ~30€ for the components (and shipping). Building instructions and documention is in the work.
-
-The "retropico" os currently support four 8 bits consoles indlucing the nes, gameboy, master system and gamegear.
-
-While a lot of work have been put in porting the emulated systems (including 60fps, sram support, ...), the emulation is far from perfect. A few games wont run, more will have graphical glitches, but the fun is here.
-
+The "retropico" os currently support four 8 bits consoles inducing the nes, gameboy, master system and game gear. While a lot of work has been put into porting the emulated systems (including 60fps, sram support, ...), the emulation is far from perfect. A few games won't run, more will have graphical glitches, but the fun is here.
