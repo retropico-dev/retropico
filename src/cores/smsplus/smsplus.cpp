@@ -95,7 +95,12 @@ bool SMSPlus::loadRom(const Io::File &file) {
     system_init(SMS_AUD_RATE);
 
     // load state if any
-    system_load_state();
+    //system_load_state();
+
+    // initialize
+    cpu_reset();
+    system_reset();
+    system_load_sram();
 
     return true;
 }
