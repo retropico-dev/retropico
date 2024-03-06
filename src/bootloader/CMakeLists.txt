@@ -1,12 +1,15 @@
 cmake_minimum_required(VERSION 3.13)
 #set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON")
 
-project(microboy-bootloader)
+project(retropico-bootloader)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
 # set source files
-file(GLOB BOOTLOADER_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/flashloader.c)
+file(GLOB BOOTLOADER_SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/bootloader.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/bootloader_helper.c
+)
 set(BOOTLOADER_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR})
 set(BOOTLOADER_LIBS
         hardware_structs
@@ -24,34 +27,28 @@ set(BOOTLOADER_LIBS
 )
 set(BOOTLOADER_FLAGS -Wall -Wextra -Wno-ignored-qualifiers -Os)
 
-# microboy board revision define
+# retropico board revision define
 if (PICO_BOARD STREQUAL "adafruit_feather_rp2040")
-    list(APPEND BOOTLOADER_FLAGS -DMICROBOY_10)
+    list(APPEND BOOTLOADER_FLAGS -DRETROPICO_10)
 else ()
-    list(APPEND BOOTLOADER_FLAGS -DMICROBOY_11 "-DPICO_FLASH_SIZE_BYTES=(16 * 1024 * 1024)")
+    list(APPEND BOOTLOADER_FLAGS -DRETROPICO_11)
 endif ()
 
 ######################
 # bootloader binary
 ######################
-add_executable(microboy-bootloader ${BOOTLOADER_SOURCES})
-target_include_directories(microboy-bootloader PRIVATE ${BOOTLOADER_INCLUDES})
-target_compile_options(microboy-bootloader PRIVATE ${BOOTLOADER_FLAGS})
-target_link_libraries(microboy-bootloader ${BOOTLOADER_LIBS})
+add_executable(${PROJECT_NAME} ${BOOTLOADER_SOURCES})
+target_include_directories(${PROJECT_NAME} PRIVATE ${BOOTLOADER_INCLUDES})
+target_compile_options(${PROJECT_NAME} PRIVATE ${BOOTLOADER_FLAGS})
+target_link_libraries(${PROJECT_NAME} ${BOOTLOADER_LIBS})
 if (NOT PLATFORM_LINUX)
-    set_linker_script(microboy-bootloader memmap_flashloader.ld)
-    pico_add_uf2_output(microboy-bootloader)
-    # debug output
-    if (PICO_STDIO_UART)
-        pico_enable_stdio_usb(microboy-bootloader 0)
-        pico_enable_stdio_uart(microboy-bootloader 1)
-    else ()
-        pico_enable_stdio_usb(microboy-bootloader 1)
-        pico_enable_stdio_uart(microboy-bootloader 0)
-    endif ()
+    set_linker_script(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/memmap_flashloader.ld)
+    pico_add_uf2_output(${PROJECT_NAME})
+    pico_enable_stdio_usb(${PROJECT_NAME} 0)
+    pico_enable_stdio_uart(${PROJECT_NAME} 0)
 
     # combine the bootloader (flashloader) and apps into one UF2 image
-    set(COMPLETE_UF2 ${CMAKE_BINARY_DIR}/microboy.uf2)
+    set(COMPLETE_UF2 ${CMAKE_BINARY_DIR}/retropico.uf2)
 
     find_package(Python3 REQUIRED COMPONENTS Interpreter)
     add_custom_command(OUTPUT ${COMPLETE_UF2}
@@ -66,5 +63,5 @@ if (NOT PLATFORM_LINUX)
             ${CMAKE_BINARY_DIR}/src/cores/Peanut-GB/${CMAKE_PROJECT_NAME}-gb.uf2
             ${CMAKE_BINARY_DIR}/src/cores/smsplus/${CMAKE_PROJECT_NAME}-sms.uf2
     )
-    add_custom_target(microboy ALL DEPENDS ${COMPLETE_UF2})
+    add_custom_target(retropico ALL DEPENDS ${COMPLETE_UF2})
 endif ()

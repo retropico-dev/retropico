@@ -2,8 +2,19 @@
 // Created by cpasjuste on 02/08/23.
 //
 
-#ifndef MICROBOY_MAIN_H
-#define MICROBOY_MAIN_H
+#ifndef RETROPICO_MAIN_H
+#define RETROPICO_MAIN_H
+
+#include "platform.h"
+#include "../bootloader/bootloader.h"
+
+#ifdef PICO_BUILD
+#if defined(MB_NES) || defined(MB_SMS)
+// use direct drawing
+#undef P2DDisplay
+#define P2DDisplay PicoDisplayDirectDraw
+#endif
+#endif
 
 #ifdef MB_NES
 #include "infones.h"
@@ -16,4 +27,4 @@
 #define MBCore SMSPlus
 #endif
 
-#endif //MICROBOY_MAIN_H
+#endif //RETROPICO_MAIN_H

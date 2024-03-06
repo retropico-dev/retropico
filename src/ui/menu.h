@@ -2,25 +2,25 @@
 // Created by cpasjuste on 04/07/23.
 //
 
-#ifndef MICROBOY_MENU_H
-#define MICROBOY_MENU_H
+#ifndef RETROPICO_MENU_H
+#define RETROPICO_MENU_H
 
 #include "rectangle.h"
 #include "text.h"
 #include "bitmap.h"
 
-namespace mb {
-    class Menu : public Rectangle {
+namespace retropico {
+    class Menu : public p2d::Rectangle {
     public:
         class MenuLine : public Rectangle {
         public:
-            MenuLine(const Utility::Vec4i &bounds, const Bitmap::Image *image, const std::string &text);
+            MenuLine(const p2d::Utility::Vec4i &bounds, const p2d::Io::File &file, const std::string &text);
 
-            Text *p_text;
-            Bitmap *p_bitmap;
+            p2d::Text *p_text;
+            p2d::Bitmap *p_bitmap;
         };
 
-        Menu(const Utility::Vec2i &pos, const Utility::Vec2i &size);
+        Menu(const p2d::Utility::Vec2i &pos, const p2d::Utility::Vec2i &size);
 
     private:
         std::vector<MenuLine *> m_lines;
@@ -28,8 +28,8 @@ namespace mb {
 
         void refresh();
 
-        void loop(const Utility::Vec2i &pos, const uint16_t &buttons) override;
+        bool onInput(const uint16_t &buttons) override;
     };
 }
 
-#endif //MICROBOY_MENU_H
+#endif //RETROPICO_MENU_H

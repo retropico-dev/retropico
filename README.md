@@ -1,25 +1,13 @@
-# microboy
+<h1 align="center">RetroPico</h1>
 
-# TODO
+<p align=center>
+  <img src="https://github.com/retropico-dev/retropico/raw/dev/docs/pics/retropico-pic-01.jpg" width="50%" height="50%" alt="RetroPico !">
+</p>
 
-- audio (MAX98357A): wire gain pin to
-  vin ? ([9dB => 6dB](https://learn.adafruit.com/adafruit-max98357-i2s-class-d-mono-amp/pinouts))
+RertroPico is "yet another" rp2040 handeld deivce.
 
-# working pico-sdk commit
+The whole project was done by myself, and I'm very proud of it. This includes familiarizing with microcontrollers, writing a cross platform framework for linux and the chosen one (rp2040), porting some emulators, designing a pcb and finally buying, designing and printing a 3d case for it.
 
-commit f396d05f8252d4670d4ea05c8b7ac938ef0cd381 (HEAD -> master, origin/master, origin/HEAD)
-Author: Graham Sanderson <graham.sanderson@raspberrypi.com>
-Date:   Sat Feb 11 16:54:33 2023 -0600
+The main goal was to make a cheap handheld capable of running a few 8 bit consoles on a homemade tiny device, which can be "easily" (with a few soldering skills) done at a reasonable price. Finally, it would be totally open source, of course. The cost of the device is currently ~30€ for the components (and shipping). Building instructions and documentation is in the work.
 
-    Actually target correct USB1.5.0 version - same code (#1245)
-
-# working pico-extras commit
-
-commit 09c64d509f1d7a49ceabde699ed6c74c77e195a1 (HEAD -> master, origin/master, origin/HEAD)
-Author: James Hughes <JamesH65@users.noreply.github.com>
-Date:   Mon Sep 11 14:17:53 2023 +0100
-
-    Update README.adoc (#68)
-    
-    Fixed up some spelling mistakes and general tidying up. No technical changes.
-
+The "retropico" os currently support four 8 bits consoles inducing the nes, gameboy, master system and game gear. While a lot of work has been put into porting the emulated systems (including 60fps, sram support, ...), the emulation is far from perfect. A few games won't run, more will have graphical glitches, but the fun is here.

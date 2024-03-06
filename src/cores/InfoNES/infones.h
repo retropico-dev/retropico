@@ -2,22 +2,22 @@
 // Created by cpasjuste on 06/06/23.
 //
 
-#ifndef MICROBOY_PEANUT_GB_H
-#define MICROBOY_PEANUT_GB_H
+#ifndef RETROPICO_INFONES_H
+#define RETROPICO_INFONES_H
 
 #include "core.h"
 
-namespace mb {
+namespace retropico {
     class InfoNES : public Core {
     public:
-        explicit InfoNES(Platform *platform);
+        explicit InfoNES(const p2d::Display::Settings &displaySettings);
 
-        ~InfoNES() override;
+        bool loop() override;
 
-        bool loadRom(Io::FileBuffer file) override;
+        void close() override;
 
-        bool loop(uint16_t buttons) override;
+        bool loadRom(const p2d::Io::File &file) override;
     };
 }
 
-#endif //MICROBOY_PEANUT_GB_H
+#endif //RETROPICO_INFONES_H

@@ -11,3 +11,10 @@ CTestTestfile.cmake
 _deps
 cmake-build*
 .idea
+
+# debug romfs
+*.nes
+*.gb
+*.sms
+*.gg
+rom.bin

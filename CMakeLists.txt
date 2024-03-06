@@ -1,53 +1,27 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.5)
 #set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON")
 
-# linux platform
-option(PLATFORM_LINUX "Linux target platform" OFF)
-
-# microboy default board
-if (NOT PLATFORM_LINUX AND NOT PICO_BOARD)
-    #set(PICO_BOARD "adafruit_feather_rp2040") # v1.0 rev board
-    set(PICO_BOARD "pico") # v1.1 rev board
+if (NOT PLATFORM_LINUX)
+    include(${CMAKE_SOURCE_DIR}/external/misc/libpico2d/src/platforms/pico/cmake/pico_sdk_import.cmake)
 endif ()
 
 # pico options
-option(PICO_STDIO_UART "Pico UART debug" ON)
-option(PICO_USE_BOOTLOADER "Build bootloader compatible binaries" ON)
+option(PICO_USE_BOOTLOADER "Build bootloader compatible binaries" OFF)
 option(PICO_DISPLAY_ST7789_PIO "Pico ST7789 display driver (pio)" ON)
+option(PICO_DEBUG_UART "Pico uart debug" OFF)
+option(PICO_DEBUG_USB "Pico usb debug" OFF)
+
+add_subdirectory(${CMAKE_SOURCE_DIR}/external/misc/libpico2d)
+
+project(retropico)
 
 if (NOT PLATFORM_LINUX)
-    # initialize the SDK based on PICO_SDK_PATH
-    # note: this must happen before project()
-    include(${CMAKE_SOURCE_DIR}/src/skeleton/platforms/pico/cmake/pico_sdk_import.cmake)
-
-    # for pico_audio_i2s, hardware_sleep
-    include(${CMAKE_SOURCE_DIR}/src/skeleton/platforms/pico/cmake/pico_extras_import.cmake)
-endif ()
-
-project(microboy)
-
-if (NOT PLATFORM_LINUX)
-    # initialize the Raspberry Pi Pico SDK
-    pico_sdk_init()
-endif ()
-
-if (NOT PLATFORM_LINUX)
-    function(set_linker_script TARGET script)
-        target_link_directories(${TARGET} PRIVATE ${CMAKE_SOURCE_DIR}/src/bootloader)
-        pico_set_linker_script(${TARGET} ${CMAKE_SOURCE_DIR}/src/bootloader/${script})
-
-        # Add dependencies on the 'included' linker scripts so that the target gets
-        # rebuilt if they are changed
-        pico_add_link_depend(${TARGET} ${CMAKE_SOURCE_DIR}/src/bootloader/memmap_defines.ld)
-        pico_add_link_depend(${TARGET} ${CMAKE_SOURCE_DIR}/src/bootloader/memmap_default.ld)
-    endfunction()
-else ()
     # i want all executable located at root of build directory
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} CACHE STRING "" FORCE)
 endif ()
 
-# microboy-skeleton (cross-platform library)
-add_subdirectory(src/skeleton)
+# microboy-common (common library)
+add_subdirectory(src/common)
 
 # microboy-ui (ui binary)
 add_subdirectory(src/ui)

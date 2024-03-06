@@ -2,20 +2,22 @@
 // Created by cpasjuste on 06/06/23.
 //
 
-#ifndef MICROBOY_PEANUT_GB_H
-#define MICROBOY_PEANUT_GB_H
+#ifndef RETROPICO_SMS_H
+#define RETROPICO_SMS_H
 
 #include "core.h"
 
-namespace mb {
+namespace retropico {
     class SMSPlus : public Core {
     public:
-        explicit SMSPlus(Platform *platform);
+        explicit SMSPlus(const p2d::Display::Settings &displaySettings);
 
-        bool loadRom(Io::FileBuffer file) override;
+        bool loop() override;
 
-        bool loop(uint16_t buttons) override;
+        void close() override;
+
+        bool loadRom(const p2d::Io::File &file) override;
     };
 }
 
-#endif //MICROBOY_PEANUT_GB_H
+#endif //RETROPICO_SMS_H

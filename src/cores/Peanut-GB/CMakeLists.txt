@@ -1,43 +1,53 @@
 cmake_minimum_required(VERSION 3.13)
 #set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON")
 
-project(microboy-gb)
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 17)
+project(retropico-gb)
 
 # set source files
 file(GLOB GB_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/../main.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../*.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/*.c*
-        ${CMAKE_SOURCE_DIR}/external/cores/Peanut-GB/examples/sdl2/minigb_apu/*.c*
-        )
+)
 set(GB_INCLUDES
         ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/..
         ${CMAKE_SOURCE_DIR}/external/cores/Peanut-GB
-        ${CMAKE_SOURCE_DIR}/external/cores/Peanut-GB/examples/sdl2/minigb_apu
-        )
-set(GB_FLAGS -DMB_GB)
+)
+set(GB_FLAGS
+        -DMB_GB
+        -DPICO_AUDIO_I2S_BUFFER_SAMPLE_LENGTH=256
+)
 
 ####################
 # Peanut-GB binary
 ####################
-add_executable(microboy-gb ${GB_SOURCES})
-target_include_directories(microboy-gb PUBLIC ${GB_INCLUDES})
-target_compile_definitions(microboy-gb PUBLIC ${GB_FLAGS})
-target_link_libraries(microboy-gb ${GB_LIBS} microboy-skeleton)
+add_executable(${PROJECT_NAME} ${GB_SOURCES})
+target_include_directories(${PROJECT_NAME} PUBLIC ${GB_INCLUDES})
+target_compile_definitions(${PROJECT_NAME} PUBLIC ${GB_FLAGS})
+target_link_libraries(${PROJECT_NAME} ${GB_LIBS} retropico-common)
+
+# test rom
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_add_resources(${PROJECT_NAME} "romfs/rom.bin")
+endif ()
+
 if (NOT PLATFORM_LINUX)
     if (PICO_USE_BOOTLOADER)
-        set_linker_script(microboy-gb memmap_gb.ld)
-        target_compile_definitions(microboy-gb PUBLIC ${GB_FLAGS} PICO_USE_BOOTLOADER)
-    endif ()
-    #pico_set_binary_type(microboy-gb copy_to_ram)
-    pico_add_uf2_output(microboy-gb)
-    # debug output
-    if (PICO_STDIO_UART)
-        pico_enable_stdio_usb(microboy-gb 0)
-        pico_enable_stdio_uart(microboy-gb 1)
+        set_linker_script(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/src/bootloader/memmap_gb.ld)
+        target_compile_definitions(${PROJECT_NAME} PUBLIC ${GB_FLAGS} PICO_USE_BOOTLOADER)
     else ()
-        pico_enable_stdio_usb(microboy-gb 1)
-        pico_enable_stdio_uart(microboy-gb 0)
+        set_linker_flash_size_16(${PROJECT_NAME})
+    endif ()
+    pico_add_uf2_output(${PROJECT_NAME})
+    # debug output
+    if (PICO_DEBUG_UART)
+        pico_enable_stdio_usb(${PROJECT_NAME} 0)
+        pico_enable_stdio_uart(${PROJECT_NAME} 1)
+    elseif (PICO_DEBUG_USB)
+        pico_enable_stdio_usb(${PROJECT_NAME} 1)
+        pico_enable_stdio_uart(${PROJECT_NAME} 0)
+    else ()
+        pico_enable_stdio_usb(${PROJECT_NAME} 0)
+        pico_enable_stdio_uart(${PROJECT_NAME} 0)
     endif ()
 endif ()

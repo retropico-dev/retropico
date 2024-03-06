@@ -1,8 +1,0 @@
-//
-// Created by cpasjuste on 06/06/23.
-//
-
-#ifndef MICROBOY_ADAFRUIT_I2CDEVICE_H
-#define MICROBOY_ADAFRUIT_I2CDEVICE_H
-
-#endif //MICROBOY_ADAFRUIT_I2CDEVICE_H

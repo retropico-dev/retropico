@@ -17,50 +17,72 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "platform.h"
 #include "main.h"
+#include "retropico_overlay.h"
 
-using namespace mb;
+using namespace retropico;
+using namespace p2d;
+
+#ifdef MB_NES
+static Display::Settings ds{
+        .displaySize = {240, 240},
+        .renderSize = {240, 240},
+        .renderBounds = {0, 0, 240, 240},
+        .bufferingMode = Display::Buffering::None,
+        .format = Display::Format::ARGB444
+};
+#elif MB_GB
+static Display::Settings ds{
+        .displaySize = {240, 240},
+        .renderSize = {160, 144},
+        .renderBounds = {0, 0, 240, 240},
+        .bufferingMode = Display::Buffering::Double,
+        .format = Display::Format::RGB565
+};
+#elif MB_SMS
+static Display::Settings ds{
+        .displaySize = {240, 240},
+        .renderSize = {240, 240},
+        .bufferingMode = Display::Buffering::None,
+        .format = Display::Format::RGB565
+};
+#endif
 
 int main() {
-    Clock clock;
-    int frames = 0;
-    bool running = true;
+    auto core = new MBCore(ds);
 
-    auto platform = new MBPlatform();
-    auto core = new MBCore(platform);
-
-    Io::FileBuffer fb = platform->getIo()->readRomFromFlash();
-    if (!core->loadRom(fb)) {
+    // retrieve rom from flash
+#ifndef NDEBUG
+    Io::File file{"res:/romfs/rom.bin"};
+#else
+    auto list = Io::getList("flash:/rom/");
+    if (list.empty()) {
         // reboot to ui
-        platform->reboot(Platform::RebootTarget::Ui);
+        core->reboot(FLASH_MAGIC_UI);
+    }
+    Io::File file{"flash:/rom/" + list[0].name};
+#endif
+
+    // load rom
+    if (!core->loadRom(file)) {
+        // reboot to ui
+        core->reboot(FLASH_MAGIC_UI);
     }
 
     // emulation loop
-    while (running) {
-        // emulation loop
-        running = core->loop(platform->getInput()->getButtons());
+    while (core->loop()) {}
 
-        // fps
-        if (clock.getElapsedTime().asSeconds() >= 1) {
-            auto percent = (uint16_t) (((float) Utility::getUsedHeap() / (float) Utility::getTotalHeap()) * 100);
-            printf("fps: %i, heap: %i/%i (%i%%)\r\n",
-                   (int) ((float) frames / clock.restart().asSeconds()),
-                   Utility::getUsedHeap(), Utility::getTotalHeap(), percent);
-            frames = 0;
-        }
-        // increment frames for fps counter
-        frames++;
-    }
+    // save...
+    core->getConfig()->save();
 
     // cleanly close core (handle saves and such)
-    delete (core);
+    core->close();
 
     // reboot to ui
-    platform->reboot(Platform::RebootTarget::Ui);
+    core->reboot(FLASH_MAGIC_UI);
 
     // unreachable
-    delete (platform);
+    delete (core);
 
     return 0;
 }
