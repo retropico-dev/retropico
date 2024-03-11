@@ -11,3 +11,5 @@ The whole project was done by myself, and I'm very proud of it. This includes fa
 The main goal was to make a cheap handheld capable of running a few 8 bit consoles on a homemade tiny device, which can be "easily" (with a few soldering skills) done at a reasonable price. Finally, it would be totally open source, of course. The cost of the device is currently ~30€ for the components (and shipping). Building instructions and documentation is in the work.
 
 The "retropico" os currently support four 8 bits consoles inducing the nes, gameboy, master system and game gear. While a lot of work has been put into porting the emulated systems (including 60fps, sram support, ...), the emulation is far from perfect. A few games won't run, more will have graphical glitches, but the fun is here.
+
+I use [JetBrains CLion](https://www.jetbrains.com/clion/) IDE for all my open sources projects, thanks to the support !
