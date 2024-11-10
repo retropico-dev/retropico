@@ -13,7 +13,7 @@
 
 #ifndef LINUX
 
-#include <pico/platform.h>
+#include <pico.h>
 //#define in_ram __not_in_flash_func
 #undef MIN
 #undef MAX

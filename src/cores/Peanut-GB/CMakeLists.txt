@@ -36,7 +36,7 @@ if (NOT PLATFORM_LINUX)
         set_linker_script(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/src/bootloader/memmap_gb.ld)
         target_compile_definitions(${PROJECT_NAME} PUBLIC ${GB_FLAGS} PICO_USE_BOOTLOADER)
     else ()
-        set_linker_flash_size_16(${PROJECT_NAME})
+        #set_linker_flash_size_16(${PROJECT_NAME})
     endif ()
     pico_add_uf2_output(${PROJECT_NAME})
     # debug output
