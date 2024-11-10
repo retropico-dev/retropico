@@ -49,7 +49,6 @@ static void vblank(GB_gameboy_t *gb, GB_vblank_type_t type) {
         //s_core->getDisplay()->flip();
         //printf("display\n");
 
-        /*
         uint32_t pixel = 0;
 
         for (uint32_t y = 0; y < 144; y++) {
@@ -63,7 +62,6 @@ static void vblank(GB_gameboy_t *gb, GB_vblank_type_t type) {
             }
 #endif
         }
-    */
     }
 }
 
@@ -98,9 +96,9 @@ SameBoy::SameBoy(const p2d::Display::Settings &ds) : Core(ds, Core::Type::Gb) {
     //GB_set_pixels_output(&gameboy, (uint32_t *) surface->getPixels());
     GB_set_pixels_output(&gameboy, active_pixel_buffer);
     GB_set_rgb_encode_callback(&gameboy, rgb_encode);
+    //GB_set_rendering_disabled(&gameboy, true);
     GB_set_sample_rate(&gameboy, 11025);
     GB_apu_set_sample_callback(&gameboy, audio_callback);
-    //GB_set_rumble_callback(&gb, rumble_callback);
     GB_set_vblank_callback(&gameboy, (GB_vblank_callback_t) vblank);
     //GB_set_lcd_status_callback(&gameboy, lcd_status_change);
 }
