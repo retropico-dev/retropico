@@ -12,4 +12,10 @@ The main goal was to make a cheap handheld capable of running a few 8 bit consol
 
 The "retropico" os currently support four 8 bits consoles inducing the nes, gameboy, master system and game gear. While a lot of work has been put into porting the emulated systems (including 60fps, sram support, ...), the emulation is far from perfect. A few games won't run, more will have graphical glitches, but the fun is here.
 
+### PCB
+
+TOP | BOT
+:--:|:--:
+![](docs/pics/PCB_RetroPico-top-v1.2_2024-11-10.svg) | ![](docs/pics/PCB_RetroPico-bottom-v1.2_2024-11-10.svg)
+
 I use [JetBrains CLion](https://www.jetbrains.com/clion/) IDE for all my open sources projects, thanks to the support !
