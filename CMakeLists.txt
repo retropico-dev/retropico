@@ -35,6 +35,9 @@ add_subdirectory(src/cores/Peanut-GB)
 # microboy-sms (smsplus core)
 add_subdirectory(src/cores/smsplus)
 
+# microboy-sameboy (SameBoy core, wip)
+#add_subdirectory(src/cores/SameBoy)
+
 # microboy-bootloader
 if (PICO_USE_BOOTLOADER)
     add_subdirectory(src/bootloader)

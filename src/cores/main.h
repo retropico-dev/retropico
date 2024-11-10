@@ -22,6 +22,9 @@
 #elif MB_GB
 #include "peanut-gb.h"
 #define MBCore PeanutGB
+#elif MB_SAMEBOY
+#include "sameboy.h"
+#define MBCore SameBoy
 #elif MB_SMS
 #include "smsplus.h"
 #define MBCore SMSPlus

@@ -39,6 +39,14 @@ static Display::Settings ds{
         .bufferingMode = Display::Buffering::Double,
         .format = Display::Format::RGB565
 };
+#elif MB_SAMEBOY
+static Display::Settings ds{
+    .displaySize = {240, 240},
+    .renderSize = {240, 240},
+    .renderBounds = {0, 0, 240, 240},
+    .bufferingMode = Display::Buffering::None,
+    .format = Display::Format::RGB565
+};
 #elif MB_SMS
 static Display::Settings ds{
         .displaySize = {240, 240},
@@ -70,7 +78,8 @@ int main() {
     }
 
     // emulation loop
-    while (core->loop()) {}
+    while (core->loop()) {
+    }
 
     // save...
     core->getConfig()->save();
