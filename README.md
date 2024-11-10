@@ -18,4 +18,4 @@ TOP | BOT
 :--:|:--:
 ![](docs/pics/PCB_RetroPico-top-v1.2_2024-11-10.svg) | ![](docs/pics/PCB_RetroPico-bottom-v1.2_2024-11-10.svg)
 
-I use [JetBrains CLion](https://www.jetbrains.com/clion/) IDE for all my open sources projects, thanks to the support !
+I use [JetBrains CLion](https://www.jetbrains.com/clion/) IDE for all my open sources projects, thanks for the support !
