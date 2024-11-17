@@ -7,9 +7,9 @@
 using namespace p2d;
 using namespace retropico;
 
-Overlay::Overlay(Config *config, p2d::Platform *platform, const p2d::Utility::Vec4i &bounds) {
-    setPosition(bounds.x, bounds.y);
-    setSize(bounds.w, bounds.h);
+Overlay::Overlay(Config *config, Platform *platform, const Utility::Vec4i &bounds) {
+    Overlay::setPosition(bounds.x, bounds.y);
+    Overlay::setSize(bounds.w, bounds.h);
 
     p_platform = platform;
 
@@ -18,13 +18,16 @@ Overlay::Overlay(Config *config, p2d::Platform *platform, const p2d::Utility::Ve
     platform->getAudio()->setVolume(p_config->getVolume());
 
     // volume slider
-    p_volume_widget = new VolumeWidget({static_cast<int16_t>(bounds.w - 6), 32,
-                                        12, static_cast<int16_t>(bounds.h - 64)});
+    p_volume_widget = new VolumeWidget({
+        static_cast<int16_t>(bounds.w - 6), 32,
+        12, static_cast<int16_t>(bounds.h - 64)
+    });
+
     p_volume_widget->setVolume(platform->getAudio()->getVolume());
     p_volume_widget->setOrigin(Origin::TopRight);
-    add(p_volume_widget);
+    Overlay::add(p_volume_widget);
 
-    setVisibility(Visibility::Hidden);
+    Overlay::setVisibility(Visibility::Hidden);
 }
 
 void Overlay::onUpdate(p2d::Time delta) {

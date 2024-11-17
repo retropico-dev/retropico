@@ -12,8 +12,8 @@ Core::Core(const Display::Settings &displaySettings, const Core::Type &core) : P
     p_audio->setVolume(p_config->getVolume());
 
     // add overlay
-    p_overlay = new Overlay(p_config, this, getBounds());
-    add(p_overlay);
+    p_overlay = new Overlay(p_config, this, Core::getBounds());
+    Core::add(p_overlay);
 }
 
 bool Core::loop() {
@@ -22,7 +22,7 @@ bool Core::loop() {
 
     // check for quit
     uint16_t buttons = getInput()->getButtons();
-    if (buttons & p2d::Input::Button::START && buttons & p2d::Input::Button::SELECT ||
+    if (buttons & Input::Button::START && buttons & Input::Button::SELECT ||
         p_input->getButtons() & Input::Button::QUIT) {
         return false;
     }

@@ -17,14 +17,14 @@ using namespace p2d;
 
 #define CC(x) ((((x) >> 1) & 15) | ((((x) >> 6) & 15) << 4) | ((((x) >> 11) & 15) << 8))
 const uint16_t NesPalette[64] = {
-        CC(0x39ce), CC(0x1071), CC(0x0015), CC(0x2013), CC(0x440e), CC(0x5402), CC(0x5000), CC(0x3c20),
-        CC(0x20a0), CC(0x0100), CC(0x0140), CC(0x00e2), CC(0x0ceb), CC(0x0000), CC(0x0000), CC(0x0000),
-        CC(0x5ef7), CC(0x01dd), CC(0x10fd), CC(0x401e), CC(0x5c17), CC(0x700b), CC(0x6ca0), CC(0x6521),
-        CC(0x45c0), CC(0x0240), CC(0x02a0), CC(0x0247), CC(0x0211), CC(0x0000), CC(0x0000), CC(0x0000),
-        CC(0x7fff), CC(0x1eff), CC(0x2e5f), CC(0x223f), CC(0x79ff), CC(0x7dd6), CC(0x7dcc), CC(0x7e67),
-        CC(0x7ae7), CC(0x4342), CC(0x2769), CC(0x2ff3), CC(0x03bb), CC(0x0000), CC(0x0000), CC(0x0000),
-        CC(0x7fff), CC(0x579f), CC(0x635f), CC(0x6b3f), CC(0x7f1f), CC(0x7f1b), CC(0x7ef6), CC(0x7f75),
-        CC(0x7f94), CC(0x73f4), CC(0x57d7), CC(0x5bf9), CC(0x4ffe), CC(0x0000), CC(0x0000), CC(0x0000)
+    CC(0x39ce), CC(0x1071), CC(0x0015), CC(0x2013), CC(0x440e), CC(0x5402), CC(0x5000), CC(0x3c20),
+    CC(0x20a0), CC(0x0100), CC(0x0140), CC(0x00e2), CC(0x0ceb), CC(0x0000), CC(0x0000), CC(0x0000),
+    CC(0x5ef7), CC(0x01dd), CC(0x10fd), CC(0x401e), CC(0x5c17), CC(0x700b), CC(0x6ca0), CC(0x6521),
+    CC(0x45c0), CC(0x0240), CC(0x02a0), CC(0x0247), CC(0x0211), CC(0x0000), CC(0x0000), CC(0x0000),
+    CC(0x7fff), CC(0x1eff), CC(0x2e5f), CC(0x223f), CC(0x79ff), CC(0x7dd6), CC(0x7dcc), CC(0x7e67),
+    CC(0x7ae7), CC(0x4342), CC(0x2769), CC(0x2ff3), CC(0x03bb), CC(0x0000), CC(0x0000), CC(0x0000),
+    CC(0x7fff), CC(0x579f), CC(0x635f), CC(0x6b3f), CC(0x7f1f), CC(0x7f1b), CC(0x7ef6), CC(0x7f75),
+    CC(0x7f94), CC(0x73f4), CC(0x57d7), CC(0x5bf9), CC(0x4ffe), CC(0x0000), CC(0x0000), CC(0x0000)
 };
 
 static Core *s_core;
@@ -56,6 +56,7 @@ union core_cmd {
         uint8_t index;
         uint8_t dummy;
     };
+
     uint32_t full;
 };
 
@@ -176,7 +177,6 @@ void in_ram(core1_lcd_draw_line)(const uint_fast8_t line, const uint_fast8_t ind
 
     // crop line buffer width by 16 pixels (240x240 display)
     display->put(lineBufferRGB444[index] + 8, 240);
-
 #ifdef LINUX
     if (line == 235) {
         if (s_core->getOverlay()->isVisible()) {
@@ -225,7 +225,8 @@ void InfoNES_PostDrawLine(int line) {
     core1_lcd_draw_line(line, lineBufferIndex);
 #else
     // wait until previous line is sent
-    while (__atomic_load_n(&lcd_line_busy, __ATOMIC_SEQ_CST)) {}
+    while (__atomic_load_n(&lcd_line_busy, __ATOMIC_SEQ_CST)) {
+    }
 
     // set core1 in busy state
     __atomic_store_n(&lcd_line_busy, 1, __ATOMIC_SEQ_CST);
@@ -295,7 +296,8 @@ int InfoNES_SoundOpen(int samples_per_sync, int sample_rate) {
     return 1;
 }
 
-void InfoNES_SoundClose() {}
+void InfoNES_SoundClose() {
+}
 
 int InfoNES_GetSoundBufferSize() {
     //printf("InfoNES_GetSoundBufferSize\r\n");
@@ -435,7 +437,6 @@ int InfoNES_SaveSRAM(const std::string &path) {
             chPrevData = chData;
             nRunLen = 1;
         }
-
     }
     if (nRunLen >= 4 || chPrevData == chTag) {
         pDstBuf[nEncLen++] = chTag;
