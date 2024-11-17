@@ -15,7 +15,7 @@ void copyPageInit(const void *src);
 
 uint32_t copyPage();
 
-void configClock(enum clock_index clk_index, uint32_t src, uint32_t auxsrc);
+void configClock(int clk_index, uint32_t src, uint32_t auxsrc);
 
 void initClock();
 

@@ -20,6 +20,26 @@ if (NOT PLATFORM_LINUX)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} CACHE STRING "" FORCE)
 endif ()
 
+function(retropico_setup_ld target script)
+    configure_file("${CMAKE_SOURCE_DIR}/src/bootloader/memmap_defines.ld"
+            "${CMAKE_CURRENT_BINARY_DIR}/memmap_defines.ld" COPYONLY)
+
+    if (PICO_PLATFORM STREQUAL "rp2040")
+        configure_file("${CMAKE_SOURCE_DIR}/src/bootloader/memmap_default_rp2040.ld"
+                "${CMAKE_CURRENT_BINARY_DIR}/memmap_default.ld" COPYONLY)
+    else () # rp2350
+        if (PICO_PSRAM)
+            configure_file("${CMAKE_SOURCE_DIR}/src/bootloader/memmap_default_rp2350_psram.ld"
+                    "${CMAKE_CURRENT_BINARY_DIR}/memmap_default.ld" COPYONLY)
+        else ()
+            configure_file("${CMAKE_SOURCE_DIR}/src/bootloader/memmap_default_rp2350.ld"
+                    "${CMAKE_CURRENT_BINARY_DIR}/memmap_default.ld" COPYONLY)
+        endif ()
+    endif ()
+
+    target_set_pico2d_stuff(${target} "${script}")
+endfunction()
+
 # microboy-common (common library)
 add_subdirectory(src/common)
 

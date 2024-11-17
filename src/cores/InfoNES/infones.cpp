@@ -6,6 +6,7 @@
 #include <cstring>
 #include "platform.h"
 #include "infones.h"
+
 #include "InfoNES.h"
 #include "InfoNES_System.h"
 #include "K6502.h"

@@ -22,8 +22,8 @@ target_link_libraries(${PROJECT_NAME} ${UI_LIBS} retropico-common pico2d-skeleto
 
 if (NOT PLATFORM_LINUX)
     if (PICO_USE_BOOTLOADER)
-        #set_linker_script(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/src/bootloader/memmap_ui.ld)
-        #target_compile_definitions(${PROJECT_NAME} PUBLIC ${UI_FLAGS} PICO_USE_BOOTLOADER)
+        retropico_setup_ld(${PROJECT_NAME} "${CMAKE_SOURCE_DIR}/src/bootloader/memmap_ui.ld")
+        target_compile_definitions(${PROJECT_NAME} PUBLIC ${GB_FLAGS} PICO_USE_BOOTLOADER)
     else ()
         target_set_pico2d_stuff(${PROJECT_NAME})
     endif ()

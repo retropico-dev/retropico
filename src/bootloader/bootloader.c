@@ -21,18 +21,24 @@
 // the flashloader will drop back to bootrom bootloader.
 
 #include <string.h>
-#include <hardware/gpio.h>
+#include <stdio.h>
+#include <pico/stdio.h>
 #include <pico/time.h>
+#include <hardware/gpio.h>
 #include "hardware/regs/addressmap.h"
+#ifdef PICO_RP2350
+#include "hardware/regs/m33.h"
+#else
 #include "hardware/regs/m0plus.h"
+#endif
 #include "hardware/structs/watchdog.h"
 #include "hardware/resets.h"
 #include "hardware/flash.h"
 #include "hardware/watchdog.h"
 #include "pico/bootrom.h"
 #include "pico/binary_info.h"
-
 #include "bootloader.h"
+
 #include "bootloader_helper.h"
 
 #include "../../external/misc/libpico2d/src/platforms/pico/misc/pinout.h"
@@ -81,15 +87,19 @@ int startMainApplication() {
         reset_block(RESETS_RESET_DMA_BITS);
 
         asm volatile (
-                "mov r0, %[start]\n"
-                "ldr r1, =%[vtable]\n"
-                "str r0, [r1]\n"
-                "ldmia r0, {r0, r1}\n"
-                "msr msp, r0\n"
-                "bx r1\n"
-                :
-                : [start] "r"(sAppStartOffset + 0x100), [vtable] "X"(PPB_BASE + M0PLUS_VTOR_OFFSET)
-        :
+            "mov r0, %[start]\n"
+            "ldr r1, =%[vtable]\n"
+            "str r0, [r1]\n"
+            "ldmia r0, {r0, r1}\n"
+            "msr msp, r0\n"
+            "bx r1\n"
+            :
+#ifdef PICO_RP2350
+            : [start] "r"(sAppStartOffset + 0x100), [vtable] "X"(PPB_BASE + M33_VTOR_OFFSET)
+#else
+            : [start] "r"(sAppStartOffset + 0x100), [vtable] "X"(PPB_BASE + M0PLUS_VTOR_OFFSET)
+#endif
+            :
         );
     }
 
@@ -98,26 +108,28 @@ int startMainApplication() {
 }
 
 // check for combo keys
-// SELECT: reboot to bootloader
-// A + B: boot ui (filer)
 bool check_bootloader_combo() {
-    if (BTN_PIN_DOWN > -1) {
-        gpio_set_function(BTN_PIN_DOWN, GPIO_FUNC_SIO);
-        gpio_set_dir(BTN_PIN_DOWN, GPIO_IN);
-        gpio_pull_up(BTN_PIN_DOWN);
+    printf("BL: check_bootloader_combo\r\n");
+
+    if (BTN_PIN_VOL_D > -1) {
+        gpio_set_function(BTN_PIN_VOL_D, GPIO_FUNC_SIO);
+        gpio_set_dir(BTN_PIN_VOL_D, GPIO_IN);
+        gpio_pull_up(BTN_PIN_VOL_D);
         sleep_ms(10);
-        if (!gpio_get(BTN_PIN_DOWN)) {
+        if (!gpio_get(BTN_PIN_VOL_D)) {
+            printf("BL: vol down button pressed (reboot bootloader)\r\n");
             reset_usb_boot(0, 0);
             while (true) tight_loop_contents();
         }
     }
 
-    if (BTN_PIN_UP > -1) {
-        gpio_set_function(BTN_PIN_UP, GPIO_FUNC_SIO);
-        gpio_set_dir(BTN_PIN_UP, GPIO_IN);
-        gpio_pull_up(BTN_PIN_UP);
+    if (BTN_PIN_VOL_U > -1) {
+        gpio_set_function(BTN_PIN_VOL_U, GPIO_FUNC_SIO);
+        gpio_set_dir(BTN_PIN_VOL_U, GPIO_IN);
+        gpio_pull_up(BTN_PIN_VOL_U);
         sleep_ms(10);
-        if (!gpio_get(BTN_PIN_UP)) {
+        if (!gpio_get(BTN_PIN_VOL_U)) {
+            printf("BL: vol up button pressed (ui)\r\n");
             return true;
         }
     }
@@ -175,8 +187,16 @@ int main(void) {
     const tFlashHeader *header;
     uint32_t eraseLength = 0;
 
+#if defined(PICO_DEBUG_UART) || defined(PICO_DEBUG_USB)
+    stdio_init_all();
+#endif
+    printf("BL: starting...\r\n");
+
     uint32_t scratch = watchdog_hw->scratch[0];
     uint32_t image = watchdog_hw->scratch[1];
+
+    stdio_init_all();
+    printf("BL: scratch: 0x%08lx\r\n", scratch);
 
     // Use xosc, which will give us a speed boost
     initClock();
@@ -194,6 +214,8 @@ int main(void) {
         sAppStartOffset = get_core_offset();
     }
 
+    printf("BL: sAppStartOffset: 0x%08lx\r\n", sAppStartOffset);
+
     if ((scratch == FLASH_MAGIC1) && ((image & 0xfff) == 0) && (image > sAppStartOffset)) {
         // Invert the magic number (so we know we've been here) and
         // initialise the retry counter
@@ -202,6 +224,7 @@ int main(void) {
     } else if (scratch == ~FLASH_MAGIC1) {
         watchdog_hw->scratch[2]++;
     } else if (!startMainApplication()) {
+        printf("BL: startMainApplication failed...\r\n");
         // Tried and failed to start the main application so try to find
         // an update image
         image = sAppStartOffset + 0x1000;
@@ -254,6 +277,8 @@ int main(void) {
     // to start the normal application since we didn't before
     if ((scratch == FLASH_MAGIC1) || (scratch == ~FLASH_MAGIC1))
         startMainApplication();
+
+    printf("BL: warning: rebooting to bootloader... \r\n");
 
     // Otherwise go to the bootrom bootloader as a last resort
     reset_usb_boot(0, 0);

@@ -47,12 +47,12 @@ uint32_t crc32(const void *data, size_t len, uint32_t crc) {
     dma_hw->sniff_data = crc;
 
     dma_channel_configure(
-            sDMAChannel,
-            &c,
-            &dummy,
-            data,
-            len,
-            true    // Start immediately
+        sDMAChannel,
+        &c,
+        &dummy,
+        data,
+        len,
+        true // Start immediately
     );
 
     dma_channel_wait_for_finish_blocking(sDMAChannel);
@@ -78,12 +78,12 @@ void copyPageInit(const void *src) {
     dma_hw->sniff_data = 0xffffffff;
 
     dma_channel_configure(
-            sDMAChannel,
-            &c,
-            sPageBuffer,
-            src,
-            256 / 4,
-            false    // Do not start immediately
+        sDMAChannel,
+        &c,
+        sPageBuffer,
+        src,
+        256 / 4,
+        false // Do not start immediately
     );
 }
 
@@ -176,7 +176,7 @@ void flashFirmware(const tFlashHeader *header, uint32_t eraseLength) {
 //
 // This is mostly lifted from clock_configure with some code removed that
 // doesn't apply to clk_ref or clk_sys and using a fixed divisor
-void configClock(enum clock_index clk_index, uint32_t src, uint32_t auxsrc) {
+void configClock(int clk_index, uint32_t src, uint32_t auxsrc) {
     clock_hw_t *clock = &clocks_hw->clk[clk_index];
 
     clock->div = 0x100; // divisor == 1.00
@@ -233,17 +233,21 @@ void initClock() {
 //****************************************************************************
 // These functions are normally provided as part of pico_stdlib so we have to
 // provide them here if not we're not using it.
+#if 0
 void exit(int ret) {
     (void) ret;
     while (true)
         tight_loop_contents();
 }
+#endif
 
+#if 0
 void panic(const char *fmt, ...) {
     (void) fmt;
     while (true)
         tight_loop_contents();
 }
+#endif
 
 void hard_assertion_failure(void) {
     while (true)

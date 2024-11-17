@@ -6,7 +6,7 @@
 # ~1544k used of 5Mb total reserved (see libpico2d "FLASH_TARGET_OFFSET_CACHE")
 
 __FLASHLOADER_START = 0;
-__FLASHLOADER_LENGTH = 1 * 8k;                              # 8k for bootloader
+__FLASHLOADER_LENGTH = 1 * 32k;                              # 64k for bootloader (safe)
 __UI_START = __FLASHLOADER_START + __FLASHLOADER_LENGTH;
 
 # release mode

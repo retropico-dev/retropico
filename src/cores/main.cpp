@@ -1,7 +1,3 @@
-//
-// Created by cpasjuste on 30/05/23.
-//
-
 /**
  * Copyright (C) 2023 by cpasjuste <cpasjuste@gmail.com>
  *
