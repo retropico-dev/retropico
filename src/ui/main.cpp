@@ -156,11 +156,7 @@ int main() {
     auto ui = new Ui(platform);
     platform->add(ui);
 
-    int i;
     while (platform->loop() && !ui->isDone()) {
-        i++;
-        const std::string msg = "Loading... " + std::to_string(i) + "%";
-        ui->getInfoBox()->show(msg);
     }
 
     // save...
