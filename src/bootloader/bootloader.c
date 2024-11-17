@@ -111,25 +111,25 @@ int startMainApplication() {
 bool check_bootloader_combo() {
     printf("BL: check_bootloader_combo\r\n");
 
-    if (BTN_PIN_VOL_D > -1) {
-        gpio_set_function(BTN_PIN_VOL_D, GPIO_FUNC_SIO);
-        gpio_set_dir(BTN_PIN_VOL_D, GPIO_IN);
-        gpio_pull_up(BTN_PIN_VOL_D);
+    if (BTN_PIN_DOWN > -1) {
+        gpio_set_function(BTN_PIN_DOWN, GPIO_FUNC_SIO);
+        gpio_set_dir(BTN_PIN_DOWN, GPIO_IN);
+        gpio_pull_up(BTN_PIN_DOWN);
         sleep_ms(10);
-        if (!gpio_get(BTN_PIN_VOL_D)) {
-            printf("BL: vol down button pressed (reboot bootloader)\r\n");
+        if (!gpio_get(BTN_PIN_DOWN)) {
+            printf("BL: down button pressed (reboot bootloader)\r\n");
             reset_usb_boot(0, 0);
             while (true) tight_loop_contents();
         }
     }
 
-    if (BTN_PIN_VOL_U > -1) {
-        gpio_set_function(BTN_PIN_VOL_U, GPIO_FUNC_SIO);
-        gpio_set_dir(BTN_PIN_VOL_U, GPIO_IN);
-        gpio_pull_up(BTN_PIN_VOL_U);
+    if (BTN_PIN_UP > -1) {
+        gpio_set_function(BTN_PIN_UP, GPIO_FUNC_SIO);
+        gpio_set_dir(BTN_PIN_UP, GPIO_IN);
+        gpio_pull_up(BTN_PIN_UP);
         sleep_ms(10);
-        if (!gpio_get(BTN_PIN_VOL_U)) {
-            printf("BL: vol up button pressed (ui)\r\n");
+        if (!gpio_get(BTN_PIN_UP)) {
+            printf("BL: up button pressed (ui)\r\n");
             return true;
         }
     }
