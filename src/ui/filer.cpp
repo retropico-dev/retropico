@@ -134,7 +134,15 @@ bool Filer::onInput(const uint16_t &buttons) {
         // copy new rom
         printf("Filer: copying %s to flash:/rom/%s\r\n", path.c_str(), name.c_str());
         Ui::getInstance()->getInfoBox()->show("Loading...");
-        auto success = Io::copy(path, "flash:/rom/" + name);
+        const auto success = Io::copy(path, "flash:/rom/" + name, [](const uint8_t progress) {
+            //std::cout << "Progress: " << progress << "%\r" << std::flush;
+            if (progress % 5 == 0) {
+                //printf("copy: %i\r\n", progress);
+                const std::string msg = "Loading... " + std::to_string(progress) + "%";
+                Ui::getInstance()->getInfoBox()->show(msg);
+            }
+        });
+
         if (success) {
             printf("Filer: copy done... writing config to flash...\r\n");
             // write bootloader "config"

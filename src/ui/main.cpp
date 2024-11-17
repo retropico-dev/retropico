@@ -23,19 +23,21 @@ using namespace p2d;
 using namespace retropico;
 
 static Display::Settings ds{
-        .displaySize = {240, 240},
-        .renderSize = {120, 120},
-        .renderBounds = {0, 0, 240, 240},
-        .bufferingMode = Display::Buffering::Double,
-        .format = Display::Format::RGB565
+    .displaySize = {240, 240},
+    .renderSize = {120, 120},
+    .renderBounds = {0, 0, 240, 240},
+    .bufferingMode = Display::Buffering::Double,
+    .format = Display::Format::RGB565
 };
 
 //...
 static Ui *s_ui = nullptr;
 
 Ui::Ui(Platform *p) : Rectangle({1, 1},
-                                {(int16_t) (p->getDisplay()->getSize().x - 2),
-                                 (int16_t) (p->getDisplay()->getSize().y - 2)}) {
+                                {
+                                    (int16_t) (p->getDisplay()->getSize().x - 2),
+                                    (int16_t) (p->getDisplay()->getSize().y - 2)
+                                }) {
     s_ui = this;
     p_platform = p;
 
@@ -88,9 +90,9 @@ Ui::Ui(Platform *p) : Rectangle({1, 1},
     add(p_menu);
 
     // add info box
-    p_infoBox = new InfoBox({(int16_t) (getSize().x / 2), (int16_t) (getSize().y / 2)},
-                            {(int16_t) (getSize().x - 32), 128 - 64});
-    p_infoBox->setOrigin(Origin::Center);
+    p_infoBox = new InfoBox({(int16_t) (getSize().x / 2), (int16_t) (getSize().y - 2)},
+                            {(int16_t) (getSize().x - 4), 16});
+    p_infoBox->setOrigin(Origin::Bottom);
     p_infoBox->setVisibility(Visibility::Hidden);
     add(p_infoBox);
 
@@ -154,7 +156,12 @@ int main() {
     auto ui = new Ui(platform);
     platform->add(ui);
 
-    while (platform->loop() && !ui->isDone()) {}
+    int i;
+    while (platform->loop() && !ui->isDone()) {
+        i++;
+        const std::string msg = "Loading... " + std::to_string(i) + "%";
+        ui->getInfoBox()->show(msg);
+    }
 
     // save...
     ui->getConfig()->save();
