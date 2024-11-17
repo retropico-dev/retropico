@@ -48,6 +48,9 @@ Filer::Filer(const Utility::Vec2i &pos, const Utility::Vec2i &size) : Widget(pos
 
 void Filer::load() {
     // buffer roms lists
+    // TODO: add menu option to reload rom list from sdcard to flash
+    Ui::getInstance()->getConfig()->getListBuffer(0)->data = nullptr;
+    // TODO
     if (Ui::getInstance()->getConfig()->getListBuffer(0)->data == nullptr) {
         uint32_t offset = FLASH_TARGET_OFFSET_CACHE;
         for (int i = 0; i < ROMS_FOLDER_COUNT; i++) {
