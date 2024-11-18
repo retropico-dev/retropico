@@ -24,19 +24,19 @@ Menu::MenuLine::MenuLine(const Utility::Vec4i &bounds, const p2d::Io::File &file
     p_text = new Text((int16_t) (p_bitmap->getSize().x + 6), (int16_t) (getSize().y / 2) + 2,
                       getSize().x - p_bitmap->getSize().x - 8, (int16_t) (getSize().y / 2), text);
     p_text->setOrigin(Origin::Left);
-    p_text->setColor(Ui::Color::Yellow);
+    p_text->setColor(Yellow);
     Menu::MenuLine::add(p_text);
 }
 
-Menu::Menu(const Utility::Vec2i &pos, const Utility::Vec2i &size) : Rectangle(pos, size, Ui::Color::GrayDark) {
-    Menu::setOutlineColor(Ui::Color::Red);
+Menu::Menu(const Utility::Vec2i &pos, const Utility::Vec2i &size) : Rectangle(pos, size, GrayDark) {
+    Menu::setOutlineColor(Red);
     Menu::setOutlineThickness(1);
 
     auto h = (int16_t) (getSize().y / 4);
     auto line = new MenuLine({0, 0, (int16_t) (getSize().x - 1), h},
                              Io::File("res:/romfs/nes.bmp"), "NES");
-    line->setColor(Ui::Color::Red);
-    line->setOutlineColor(Ui::Color::Yellow);
+    line->setColor(Red);
+    line->setOutlineColor(Yellow);
     add(line);
     m_lines.emplace_back(line);
 
@@ -118,8 +118,8 @@ void Menu::refresh() {
 
     for (int i = 0; i < m_lines.size(); i++) {
         if (i == m_line_index) {
-            m_lines.at(i)->setColor(Ui::Color::Red);
-            m_lines.at(i)->setOutlineColor(Ui::Color::Yellow);
+            m_lines.at(i)->setColor(Red);
+            m_lines.at(i)->setOutlineColor(Yellow);
         } else {
             m_lines.at(i)->setColor(Display::Color::Transparent);
             m_lines.at(i)->setOutlineColor(Display::Color::Transparent);

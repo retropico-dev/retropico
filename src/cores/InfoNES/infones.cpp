@@ -75,15 +75,17 @@ InfoNES::InfoNES(const p2d::Display::Settings &ds) : Core(ds, Core::Type::Nes) {
 }
 
 bool InfoNES::loadRom(const Io::File &file) {
-    printf("InfoNES::loadRom: %s (%lu bytes)\r\n", file.getPath().c_str(), file.getLength());
+    printf("InfoNES::loadRom: %s (%u bytes)\r\n", file.getPath().c_str(), file.getLength());
     m_romName = file.getPath();
-    m_sramPath = Core::getSavesPath(Core::Type::Nes) + "/"
+    m_sramPath = getSavesPath(Nes) + "/"
                  + Utility::removeExt(Utility::baseName(m_romName)) + ".srm";
 
-    auto data = (uint8_t *) file.getPtr();
+    auto data = const_cast<uint8_t *>(file.getPtr());
     memcpy(&NesHeader, data, sizeof(NesHeader));
     if (memcmp(NesHeader.byID, "NES\x1a", 4) != 0) {
         printf("InfoNES::loadRom: NES header not found in rom...\n");
+        getOverlay()->getInfoBox()->show("OOPS: SOMETHING WENT WRONG", 1000 * 5, this);
+        sleep(1000 * 5);
         return false;
     }
 
@@ -94,20 +96,21 @@ bool InfoNES::loadRom(const Io::File &file) {
         data += 512;
     }
 
-    auto romSize = NesHeader.byRomSize * 0x4000;
-    ROM = (BYTE *) data;
+    const auto romSize = NesHeader.byRomSize * 0x4000;
+    ROM = data;
     data += romSize;
 
     if (NesHeader.byVRomSize > 0) {
         //printf("NesHeader.byVRomSize > 0\r\n");
-        auto vSize = NesHeader.byVRomSize * 0x2000;
+        const auto vSize = NesHeader.byVRomSize * 0x2000;
         VROM = (BYTE *) data;
         data += vSize;
     }
 
     if (InfoNES_Reset() < 0) {
-#warning "TODO: add ui error message"
         printf("InfoNES::loadRom: NES reset error\n");
+        getOverlay()->getInfoBox()->show("OOPS: SOMETHING WENT WRONG", 1000 * 5, this);
+        sleep(1000 * 5);
         return false;
     }
 
@@ -126,6 +129,7 @@ bool InfoNES::loadRom(const Io::File &file) {
 bool in_ram(InfoNES::loop)() {
     if (!Core::loop()) return false;
     if (InfoNES_Menu() == -1) return false;
+    if (!ROM) return false;
 
     // static buttons
     s_buttons = getInput()->getButtons();
@@ -180,7 +184,7 @@ void in_ram(core1_lcd_draw_line)(const uint_fast8_t line, const uint_fast8_t ind
 #ifdef LINUX
     if (line == 235) {
         if (s_core->getOverlay()->isVisible()) {
-            s_core->getOverlay()->onDraw({}, true);
+            s_core->getOverlay()->onDraw(true);
         }
         display->flip();
     }

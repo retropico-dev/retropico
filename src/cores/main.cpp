@@ -21,11 +21,11 @@ using namespace p2d;
 
 #ifdef MB_NES
 static Display::Settings ds{
-        .displaySize = {240, 240},
-        .renderSize = {240, 240},
-        .renderBounds = {0, 0, 240, 240},
-        .bufferingMode = Display::Buffering::None,
-        .format = Display::Format::ARGB444
+    .displaySize = {240, 240},
+    .renderSize = {240, 240},
+    .renderBounds = {0, 0, 240, 240},
+    .bufferingMode = Display::Buffering::None,
+    .format = Display::Format::ARGB444
 };
 #elif MB_GB
 static Display::Settings ds{
@@ -71,6 +71,8 @@ int main() {
     if (!core->loadRom(file)) {
         // reboot to ui
         core->reboot(FLASH_MAGIC_UI);
+
+        return 1;
     }
 
     // emulation loop

@@ -7,6 +7,8 @@
 using namespace p2d;
 using namespace retropico;
 
+// TODO: move config stuff to libpico2d ?
+
 Overlay::Overlay(Config *config, Platform *platform, const Utility::Vec4i &bounds) {
     Overlay::setPosition(bounds.x, bounds.y);
     Overlay::setSize(bounds.w, bounds.h);
@@ -16,6 +18,15 @@ Overlay::Overlay(Config *config, Platform *platform, const Utility::Vec4i &bound
     // apply config
     p_config = config;
     platform->getAudio()->setVolume(p_config->getVolume());
+
+    // infobox
+    const auto size = Overlay::getSize();
+    p_infoBox = new InfoBox({(int16_t) (size.x / 2), (int16_t) (size.y - 2)},
+                            {(int16_t) (size.x - 4), 16},
+                            Black, YellowLight);
+    p_infoBox->setOrigin(Origin::Bottom);
+    p_infoBox->setVisibility(Visibility::Hidden);
+    Overlay::add(p_infoBox);
 
     // volume slider
     p_volume_widget = new VolumeWidget({

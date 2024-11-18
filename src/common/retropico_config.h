@@ -6,7 +6,8 @@
 #define RETROPICO_CONFIG_H
 
 #include <cstdint>
-#include "io.h"
+#include <io.h>
+#include "retropico_colors.h"
 
 #define LIST_BUFFER_MAX 6
 

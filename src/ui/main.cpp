@@ -91,7 +91,8 @@ Ui::Ui(Platform *p) : Rectangle({1, 1},
 
     // add info box
     p_infoBox = new InfoBox({(int16_t) (getSize().x / 2), (int16_t) (getSize().y - 2)},
-                            {(int16_t) (getSize().x - 4), 16});
+                            {(int16_t) (getSize().x - 4), 16},
+                            Black, YellowLight);
     p_infoBox->setOrigin(Origin::Bottom);
     p_infoBox->setVisibility(Visibility::Hidden);
     add(p_infoBox);

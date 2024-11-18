@@ -5,16 +5,17 @@
 #ifndef RETROPICO_INFOBOX_H
 #define RETROPICO_INFOBOX_H
 
-#include "rectangle.h"
+#include <platform.h>
 #include "text.h"
 #include "utility.h"
 
 namespace retropico {
-    class InfoBox : public p2d::Rectangle {
+    class InfoBox final : public p2d::Rectangle {
     public:
-        InfoBox(const p2d::Utility::Vec2i &pos, const p2d::Utility::Vec2i &size);
+        InfoBox(const p2d::Utility::Vec2i &pos, const p2d::Utility::Vec2i &size,
+                const uint16_t &color, const uint16_t &bg_color);
 
-        void show(const std::string &text, uint32_t m_millis = 0);
+        void show(const std::string &text, uint32_t m_millis = 0, p2d::Platform *platform = nullptr);
 
         void hide();
 

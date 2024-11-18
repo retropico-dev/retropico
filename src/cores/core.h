@@ -24,7 +24,8 @@ namespace retropico {
 
         bool loop() override;
 
-        virtual void close() {}
+        virtual void close() {
+        }
 
         virtual bool loadRom(const p2d::Io::File &file) { return false; }
 
