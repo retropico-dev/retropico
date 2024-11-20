@@ -69,9 +69,9 @@ int main() {
 
     // load rom
     if (!core->loadRom(file)) {
+        core->getOverlay()->getInfoBox()->show("OOPS: ROM COULD NOT BE LOADED...", 1000 * 5, core);
         // reboot to ui
         core->reboot(FLASH_MAGIC_UI);
-
         return 1;
     }
 

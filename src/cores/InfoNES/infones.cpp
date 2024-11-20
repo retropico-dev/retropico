@@ -84,8 +84,6 @@ bool InfoNES::loadRom(const Io::File &file) {
     memcpy(&NesHeader, data, sizeof(NesHeader));
     if (memcmp(NesHeader.byID, "NES\x1a", 4) != 0) {
         printf("InfoNES::loadRom: NES header not found in rom...\n");
-        getOverlay()->getInfoBox()->show("OOPS: SOMETHING WENT WRONG", 1000 * 5, this);
-        sleep(1000 * 5);
         return false;
     }
 
@@ -109,8 +107,6 @@ bool InfoNES::loadRom(const Io::File &file) {
 
     if (InfoNES_Reset() < 0) {
         printf("InfoNES::loadRom: NES reset error\n");
-        getOverlay()->getInfoBox()->show("OOPS: SOMETHING WENT WRONG", 1000 * 5, this);
-        sleep(1000 * 5);
         return false;
     }
 

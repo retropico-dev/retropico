@@ -28,6 +28,7 @@ void InfoBox::show(const std::string &text, uint32_t millis, Platform *platform)
     if (platform) {
         onDraw(true);
         platform->getDisplay()->flip();
+        platform->sleep(1000 * 5);
     }
 }
 
