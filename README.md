@@ -28,7 +28,7 @@ TOP | BOT
 - 1 x "High Quality MAX98357 MAX98357A I2S 3W Class D Amplifier Breakout Interface I2S DAC Decoder for Audio" ([pic](docs/pics/components/max98357a.jpg), [link](https://aliexpress.com/item/33043664469.html))
 - 1 x "Waveshare RP2040-Plus 16MB" ([pic](docs/pics/components/waveshare-rp2040-plus.jpg), [link](https://aliexpress.com/item/1005007298252311.html))
 - 1 x "Ultra Thin Mini Speaker 8 ohm 2 Watt 2W 8R Speaker Diameter 20MM" ([pic](docs/pics/components/hp-2w8r-20mm.jpg), [link](https://aliexpress.com/item/1005005376301547.html))
-- 1 x "EEMB Batterie 3.7V 820mAh 653042 Batterie Lipo 3.7V" (or similar size: 44x30.5x6.8mm) ([pic](docs/pics/components/820mah-lipo.jpg), [link](https://www.amazon.com/dp/B08HJ53Q3Cl))
+- 1 x "EEMB Batterie 3.7V 820mAh 653042 Batterie Lipo 3.7V" (or similar size: 44x30.5x6.8mm) ([pic](docs/pics/components/820mah-lipo.jpg), [link](https://www.amazon.com/dp/B08HJ53Q3C))
 - 1 x RetroPico PCB ([pic](docs/pics/components/retropico-pcb-v1.1.jpg), [TODO](TODO))
 - 1 x RetroPico Case (TODO)
 
