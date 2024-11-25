@@ -20,7 +20,7 @@ namespace retropico {
         void hide();
 
     private:
-        bool onInput(const uint16_t &buttons) override;
+        void onUpdate(p2d::Time delta) override;
 
         p2d::Text *p_text{};
         p2d::Clock m_clock{};

@@ -53,15 +53,16 @@ Ui::Ui(Platform *p) : Rectangle({1, 1},
     auto surface = new Surface(Io::File("res:/romfs/retropico.bmp"));
     p_platform->getDisplay()->drawSurface(surface);
     p_platform->getDisplay()->flip();
+    p_platform->getDisplay()->flush();
     delete (surface);
 
     // set repeat delay for ui
     p_platform->getInput()->setRepeatDelay(INPUT_DELAY_UI);
 
     // set colors
-    setColor(GrayDark);
-    setOutlineColor(Red);
-    setOutlineThickness(1);
+    Ui::setColor(GrayDark);
+    Ui::setOutlineColor(Red);
+    Ui::setOutlineThickness(1);
 
     // create needed directories
     printf("Ui::Ui: creating needed directories\r\n");
@@ -76,34 +77,26 @@ Ui::Ui(Platform *p) : Rectangle({1, 1},
     if (!Io::directoryExists(Core::getSavesPath(Core::Type::Gg))) Io::create(Core::getSavesPath(Core::Type::Gg));
 
     // add filer
-    p_filer = new Filer({0, 0}, {(int16_t) (getSize().x - 2), (int16_t) (getSize().y - 2)});
-    add(p_filer);
+    p_filer = new Filer({0, 0}, {(int16_t) (Ui::getSize().x - 2), (int16_t) (Ui::getSize().y - 2)});
+    Ui::add(p_filer);
 
     // add settings
     p_settings = new Settings(p_filer->getPosition(), p_filer->getSize());
     p_settings->setVisibility(Visibility::Hidden);
-    add(p_settings);
+    Ui::add(p_settings);
 
     // add menu
-    p_menu = new Menu({-1, (int16_t) (getSize().y / 2)}, {150 / 2, 192 / 2});
+    p_menu = new Menu({-1, (int16_t) (Ui::getSize().y / 2)}, {150 / 2, 192 / 2});
     p_menu->setOrigin(Origin::Left);
     p_menu->setVisibility(Visibility::Hidden);
-    add(p_menu);
-
-    // add info box
-    p_infoBox = new InfoBox({(int16_t) (getSize().x / 2), (int16_t) (getSize().y - 2)},
-                            {(int16_t) (getSize().x - 4), 16},
-                            Black, YellowLight);
-    p_infoBox->setOrigin(Origin::Bottom);
-    p_infoBox->setVisibility(Visibility::Hidden);
-    add(p_infoBox);
+    Ui::add(p_menu);
 
     // load / cache files
     p_filer->load();
 
     // add overlay
-    p_overlay = new Overlay(p_config, p_platform, getBounds());
-    add(p_overlay);
+    p_overlay = new Overlay(p_config, p_platform, Ui::getBounds());
+    Ui::add(p_overlay);
 
 #ifdef NDEBUG
     // give some time for title screen

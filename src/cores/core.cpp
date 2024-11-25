@@ -31,7 +31,7 @@ bool Core::loop() {
     onUpdate(m_delta_clock.restart());
 
     // drawing is handled in emulated cores
-    //onDraw(m_position, true);
+    //onDraw();
 
     return true;
 }

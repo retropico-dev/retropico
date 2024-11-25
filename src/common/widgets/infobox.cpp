@@ -26,10 +26,8 @@ void InfoBox::show(const std::string &text, uint32_t millis, Platform *platform)
     m_millis = millis;
     setVisibility(Visibility::Visible);
     if (platform) {
-#warning TODO
-        //onDraw(true);
-        //platform->getDisplay()->flip();
-        //platform->sleep(1000 * 5);
+        platform->onDraw(platform->getBounds());
+        platform->sleep(millis);
     }
 }
 
@@ -37,11 +35,10 @@ void InfoBox::hide() {
     setVisibility(Visibility::Hidden);
 }
 
-bool InfoBox::onInput(const uint16_t &buttons) {
-    if (m_millis > 0 && m_clock.getElapsedTime().asMilliseconds() >= m_millis) {
+void InfoBox::onUpdate(const Time delta) {
+    if (isVisible() && m_millis > 0 && m_clock.getElapsedTime().asMilliseconds() >= m_millis) {
         setVisibility(Visibility::Hidden);
-        return true;
     }
 
-    return Rectangle::onInput(buttons);
+    Rectangle::onUpdate(delta);
 }

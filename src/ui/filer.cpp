@@ -143,12 +143,12 @@ bool Filer::onInput(const uint16_t &buttons) {
         }
         // copy new rom
         printf("Filer: copying %s to flash:/rom/%s\r\n", path.c_str(), name.c_str());
-        Ui::getInstance()->getInfoBox()->show("Loading...");
-        const auto success = Io::copy(path, "flash:/rom/" + name, [](const uint8_t progress) {
+        Ui::getInstance()->getOverlay()->getInfoBox()->show("Loading...", 0, p_platform);
+        const auto success = Io::copy(path, "flash:/rom/" + name, [this](const uint8_t progress) {
             if (progress % 5 == 0) {
                 //printf("copy: %i\r\n", progress);
                 const std::string msg = "Loading... " + std::to_string(progress) + "%";
-                Ui::getInstance()->getInfoBox()->show(msg);
+                Ui::getInstance()->getOverlay()->getInfoBox()->show(msg, 0, p_platform);
             }
         });
 
@@ -169,10 +169,10 @@ bool Filer::onInput(const uint16_t &buttons) {
             printf("Filer: done... rebooting to bootloader...\r\n");
             m_done = true;
             return true;
-        } else {
-            printf("Filer: failed to load rom (%s)\r\n", path.c_str());
-            Ui::getInstance()->getInfoBox()->hide();
         }
+
+        printf("Filer: failed to load rom (%s)\r\n", path.c_str());
+        Ui::getInstance()->getOverlay()->getInfoBox()->hide();
     }
 
     return Widget::onInput(buttons);

@@ -30,7 +30,7 @@ namespace retropico {
 
         Settings *getSettings() { return p_settings; }
 
-        InfoBox *getInfoBox() { return p_infoBox; }
+        Overlay *getOverlay() { return p_overlay; }
 
         p2d::Platform *getPlatform() { return p_platform; }
 
@@ -45,7 +45,6 @@ namespace retropico {
         Filer *p_filer;
         Menu *p_menu;
         Settings *p_settings;
-        InfoBox *p_infoBox;
         // auto-repeat
         uint16_t m_buttons_old = 0;
         p2d::Clock m_repeat_clock{};
