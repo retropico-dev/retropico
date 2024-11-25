@@ -4,6 +4,7 @@
 
 #include "main.h"
 #include "settings.h"
+#include "retropico_colors.h"
 
 using namespace p2d;
 using namespace retropico;

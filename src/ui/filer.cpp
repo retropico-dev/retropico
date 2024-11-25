@@ -4,6 +4,7 @@
 
 #include "main.h"
 #include "filer.h"
+#include "retropico_colors.h"
 #include "../bootloader/bootloader.h"
 
 using namespace p2d;
@@ -19,7 +20,7 @@ Filer::Filer(const Utility::Vec2i &pos, const Utility::Vec2i &size) : Widget(pos
     }
 
     // add highlight
-    p_highlight = new Rectangle({0, 0}, {Filer::getSize().x, (int16_t) (m_line_height + 4)}, true);
+    p_highlight = new Rectangle({1, 1}, {Filer::getSize().x, (int16_t) (m_line_height + 4)}, true);
     p_highlight->setColor(Red);
     p_highlight->setOutlineColor(YellowLight);
     p_highlight->setOutlineThickness(1);
@@ -27,7 +28,7 @@ Filer::Filer(const Utility::Vec2i &pos, const Utility::Vec2i &size) : Widget(pos
 
     // add lines
     for (int i = 0; i < m_max_lines; i++) {
-        auto line = new Text(3, (int16_t) (m_line_height * i + 5),
+        auto line = new Text(3, (int16_t) (m_line_height * i + 6),
                              (int16_t) (Filer::getSize().x - 10), (int16_t) m_line_height, "");
         line->setColor(YellowLight);
         p_lines.push_back(line);
@@ -49,8 +50,9 @@ Filer::Filer(const Utility::Vec2i &pos, const Utility::Vec2i &size) : Widget(pos
 void Filer::load() {
     // buffer roms lists
     // TODO: add menu option to reload rom list from sdcard to flash
+#ifndef LINUX
     Ui::getInstance()->getConfig()->getListBuffer(0)->data = nullptr;
-    // TODO
+#endif
     if (Ui::getInstance()->getConfig()->getListBuffer(0)->data == nullptr) {
         uint32_t offset = FLASH_TARGET_OFFSET_CACHE;
         for (int i = 0; i < ROMS_FOLDER_COUNT; i++) {

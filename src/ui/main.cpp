@@ -18,6 +18,7 @@
  */
 
 #include "main.h"
+#include "retropico_colors.h"
 
 using namespace p2d;
 using namespace retropico;
@@ -58,8 +59,8 @@ Ui::Ui(Platform *p) : Rectangle({1, 1},
     p_platform->getInput()->setRepeatDelay(INPUT_DELAY_UI);
 
     // set colors
-    setColor(Color::GrayDark);
-    setOutlineColor(Color::Red);
+    setColor(GrayDark);
+    setOutlineColor(Red);
     setOutlineThickness(1);
 
     // create needed directories
@@ -75,7 +76,7 @@ Ui::Ui(Platform *p) : Rectangle({1, 1},
     if (!Io::directoryExists(Core::getSavesPath(Core::Type::Gg))) Io::create(Core::getSavesPath(Core::Type::Gg));
 
     // add filer
-    p_filer = new Filer({1, 1}, {(int16_t) (getSize().x - 2), (int16_t) (getSize().y - 2)});
+    p_filer = new Filer({0, 0}, {(int16_t) (getSize().x - 2), (int16_t) (getSize().y - 2)});
     add(p_filer);
 
     // add settings
@@ -142,10 +143,6 @@ bool Ui::onInput(const uint16_t &buttons) {
     }
 
     return Widget::onInput(buttons);
-}
-
-Platform *Ui::getPlatform() {
-    return p_platform;
 }
 
 Ui *Ui::getInstance() {

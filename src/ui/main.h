@@ -32,7 +32,7 @@ namespace retropico {
 
         InfoBox *getInfoBox() { return p_infoBox; }
 
-        p2d::Platform *getPlatform();
+        p2d::Platform *getPlatform() { return p_platform; }
 
         bool isDone() { return p_filer->isDone(); }
 

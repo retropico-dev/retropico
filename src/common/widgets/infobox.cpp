@@ -26,9 +26,10 @@ void InfoBox::show(const std::string &text, uint32_t millis, Platform *platform)
     m_millis = millis;
     setVisibility(Visibility::Visible);
     if (platform) {
-        onDraw(true);
-        platform->getDisplay()->flip();
-        platform->sleep(1000 * 5);
+#warning TODO
+        //onDraw(true);
+        //platform->getDisplay()->flip();
+        //platform->sleep(1000 * 5);
     }
 }
 

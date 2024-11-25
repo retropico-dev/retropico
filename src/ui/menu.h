@@ -26,7 +26,7 @@ namespace retropico {
         std::vector<MenuLine *> m_lines;
         int8_t m_line_index = 0;
 
-        void refresh();
+        void refresh() const;
 
         bool onInput(const uint16_t &buttons) override;
     };
