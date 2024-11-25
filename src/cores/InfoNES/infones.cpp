@@ -180,7 +180,7 @@ void in_ram(core1_lcd_draw_line)(const uint_fast8_t line, const uint_fast8_t ind
 #ifdef LINUX
     if (line == 235) {
         if (s_core->getOverlay()->isVisible()) {
-            s_core->getOverlay()->onDraw(true);
+            s_core->getOverlay()->onDraw({});
         }
         display->flip();
     }
