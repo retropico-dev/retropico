@@ -175,10 +175,7 @@ void system_load_sram(void) {
     if (file.read(0, 0x8000, (char *) sms.sram) != 0x8000) {
         printf("system_load_sram: sram file does not exist, skipping... (%s)\r\n",
                s_core->getSramPath().c_str());
-        return;
     }
-
-    printf("system_load_sram: loaded sram file (%s)\r\n", s_core->getSramPath().c_str());
 }
 
 void system_save_sram() {

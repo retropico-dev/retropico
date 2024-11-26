@@ -61,6 +61,7 @@ int main() {
 #else
     auto list = Io::getList("flash:/rom/");
     if (list.empty()) {
+        core->getOverlay()->getInfoBox()->show("OOPS: ROM COULD NOT BE LOADED...", 1000 * 5, core);
         // reboot to ui
         core->reboot(FLASH_MAGIC_UI);
     }

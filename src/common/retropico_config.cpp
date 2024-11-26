@@ -4,7 +4,7 @@
 
 #include "retropico_config.h"
 
-#define RETROPICO_CFG_PATH "flash:/config.dat"
+#define RETROPICO_CFG_PATH "flash:/config.bin"
 
 using namespace p2d;
 using namespace retropico;
@@ -21,28 +21,6 @@ Config::Config() {
             printf("Config::Config: brightness: %i\r\n", m_data.brightness);
             printf("Config::Config: current filer core: %i\r\n", m_data.filer_current_core);
             printf("Config::Config: current filer core index: %i\r\n", m_data.filer_current_core_index);
-            for (auto &listBuffer: m_data.listBuffers) {
-#if !defined(NDEBUG) && defined(LINUX)
-                strcpy(listBuffer.data_list[0], "Super Test 1");
-                strcpy(listBuffer.data_list[1], "Super Test 2");
-                strcpy(listBuffer.data_list[2], "Super Test 3");
-                strcpy(listBuffer.data_list[3], "Super Test 4");
-                strcpy(listBuffer.data_list[4], "Super Test 5");
-                strcpy(listBuffer.data_list[5], "Super Test 6");
-                strcpy(listBuffer.data_list[6], "Super Test 7");
-                strcpy(listBuffer.data_list[7], "Super Test 8");
-                strcpy(listBuffer.data_list[8], "Super Test 9");
-                strcpy(listBuffer.data_list[9], "Super Test 10");
-                strcpy(listBuffer.data_list[10], "Super Test 11");
-                strcpy(listBuffer.data_list[11], "Super Test 12");
-                listBuffer.data = reinterpret_cast<uint8_t *>(&listBuffer.data_list);
-                listBuffer.count = 12;
-#else
-                if (listBuffer.count == 0 || listBuffer.data_size == 0) {
-                    listBuffer.data = nullptr;
-                }
-#endif
-            }
         }
     } else {
         printf("Config::Config: config file not found, using defaults... (%s)\r\n", RETROPICO_CFG_PATH);

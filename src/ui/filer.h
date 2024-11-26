@@ -26,13 +26,15 @@ namespace retropico {
         [[nodiscard]] bool isDone() const { return m_done; }
 
         bool isEmpty() {
-            return getListBuffer(Core::Type::Nes)->count < 1
-                   && getListBuffer(Core::Type::Gb)->count < 1
-                   && getListBuffer(Core::Type::Sms)->count < 1
-                   && getListBuffer(Core::Type::Gg)->count < 1;
+            for (const auto &list: m_files) {
+                if (list.empty()) return false;
+            }
+
+            return true;
         }
 
     private:
+        std::vector<p2d::Io::File::Info> m_files[ROMS_FOLDER_COUNT];
         p2d::Platform *p_platform;
         Core::Type m_core = Core::Type::Nes;
         int m_max_lines = 0;
@@ -49,8 +51,6 @@ namespace retropico {
         void refresh();
 
         void setSelection(int index);
-
-        p2d::Io::ListBuffer *getListBuffer(uint8_t index);
     };
 }
 
