@@ -33,6 +33,7 @@ Overlay::Overlay(Config *config, Platform *platform, const Utility::Vec4i &bound
         static_cast<int16_t>(bounds.w - 6), 32,
         12, static_cast<int16_t>(bounds.h - 64)
     });
+    platform->getAudio()->setVolume(config->getVolume());
     p_volume_widget->setVolume(platform->getAudio()->getVolume());
     p_volume_widget->setOrigin(Origin::TopRight);
     p_volume_widget->setVisibility(Visibility::Hidden);
@@ -49,18 +50,20 @@ void Overlay::onUpdate(Time delta) {
         if (buttons & Input::Button::VOL_UP) {
             p_volume_widget->setVisibility(Visibility::Visible);
             m_visibility_clock.restart();
-            uint8_t volume = p_platform->getAudio()->getVolume();
-            uint8_t volumeMax = p_platform->getAudio()->getVolumeMax();
+            const auto volume = p_platform->getAudio()->getVolume();
+            const auto volumeMax = p_platform->getAudio()->getVolumeMax();
             if (volume < volumeMax) {
                 p_platform->getAudio()->setVolume(volume + 10);
+                p_config->setVolume(p_platform->getAudio()->getVolume());
                 p_volume_widget->setVolume(p_platform->getAudio()->getVolume());
             }
         } else if (buttons & Input::Button::VOL_DOWN) {
             p_volume_widget->setVisibility(Visibility::Visible);
             m_visibility_clock.restart();
-            uint8_t volume = p_platform->getAudio()->getVolume();
+            const auto volume = p_platform->getAudio()->getVolume();
             if (volume > 0) {
                 p_platform->getAudio()->setVolume(volume - 10);
+                p_config->setVolume(p_platform->getAudio()->getVolume());
                 p_volume_widget->setVolume(p_platform->getAudio()->getVolume());
             }
         }
