@@ -130,8 +130,8 @@ void Ui::onUpdate(p2d::Time delta) {
 bool Ui::onInput(const uint16_t &buttons) {
     if (buttons & Input::Button::QUIT || p_filer->isDone()) return false;
 
-    if (buttons & Input::Button::SELECT && !p_menu->isVisible()) {
-        p_menu->setVisibility(Visibility::Visible);
+    if (buttons & Input::Button::SELECT) {
+        p_menu->setVisibility(p_menu->isVisible() ? Visibility::Hidden : Visibility::Visible);
         return true;
     }
 

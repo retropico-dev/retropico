@@ -68,6 +68,13 @@ Menu::Menu(const Utility::Vec2i &pos, const Utility::Vec2i &size) : Rectangle(po
     */
 }
 
+void Menu::setSelection(uint8_t index) {
+    if (m_lines.size() > index) {
+        m_line_index = index;
+        refresh();
+    }
+}
+
 bool Menu::onInput(const uint16_t &buttons) {
     if (!isVisible()) return false;
 

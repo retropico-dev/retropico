@@ -22,6 +22,8 @@ namespace retropico {
 
         Menu(const p2d::Utility::Vec2i &pos, const p2d::Utility::Vec2i &size);
 
+        void setSelection(uint8_t index);
+
     private:
         std::vector<MenuLine *> m_lines;
         int8_t m_line_index = 0;

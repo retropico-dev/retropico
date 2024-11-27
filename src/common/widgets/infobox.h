@@ -6,6 +6,7 @@
 #define RETROPICO_INFOBOX_H
 
 #include <platform.h>
+#include "rectangle.h"
 #include "text.h"
 #include "utility.h"
 

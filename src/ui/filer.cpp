@@ -29,7 +29,7 @@ Filer::Filer(const Utility::Vec2i &pos, const Utility::Vec2i &size) : Widget(pos
     // add lines
     for (int i = 0; i < m_max_lines; i++) {
         auto line = new Text(3, (int16_t) (m_line_height * i + 6),
-                             (int16_t) (Filer::getSize().x - 10), (int16_t) m_line_height, "");
+                             (int16_t) (Filer::getSize().x - 4), (int16_t) m_line_height, "");
         line->setColor(YellowLight);
         p_lines.push_back(line);
         Filer::add(line);
@@ -51,13 +51,23 @@ void Filer::load() {
     // load roms lists from sdcard
     for (int i = 0; i < ROMS_FOLDER_COUNT; i++) {
         // TODO: filtering
+#ifdef LINUX
+        m_files[i] = {
+            {"Super Game Test 11111111"}, {"Super Game Test 2"}, {"Super Game Test 3"},
+            {"Super Game Test 4"}, {"Super Game Test 5"}, {"Super Game Test 6"},
+            {"Super Game Test 7"}, {"Super Game Test 8"}, {"Super Game Test 9"},
+            {"Super Game Test 10"}, {"Super Game Test 11"}, {"Super Game Test 12"},
+        };
+#else
         m_files[i] = Io::getList(Core::getRomsPath(i));
+#endif
         printf("Filer::load: loaded %lu roms from %s\r\n", m_files[i].size(), Core::getRomsPath(i).c_str());
     }
 
     // set current browsing directory (core) to latest one
     m_core = static_cast<Core::Type>(Ui::getInstance()->getConfig()->getFilerCurrentCore());
     setSelection(Ui::getInstance()->getConfig()->getFilerCurrentCoreIndex());
+    Ui::getInstance()->getMenu()->setSelection(m_core);
 
     // set no rom message if needed
     const auto &empty = m_files[m_core].empty();
@@ -178,9 +188,11 @@ void Filer::refresh() {
             p_lines[i]->setString(m_files[m_core].at(i + m_file_index).name);
             if (i == m_highlight_index) {
                 p_lines[i]->setColor(Yellow);
+                p_lines[i]->setScroll(true);
                 p_highlight->setPosition(p_highlight->getPosition().x, (int16_t) (p_lines[i]->getPosition().y - 5));
             } else {
                 p_lines[i]->setColor(YellowLight);
+                p_lines[i]->setScroll(false);
             }
         }
     }
@@ -207,7 +219,6 @@ void Filer::setSelection(int index) {
 }
 
 void Filer::setCore(const Core::Type &core) {
-    Ui::getInstance()->getConfig()->setFilerCurrentCores((uint8_t) core);
     m_core = core;
     m_file_index = 0;
     m_highlight_index = 0;
@@ -216,11 +227,7 @@ void Filer::setCore(const Core::Type &core) {
     p_highlight->setVisibility(empty ? Visibility::Hidden : Visibility::Visible);
     p_no_rom_text->setVisibility(empty ? Visibility::Visible : Visibility::Hidden);
 
+    Ui::getInstance()->getConfig()->setFilerCurrentCores(static_cast<uint8_t>(core));
+
     refresh();
 }
-
-#ifdef USE_FLASH_LIST_BUFFER
-Io::ListBuffer *Filer::getListBuffer(uint8_t index) {
-    return Ui::getInstance()->getConfig()->getListBuffer(index);
-}
-#endif
