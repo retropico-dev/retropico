@@ -130,6 +130,14 @@ bool Filer::onInput(const uint16_t &buttons) {
     }
 
     if (buttons & Input::Button::B1 && m_files[m_core].size() > m_file_index + m_highlight_index) {
+        /*
+        const auto debugList = Io::getList("flash:/");
+        printf("DEBUG: flash files:\r\n");
+        for (auto &f: debugList) {
+            printf("\tflash:/%s\r\n", f.name.c_str());
+        }
+        */
+
         // remove old rom
         const auto list = Io::getList("flash:/rom/");
         for (auto &f: list) {
@@ -142,13 +150,28 @@ bool Filer::onInput(const uint16_t &buttons) {
         const std::string path = Core::getRomsPath(m_core) + "/" + file.name;
         printf("Filer: copying %s to flash:/rom/%s\r\n", path.c_str(), file.name.c_str());
         Ui::getInstance()->getOverlay()->getInfoBox()->show("Loading...", 0, p_platform);
-        const auto success = Io::copy(path, "flash:/rom/" + file.name, [this](const uint8_t progress) {
+        auto success = Io::copy(path, "flash:/rom/" + file.name, [this](const uint8_t progress) {
             if (progress % 5 == 0) {
                 //printf("copy: %i\r\n", progress);
                 const std::string msg = "Loading... " + std::to_string(progress) + "%";
                 Ui::getInstance()->getOverlay()->getInfoBox()->show(msg, 0, p_platform);
             }
         });
+
+        // TODO: fix flash corruption / f_expand / bad code ?
+        if (!success) {
+            // flash corruption happened, just format flash for now...
+            printf("Filer: could not copy rom to flash, formating flash device...\r\n");
+            Io::format(Io::Device::Flash);
+            Io::create("flash:/rom/");
+            success = Io::copy(path, "flash:/rom/" + file.name, [this](const uint8_t progress) {
+                if (progress % 5 == 0) {
+                    //printf("copy: %i\r\n", progress);
+                    const std::string msg = "Loading... " + std::to_string(progress) + "%";
+                    Ui::getInstance()->getOverlay()->getInfoBox()->show(msg, 0, p_platform);
+                }
+            });
+        }
 
         if (success) {
             printf("Filer: copy done... writing config to flash...\r\n");
