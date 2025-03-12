@@ -4,7 +4,7 @@
   <img src="https://github.com/retropico-dev/retropico/raw/dev/docs/pics/retropico-pic-01.jpg" width="50%" height="50%" alt="RetroPico !">
 </p>
 
-RertroPico is "yet another" rp2040 handeld deivce.
+RertroPico is "yet another" rp2040 handeld device.
 
 The whole project was done by myself, and I'm very proud of it. This includes familiarizing with microcontrollers, writing a cross platform framework for linux and the chosen one (rp2040), porting some emulators, designing a pcb and finally buying, designing and printing a 3d case for it.
 
