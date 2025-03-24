@@ -8,13 +8,13 @@
 #include "core.h"
 
 namespace retropico {
-    class PeanutGB : public Core {
+    class PeanutGB final : public Core {
     public:
         explicit PeanutGB(const p2d::Display::Settings &displaySettings);
 
         bool loop() override;
 
-        //void close() override;
+        void close() override;
 
         bool loadRom(const p2d::Io::File &file) override;
 
