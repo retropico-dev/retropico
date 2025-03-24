@@ -34,8 +34,8 @@ set(SAMEBOY_FLAGS
         -DGB_DISABLE_REWIND
         -DGB_DISABLE_DEBUGGER
         -DGB_DISABLE_CHEATS
-        -DPICO_AUDIO_I2S_BUFFER_SAMPLE_LENGTH=735
         -DGB_INTERNAL
+        -DPICO_AUDIO_I2S_BUFFER_SAMPLE_LENGTH=735
 )
 
 ####################
@@ -58,5 +58,6 @@ if (NOT PLATFORM_LINUX)
         target_compile_definitions(${PROJECT_NAME} PUBLIC ${SAMEBOY_FLAGS} PICO_USE_BOOTLOADER)
     else ()
         target_set_pico2d_stuff(${PROJECT_NAME})
+        #pico_set_binary_type(${PROJECT_NAME} copy_to_ram)
     endif ()
 endif ()
