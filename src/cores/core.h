@@ -17,7 +17,8 @@ namespace retropico {
             Nes = 0,
             Gb = 1,
             Sms = 2,
-            Gg = 3
+            Gg = 3,
+            Genesis = 4
         };
 
         explicit Core(const p2d::Display::Settings &displaySettings, const Core::Type &core);
@@ -44,8 +45,10 @@ namespace retropico {
                 return "sd:/roms/gb";
             } else if (core == Sms) {
                 return "sd:/roms/sms";
-            } else {
+            } else if (core == Gg) {
                 return "sd:/roms/gg";
+            } else {
+                return "sd:/roms/md";
             }
         }
 
@@ -56,8 +59,10 @@ namespace retropico {
                 return "sd:/saves/gb";
             } else if (core == Sms) {
                 return "sd:/saves/sms";
-            } else {
+            } else if (core == Gg) {
                 return "sd:/saves/gg";
+            } else {
+                return "sd:/saves/md";
             }
         }
 

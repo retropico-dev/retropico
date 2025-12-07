@@ -9,7 +9,7 @@
 #include "../bootloader/bootloader.h"
 
 #ifdef PICO_BUILD
-#if defined(MB_NES) || defined(MB_SMS)
+#if defined(MB_NES) || defined(MB_SMS) || defined (MB_GENESIS)
 // use direct drawing
 #undef P2DDisplay
 #define P2DDisplay PicoDisplayDirectDraw
@@ -28,6 +28,9 @@
 #elif MB_SMS
 #include "smsplus.h"
 #define MBCore SMSPlus
+#elif MB_GENESIS
+#include "gwenesis.h"
+#define MBCore Gwenesis
 #endif
 
 #endif //RETROPICO_MAIN_H

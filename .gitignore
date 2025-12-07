@@ -17,4 +17,5 @@ cmake-build*
 *.gb
 *.sms
 *.gg
+*.md
 rom.bin*

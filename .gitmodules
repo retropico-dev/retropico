@@ -13,3 +13,6 @@
 [submodule "external/misc/libpico2d"]
 	path = external/misc/libpico2d
 	url = git@github.com:retropico-dev/libpico2d.git
+[submodule "external/cores/gwenesis"]
+	path = external/cores/gwenesis
+	url = https://github.com/retropico-dev/gwenesis.git

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 #set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON")
 
 if (NOT PLATFORM_LINUX)
@@ -54,6 +54,9 @@ add_subdirectory(src/cores/Peanut-GB)
 
 # microboy-sms (smsplus core)
 add_subdirectory(src/cores/smsplus)
+
+# microboy-genesis (gwenesis core)
+add_subdirectory(src/cores/gwenesis)
 
 # microboy-sameboy (SameBoy core, wip)
 #add_subdirectory(src/cores/SameBoy)

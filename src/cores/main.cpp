@@ -50,6 +50,13 @@ static Display::Settings ds{
     .bufferingMode = Display::Buffering::None,
     .format = Display::Format::RGB565
 };
+#elif MB_GENESIS
+static Display::Settings ds{
+    .displaySize = {320, 240},
+    .renderSize = {320, 240},
+    .bufferingMode = Display::Buffering::Double,
+    .format = Display::Format::RGB565
+};
 #endif
 
 int main() {
